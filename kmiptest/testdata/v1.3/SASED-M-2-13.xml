@@ -1,0 +1,177 @@
+<KMIP>
+<!--
+     Key Management Interoperability Protocol Profiles Version 1.3
+     OASIS Standard
+     27 December 2016
+     Copyright (c) OASIS Open 2016. All Rights Reserved.
+     Source: http://docs.oasis-open.org/kmip/profiles/v1.3/os/test-cases/kmip-v1.3/mandatory/
+     Latest version of the specification: http://docs.oasis-open.org/kmip/profiles/v1.3/kmip-profiles-v1.3.html
+     TC IPR Statement: https://www.oasis-open.org/committees/kmip/ipr.php
+
+-->
+
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Locate"/>
+    <RequestPayload>
+      <Attribute>
+        <AttributeName type="TextString" value="Name"/>
+        <AttributeValue>
+          <NameValue type="TextString" value="SASED-M-2-13-template1"/>
+          <NameType type="Enumeration" value="UninterpretedTextString"/>
+        </AttributeValue>
+      </Attribute>
+      <Attribute>
+        <AttributeName type="TextString" value="Object Type"/>
+        <AttributeValue type="Enumeration" value="Template"/>
+      </Attribute>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="$NOW"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Locate"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Register"/>
+    <RequestPayload>
+      <ObjectType type="Enumeration" value="Template"/>
+      <TemplateAttribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Name"/>
+          <AttributeValue>
+            <NameValue type="TextString" value="SASED-M-2-13-template1"/>
+            <NameType type="Enumeration" value="UninterpretedTextString"/>
+          </AttributeValue>
+        </Attribute>
+      </TemplateAttribute>
+      <Template>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Group"/>
+          <AttributeValue type="TextString" value="SASED-M-2-13-group"/>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-CustomAttribute1"/>
+          <AttributeValue type="TextString" value="CustomValue1"/>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-CustomAttribute2"/>
+          <AttributeValue type="TextString" value="CustomValue2"/>
+        </Attribute>
+      </Template>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="$NOW"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Register"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+      <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Register"/>
+    <RequestPayload>
+      <ObjectType type="Enumeration" value="SecretData"/>
+      <TemplateAttribute>
+        <Name>
+          <NameValue type="TextString" value="SASED-M-2-13-template1"/>
+          <NameType type="Enumeration" value="UninterpretedTextString"/>
+        </Name>
+        <Attribute>
+          <AttributeName type="TextString" value="x-CustomAttribute3"/>
+          <AttributeValue type="TextString" value="CustomValue3"/>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-CustomAttribute4"/>
+          <AttributeValue type="TextString" value="CustomValue4"/>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Name"/>
+          <AttributeValue>
+            <NameValue type="TextString" value="SASED-M-2-13-name"/>
+            <NameType type="Enumeration" value="UninterpretedTextString"/>
+          </AttributeValue>
+        </Attribute>
+      </TemplateAttribute>
+      <SecretData>
+        <SecretDataType type="Enumeration" value="Password"/>
+        <KeyBlock>
+          <KeyFormatType type="Enumeration" value="Opaque"/>
+          <KeyValue>
+            <KeyMaterial type="ByteString" value="2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a"/>
+          </KeyValue>
+        </KeyBlock>
+      </SecretData>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="$NOW"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Register"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+      <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+</KMIP>

@@ -1,0 +1,175 @@
+<?xml version="1.0" ?>
+<!-- This test case tests the import of a foreign key using the
+Register operation. To validate that the registered key is treated the same as
+a locally created key, an attribute is added to the key and then modified.
+Finally, the key is destroyed. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+						<AttributeValue type="Integer" value="Encrypt"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID"/>
+						<AttributeValue type="TextString" value="TC-61-11"/>
+					</Attribute>
+				</TemplateAttribute>
+				<SymmetricKey>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="0123456789abcdef0123456789abcdef"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="AES"/>
+						<CryptographicLength type="Integer" value="128"/>
+					</KeyBlock>
+				</SymmetricKey>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="AddAttribute"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="x-provider"/>
+					<AttributeValue type="TextString" value="unknown"/>
+				</Attribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="AddAttribute"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="x-provider"/>
+					<AttributeValue type="TextString" value="unknown"/>
+				</Attribute>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 2
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ModifyAttribute"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="x-provider"/>
+					<AttributeValue type="TextString" value="third   party"/>
+				</Attribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ModifyAttribute"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="x-provider"/>
+					<AttributeValue type="TextString" value="third   party"/>
+				</Attribute>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 3
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

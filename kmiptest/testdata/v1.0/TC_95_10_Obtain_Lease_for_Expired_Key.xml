@@ -1,0 +1,464 @@
+<?xml version="1.0" ?>
+<!-- Create a symmetric key with a specific name and obtain a
+lease. Revoke the key with state 'Compromised' and re-key the key. Try to
+obtain a lease on the old key which fails due to a server policy which does not
+allow giving out leases for compromised keys. Locate the new key with the
+original name. Get the new key and obtain a lease. -->
+<KMIP>
+# TIME 0
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Algorithm"/>
+						<AttributeValue type="Enumeration" value="AES"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Length"/>
+						<AttributeValue type="Integer" value="128"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+						<AttributeValue type="Integer" value="Decrypt   Encrypt"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Name"/>
+						<AttributeValue>
+							<NameValue type="TextString" value="rekeyKey"/>
+							<NameType type="Enumeration" value="UninterpretedTextString"/>
+						</AttributeValue>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Activation Date"/>
+						<AttributeValue type="DateTime" value="2010-02-11T15:45:48+00:00"/>
+					</Attribute>
+				</TemplateAttribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:49+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:49+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<SymmetricKey>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="f43c7798aacb22b1411a8773c199708b"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="AES"/>
+						<CryptographicLength type="Integer" value="128"/>
+					</KeyBlock>
+				</SymmetricKey>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 2
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:50+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<LeaseTime type="Interval" value="16"/>
+				<LastChangeDate type="DateTime" value="2010-02-11T15:45:49+00:00"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 3
+# [Client-B]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<RevocationReason>
+					<RevocationReasonCode type="Enumeration" value="KeyCompromise"/>
+				</RevocationReason>
+				<CompromiseOccurrenceDate type="DateTime" value="2010-02-11T15:45:50+00:00"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:50+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 4
+# [Client-B]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ReKey"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ReKey"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 5
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<ResultStatus type="Enumeration" value="OperationFailed"/>
+			<ResultReason type="Enumeration" value="PermissionDenied"/>
+			<ResultMessage type="TextString" value="CO is in   state Compromised, no lease given"/>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 6
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Locate"/>
+			<RequestPayload>
+				<Attribute>
+					<AttributeName type="TextString" value="Name"/>
+					<AttributeValue>
+						<NameValue type="TextString" value="rekeyKey"/>
+						<NameType type="Enumeration" value="UninterpretedTextString"/>
+					</AttributeValue>
+				</Attribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Locate"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 7
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<SymmetricKey>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="173e9499f7c573712afb9883b5df2bce"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="AES"/>
+						<CryptographicLength type="Integer" value="128"/>
+					</KeyBlock>
+				</SymmetricKey>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 8
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="ObtainLease"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<LeaseTime type="Interval" value="0"/>
+				<LastChangeDate type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 9
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 10
+# [Client-A]
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchOrderOption type="Boolean" value="true"/>
+			<BatchCount type="Integer" value="2"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke"/>
+			<UniqueBatchItemID type="ByteString" value="3748b9e243205ba7"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<RevocationReason>
+					<RevocationReasonCode type="Enumeration" value="CessationOfOperation"/>
+				</RevocationReason>
+			</RequestPayload>
+		</BatchItem>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<UniqueBatchItemID type="ByteString" value="04eaf416d0beb50d"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T15:45:51+00:00"/>
+			<BatchCount type="Integer" value="2"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke"/>
+			<UniqueBatchItemID type="ByteString" value="3748b9e243205ba7"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<UniqueBatchItemID type="ByteString" value="04eaf416d0beb50d"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

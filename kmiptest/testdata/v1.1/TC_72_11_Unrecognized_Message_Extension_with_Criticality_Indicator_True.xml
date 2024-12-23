@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<!-- A create request is issued and the request contains a
+Message Extension with the Criticality Indicator set to true. The server does
+not understand the extension, and since it is critical, the create request
+fails and an error is returned. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Length"/>
+						<AttributeValue type="Integer" value="128"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Algorithm"/>
+						<AttributeValue type="Enumeration" value="AES"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+						<AttributeValue type="Integer" value="Decrypt   Encrypt"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID"/>
+						<AttributeValue type="TextString" value="TC-72-11"/>
+					</Attribute>
+				</TemplateAttribute>
+			</RequestPayload>
+			<MessageExtension>
+				<VendorIdentification type="TextString" value="Acme"/>
+				<CriticalityIndicator type="Boolean" value="true"/>
+				<VendorExtension>
+					<TTLV tag="0x540001" type="TextString" value="na"/>
+				</VendorExtension>
+			</MessageExtension>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<ResultStatus type="Enumeration" value="OperationFailed"/>
+			<ResultReason type="Enumeration" value="FeatureNotSupported"/>
+			<ResultMessage type="TextString" value="Critical   Message Extension not recognized"/>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

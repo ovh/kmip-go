@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--TL-M-1-10 - Configuration
+Determine server configuration details including operations supported (only the mandatory
+operations are listed in the response example), objects supported (only the mandatory objects types
+are listed in the response example), optional server information, and optional list of application
+name spaces.
+ -->
+<KMIP> # TIME 0 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Query" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <QueryFunction type="Enumeration" value="QueryOperations" />
+        <QueryFunction type="Enumeration" value="QueryObjects" />
+        <QueryFunction type="Enumeration" value="QueryServerInformation" />
+        <QueryFunction type="Enumeration" value="QueryApplicationNamespaces" />
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T21:35:17+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Query" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <Operation type="Enumeration" value="Query" />
+        <Operation type="Enumeration" value="Locate" />
+        <Operation type="Enumeration" value="Destroy" />
+        <Operation type="Enumeration" value="Get" />
+        <Operation type="Enumeration" value="Create" />
+        <Operation type="Enumeration" value="Register" />
+        <Operation type="Enumeration" value="GetAttributes" />
+        <Operation type="Enumeration" value="GetAttributeList" />
+        <Operation type="Enumeration" value="AddAttribute" />
+        <Operation type="Enumeration" value="ModifyAttribute" />
+        <Operation type="Enumeration" value="DeleteAttribute" />
+        <Operation type="Enumeration" value="Activate" />
+        <Operation type="Enumeration" value="Revoke" />
+        <Operation type="Enumeration" value="Check" />
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <ObjectType type="Enumeration" value="Template" />
+        <VendorIdentification type="TextString" value="server-vendor.com" />
+        <ServerInformation>
+        </ServerInformation>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+</KMIP>

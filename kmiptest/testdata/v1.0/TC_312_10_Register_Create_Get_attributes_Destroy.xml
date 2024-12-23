@@ -1,0 +1,245 @@
+<?xml version="1.0" ?>
+<!-- Here the client first registers a template object and then
+creates a symmetric key using the registered template. To verify that the
+attributes of the key were set correctly from the template, the client then
+issues a Get Attributes command, after which it destroys first the key and then
+the template. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="Template"/>
+				<TemplateAttribute>
+      </TemplateAttribute>
+				<Template>
+					<Attribute>
+						<AttributeName type="TextString" value="Object Group"/>
+						<AttributeValue type="TextString" value="Group1"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Application Specific Information"/>
+						<AttributeValue>
+							<ApplicationNamespace type="TextString" value="ssl"/>
+							<ApplicationData type="TextString" value="www.example.com"/>
+						</AttributeValue>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Contact Information"/>
+						<AttributeValue type="TextString" value="Joe"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-Purpose"/>
+						<AttributeValue type="TextString" value="demonstration"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Name"/>
+						<AttributeValue>
+							<NameValue type="TextString" value="Template1"/>
+							<NameType type="Enumeration" value="UninterpretedTextString"/>
+						</AttributeValue>
+					</Attribute>
+				</Template>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2009-11-12T10:47:32+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<TemplateAttribute>
+					<Name>
+						<NameValue type="TextString" value="Template1"/>
+						<NameType type="Enumeration" value="UninterpretedTextString"/>
+					</Name>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Algorithm"/>
+						<AttributeValue type="Enumeration" value="AES"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Length"/>
+						<AttributeValue type="Integer" value="128"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+						<AttributeValue type="Integer" value="Decrypt   Encrypt"/>
+					</Attribute>
+				</TemplateAttribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2009-11-12T10:47:33+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 2
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributes"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<AttributeName type="TextString" value="Object Group"/>
+				<AttributeName type="TextString" value="Application Specific Information"/>
+				<AttributeName type="TextString" value="Contact Information"/>
+				<AttributeName type="TextString" value="x-Purpose"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2009-11-12T10:47:34+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributes"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<Attribute>
+					<AttributeName type="TextString" value="Object Group"/>
+					<AttributeValue type="TextString" value="Group1"/>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="Application Specific Information"/>
+					<AttributeValue>
+						<ApplicationNamespace type="TextString" value="ssl"/>
+						<ApplicationData type="TextString" value="www.example.com"/>
+					</AttributeValue>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="Contact Information"/>
+					<AttributeValue type="TextString" value="Joe"/>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="x-Purpose"/>
+					<AttributeValue type="TextString" value="demonstration"/>
+				</Attribute>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 3
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2009-11-12T10:47:34+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 4
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2009-11-12T10:47:34+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

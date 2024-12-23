@@ -1,0 +1,57 @@
+<KMIP>
+
+<!--
+     Key Management Interoperability Protocol Test Cases Version 1.4
+     Committee Note Draft 01 / Public Review Draft 01
+     30 March 2017
+     Copyright (c) OASIS Open 2017. All Rights Reserved.
+     Source: http://docs.oasis-open.org/kmip/testcases/v1.4/cnprd01/test-cases/kmip-v1.4/
+     Latest version of the specification: http://docs.oasis-open.org/kmip/testcases/v1.4/kmip-testcases-v1.4.html
+     TC IPR Statement: https://www.oasis-open.org/committees/kmip/ipr.php
+-->
+
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="4"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Query"/>
+    <RequestPayload>
+      <QueryFunction type="Enumeration" value="QueryCapabilities"/>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="4"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="$NOW"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Query"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+      <CapabilityInformation>
+        <StreamingCapability type="Boolean" value="false"/>
+        <AsynchronousCapability type="Boolean" value="false"/>
+        <AttestationCapability type="Boolean" value="false"/>
+        <BatchUndoCapability type="Boolean" value="true"/>
+	<BatchContinueCapability type="Boolean" value="true"/>
+        <UnwrapMode type="Enumeration" value="Unspecified"/>
+        <DestroyAction type="Enumeration" value="Unspecified"/>
+        <ShreddingAlgorithm type="Enumeration" value="Unspecified"/>
+        <RNGMode type="Enumeration" value="Unspecified"/>
+      </CapabilityInformation>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+</KMIP>

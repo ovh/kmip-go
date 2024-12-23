@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<!-- A create request is issued and the request contains a
+Message Extension with the Criticality Indicator set to false. The server does
+not understand the extension, but since it is non-critical, the create request
+is processed normally. Subsequently, the created key is deleted. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Length"/>
+						<AttributeValue type="Integer" value="128"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Algorithm"/>
+						<AttributeValue type="Enumeration" value="AES"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+						<AttributeValue type="Integer" value="Decrypt Encrypt"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID"/>
+						<AttributeValue type="TextString" value="TC-71-10"/>
+					</Attribute>
+				</TemplateAttribute>
+			</RequestPayload>
+			<MessageExtension>
+				<VendorIdentification type="TextString" value="Acme"/>
+				<CriticalityIndicator type="Boolean" value="false"/>
+				<VendorExtension>
+					<TTLV tag="0x540001" type="TextString" value="na"/>
+				</VendorExtension>
+			</MessageExtension>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T08:26:04+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Create"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-11T08:26:04+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

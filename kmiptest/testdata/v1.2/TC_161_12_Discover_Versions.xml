@@ -1,0 +1,201 @@
+<?xml version="1.0" ?>
+<!-- Exercise the Discover Versions operation in different ways
+in order to find out which versions a server supports, as well as to get a list
+of versions supported by both client and server. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<RequestPayload>
+    </RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2011-12-01T08:46:15+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="2"/>
+				</ProtocolVersion>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="1"/>
+				</ProtocolVersion>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="0"/>
+				</ProtocolVersion>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<RequestPayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="0"/>
+				</ProtocolVersion>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2011-06-24T12:52:18+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="0"/>
+				</ProtocolVersion>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 2
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<RequestPayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="1"/>
+				</ProtocolVersion>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2011-12-01T08:46:15+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="1"/>
+				</ProtocolVersion>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 3
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<RequestPayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="2"/>
+				</ProtocolVersion>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2011-12-01T08:46:15+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="1"/>
+					<ProtocolVersionMinor type="Integer" value="2"/>
+				</ProtocolVersion>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 4
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<RequestPayload>
+				<ProtocolVersion>
+					<ProtocolVersionMajor type="Integer" value="9"/>
+					<ProtocolVersionMinor type="Integer" value="31"/>
+				</ProtocolVersion>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2011-12-01T08:46:15+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="DiscoverVersions"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+    </ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

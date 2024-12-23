@@ -1,0 +1,85 @@
+<?xml version="1.0" ?>
+<!-- Query the server for a list and map of vendor extension tags
+it recognizes. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<RequestPayload>
+				<QueryFunction type="Enumeration" value="QueryExtensionList"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:35+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ExtensionInformation>
+					<ExtensionName type="TextString" value="ACME LOCATION"/>
+				</ExtensionInformation>
+				<ExtensionInformation>
+					<ExtensionName type="TextString" value="ACME ZIP CODE"/>
+				</ExtensionInformation>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<RequestPayload>
+				<QueryFunction type="Enumeration" value="QueryExtensionMap"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="1"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:35+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ExtensionInformation>
+					<ExtensionName type="TextString" value="ACME LOCATION"/>
+					<ExtensionTag type="Integer" value="5548545"/>
+					<ExtensionType type="Integer" value="7"/>
+				</ExtensionInformation>
+				<ExtensionInformation>
+					<ExtensionName type="TextString" value="ACME ZIP CODE"/>
+					<ExtensionTag type="Integer" value="5548546"/>
+					<ExtensionType type="Integer" value="2"/>
+				</ExtensionInformation>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

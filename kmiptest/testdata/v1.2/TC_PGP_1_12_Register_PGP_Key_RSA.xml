@@ -1,0 +1,458 @@
+<?xml version="1.0" ?>
+<!-- Register a PGP public and private key block. Add the
+appropriate links between the registered objects. Make sure everything was
+registered and the attributes set correctly by listing and retrieving the
+attributes. Get the keys, and finally destroy all the registered objects. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="PGPKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID"/>
+						<AttributeValue type="TextString" value="TC-PGP-1-12-pubkey1"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Alternative Name"/>
+						<AttributeValue>
+							<AlternativeNameValue type="TextString" value="kmip3@kmip.com"/>
+							<AlternativeNameType type="Enumeration" value="UninterpretedTextString"/>
+						</AttributeValue>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Alternative Name"/>
+						<AttributeValue>
+							<AlternativeNameValue type="TextString" value="KMIP USER RSA (OASIS Key Management Interoperability   Protocol) &lt;kmip3@kmip.com&gt;"/>
+							<AlternativeNameType type="Enumeration" value="UninterpretedTextString"/>
+						</AttributeValue>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Alternative Name"/>
+						<AttributeValue>
+							<AlternativeNameValue type="TextString" value="6CCA0D26"/>
+							<AlternativeNameType type="Enumeration" value="ObjectSerialNumber"/>
+						</AttributeValue>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Alternative Name"/>
+						<AttributeValue>
+							<AlternativeNameValue type="TextString" value="240C17B36CCA0D26"/>
+							<AlternativeNameType type="Enumeration" value="ObjectSerialNumber"/>
+						</AttributeValue>
+					</Attribute>
+				</TemplateAttribute>
+				<PGPKey>
+					<PGPKeyVersion type="Integer" value="4"/>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="2d2d2d2d2d424547494e20504750205055424c4943204b455920424c4f434b2d2d2d2d2d0a0a6d51454e424648412f645142434144676564396536746962386b6c4668507077536e69314a7365636b716a534c35775431514b4b6d4a4d4d52794931527535520a724a53426352776a4f6f6161526461766e5a454a3178756a5533325a6a2b3248327371733673536e697a434e6e6b46354843574f324a3362354d3576506b64470a505971726c6376376c7650385030776a63544f756544786e53677836496a6e3451446a642b744c6e5478544b38553059687a73475a4377752b3353366b7768670a786c57537a2b33396f50306b5435382b4a766e6c7838766f777476715a2b376e7071724d4f6f6a495665644653666b2b7a32436f31554f626a366c2b787a54740a316b71515a6658432f79794d414677544b635045792f4b4377367532627a766f755a4d4d33646b6766552f41757171704b5342414248305a2f626c6e433254790a516453754f4b787a676379494263573577526e4b746a73745757395943662f6a4936457441424542414147305430744e5356416756564e4655694253553045670a4b45394255306c544945746c6553424e595735685a3256745a57353049456c75644756796233426c636d46696157787064486b6755484a766447396a623277700a4944787262576c774d30427262576c774c6d4e766254364a415459454577454341434146416c48412f6451434779384743776b4942774d434242554343414d450a4667494441514965415149586741414b4352416b4442657a624d6f4e4a6b6431422f39504c7068476278504f32377965795839436e5a2f5a73525062475648570a586d4d52327269586f42584231465234646c562f586e677265766b34535a425846494b783277306870705351566772424b59436d732f6846434b5363566156620a634e5179384c305135544e6a46507a7879554150384d4c5546752b5272354f49695049597547464d3236516e54426644464f684468374d766a6a32775755755a0a62326f56366936676a39376d66794e4a316d4a4866722b4d624f36684265624150766e73366b596976534479724772303663705561746f6568302b32594e32350a5864456d446b30627179396b704a4d77486a6a554c6b776e73466a62762b4b6858786c326a47366d6c45714e6941695556506674585934794b6d546669425a610a344a306a30346f6d6b55384a6a3466766c6b4f6f326f366b62732b687471442b4a355748786d5831546f736772667a7556387a354d7437550a3d6e564f790a2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d0a"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="RSA"/>
+						<CryptographicLength type="Integer" value="2048"/>
+					</KeyBlock>
+				</PGPKey>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:36+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="PGPKey"/>
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID"/>
+						<AttributeValue type="TextString" value="TC-PGP-1-12-prikey1"/>
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Link"/>
+						<AttributeValue>
+							<LinkType type="Enumeration" value="PublicKeyLink"/>
+							<LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+						</AttributeValue>
+					</Attribute>
+				</TemplateAttribute>
+				<PGPKey>
+					<PGPKeyVersion type="Integer" value="4"/>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="2d2d2d2d2d424547494e205047502050524956415445204b455920424c4f434b2d2d2d2d2d0a0a6c514f2b424648412f645142434144676564396536746962386b6c4668507077536e69314a7365636b716a534c35775431514b4b6d4a4d4d52794931527535520a724a53426352776a4f6f6161526461766e5a454a3178756a5533325a6a2b3248327371733673536e697a434e6e6b46354843574f324a3362354d3576506b64470a505971726c6376376c7650385030776a63544f756544786e53677836496a6e3451446a642b744c6e5478544b38553059687a73475a4377752b3353366b7768670a786c57537a2b33396f50306b5435382b4a766e6c7838766f777476715a2b376e7071724d4f6f6a495665644653666b2b7a32436f31554f626a366c2b787a54740a316b71515a6658432f79794d414677544b635045792f4b4377367532627a766f755a4d4d33646b6766552f41757171704b5342414248305a2f626c6e433254790a516453754f4b787a676379494263573577526e4b746a73745757395943662f6a49364574414245424141482b41774d434b4a6258597a3633486a5a67703532300a536e5433316a574d784c6e452b4134534e7736434f54532f36627267484a56436b50596e4f525a5144706f616b4a672b4638485771782b6d6f764f366c30554e0a646a3067717952344e462f32744d76674b545430464d6472374c7269534c517343436835457771586d32766e667639703471664c3042746a744143762b35585a0a445a587964614674625367453862624c652f4146514c71504f64574f746f4c43482f454430523534512b566369615a6d6f676941566277496a596b4e57784d560a316753455470774c3734467a677530446967464a7045375379687152536444736b4d586c79416d5a776730756f4c4443744e3861597253456a724273793752740a33333741735753534d7a6e4674797a59625631506874486830476848426455726f2f344164356f37364d7365743342636c4d3655416736554d53626a432f76760a55367950796a65387965707643666f762f47377453516269494577534f585578616d6d326574766e6f3359424d786d356c3778395a50375a667a382b7a63564a0a6d41567853352f5151477639454d464f4747595751355a6354636b512b65476e7a5a4d516d42366a5657616871553869584d332f673559384950356938374f590a7a4c486879627032345258794f6f546942327278756c7a6d4d5655594b6c676436674e6c48647973514d344b316465487738523337652f4e4b4a726d47582b330a707348494e7035454a716e42334a66513370374137434d68634a35506878336d39556d43724b6c79474d4a6446436c2b744e32503551534138644163686776420a43304c346f5a383343435a556d6d4d346c6a492b426f73634c4f67794b53506d73706c7a727a344c375472484d384b357a466f58486b5a7a5050575a544d32350a696c5479776f67735568715865397779796177365048544842792b633168765863485166664677667165794b654f356e47754b425a63707173584a672f5a67310a72714b6d725532617a64326d477459696b516d786c6b522b494f39644435384237674f416b797a414865354e617554393043744c3637716a4158322b614a52620a757532464c44317955424d6a7066557133613573516c36716f392f724338696b6e44412f684642704944334c5271444a47745961665076386f36466a5a4831550a7255437838305930726d4e656c56363558507445382b736f32486c2f686777484552644e737069547347455366534531527875754e532b6946572f67537933430a457252505330314a554342565530565349464a545153416f5430465453564d675332563549453168626d466e5a57316c626e5167535735305a584a76634756790a59574a7062476c3065534251636d393062324e7662436b67504774746158417a514774746158417559323974506f6b424e6751544151494149415543556344390a314149624c77594c4351674841774945465149494177515741674d42416834424168654141416f4a4543514d46374e737967306d523355482f3038756d455a760a45383762764a374a66304b646e396d784539735a55645a6559784861754a6567466348555648683256583965654374362b54684a6b466355677248624453476d0a6c4a425743734570674b617a2b455549704a78567056747731444c777652446c4d324d552f50484a51412f7777745157373547766b3469493868693459557a620a7043644d46384d5536454f4873792b4f5062425a53356c76616858714c71435033755a2f49306e57596b642b76347873377145463573412b2b657a7152694b390a49504b7361765470796c52713268364854375a6733626c643053594f545275724c32536b6b7a41654f4e517554436577574e752f347146664758614d627161550a536f3249434a5255392b31646a6a49715a4e2b49466c72676e5350546969615254776d50682b2b5751366a616a7152757a3647326f50346e6c5966475a66564f0a697943742f4f35587a506b793374513d0a3d766437730a2d2d2d2d2d454e44205047502050524956415445204b455920424c4f434b2d2d2d2d2d0a"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="RSA"/>
+						<CryptographicLength type="Integer" value="2048"/>
+					</KeyBlock>
+				</PGPKey>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:36+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 2
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="AddAttribute"/>
+			<UniqueBatchItemID type="ByteString" value="31f81bfb0f0492bd"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="Link"/>
+					<AttributeValue>
+						<LinkType type="Enumeration" value="PrivateKeyLink"/>
+						<LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+					</AttributeValue>
+				</Attribute>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:36+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="AddAttribute"/>
+			<UniqueBatchItemID type="ByteString" value="31f81bfb0f0492bd"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="Link"/>
+					<AttributeValue>
+						<LinkType type="Enumeration" value="PrivateKeyLink"/>
+						<LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+					</AttributeValue>
+				</Attribute>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributeList"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 3
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:36+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributeList"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<AttributeName type="TextString" value="x-ID"/>
+				<AttributeName type="TextString" value="Unique   Identifier"/>
+				<AttributeName type="TextString" value="Object   Type"/>
+				<AttributeName type="TextString" value="Cryptographic   Algorithm"/>
+				<AttributeName type="TextString" value="Cryptographic   Length"/>
+				<AttributeName type="TextString" value="Digest"/>
+				<AttributeName type="TextString" value="Initial   Date"/>
+				<AttributeName type="TextString" value="Last   Change Date"/>
+				<AttributeName type="TextString" value="Lease   Time"/>
+				<AttributeName type="TextString" value="Link"/>
+				<AttributeName type="TextString" value="State"/>
+				<AttributeName type="TextString" value="Alternative   Name"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributes"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<AttributeName type="TextString" value="Alternative   Name"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 4
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:37+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="GetAttributes"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<Attribute>
+					<AttributeName type="TextString" value="Alternative Name"/>
+					<AttributeValue>
+						<AlternativeNameValue type="TextString" value="kmip3@kmip.com"/>
+						<AlternativeNameType type="Enumeration" value="UninterpretedTextString"/>
+					</AttributeValue>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="Alternative Name"/>
+					<AttributeIndex type="Integer" value="1"/>
+					<AttributeValue>
+						<AlternativeNameValue type="TextString" value="KMIP USER RSA (OASIS Key Management Interoperability   Protocol) &lt;kmip3@kmip.com&gt;"/>
+						<AlternativeNameType type="Enumeration" value="UninterpretedTextString"/>
+					</AttributeValue>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="Alternative Name"/>
+					<AttributeIndex type="Integer" value="2"/>
+					<AttributeValue>
+						<AlternativeNameValue type="TextString" value="6CCA0D26"/>
+						<AlternativeNameType type="Enumeration" value="ObjectSerialNumber"/>
+					</AttributeValue>
+				</Attribute>
+				<Attribute>
+					<AttributeName type="TextString" value="Alternative Name"/>
+					<AttributeIndex type="Integer" value="3"/>
+					<AttributeValue>
+						<AlternativeNameValue type="TextString" value="240C17B36CCA0D26"/>
+						<AlternativeNameType type="Enumeration" value="ObjectSerialNumber"/>
+					</AttributeValue>
+				</Attribute>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 5
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:37+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="PGPKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+				<PGPKey>
+					<PGPKeyVersion type="Integer" value="4"/>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="2d2d2d2d2d424547494e205047502050524956415445204b455920424c4f434b2d2d2d2d2d0a0a6c514f2b424648412f645142434144676564396536746962386b6c4668507077536e69314a7365636b716a534c35775431514b4b6d4a4d4d52794931527535520a724a53426352776a4f6f6161526461766e5a454a3178756a5533325a6a2b3248327371733673536e697a434e6e6b46354843574f324a3362354d3576506b64470a505971726c6376376c7650385030776a63544f756544786e53677836496a6e3451446a642b744c6e5478544b38553059687a73475a4377752b3353366b7768670a786c57537a2b33396f50306b5435382b4a766e6c7838766f777476715a2b376e7071724d4f6f6a495665644653666b2b7a32436f31554f626a366c2b787a54740a316b71515a6658432f79794d414677544b635045792f4b4377367532627a766f755a4d4d33646b6766552f41757171704b5342414248305a2f626c6e433254790a516453754f4b787a676379494263573577526e4b746a73745757395943662f6a49364574414245424141482b41774d434b4a6258597a3633486a5a67703532300a536e5433316a574d784c6e452b4134534e7736434f54532f36627267484a56436b50596e4f525a5144706f616b4a672b4638485771782b6d6f764f366c30554e0a646a3067717952344e462f32744d76674b545430464d6472374c7269534c517343436835457771586d32766e667639703471664c3042746a744143762b35585a0a445a587964614674625367453862624c652f4146514c71504f64574f746f4c43482f454430523534512b566369615a6d6f676941566277496a596b4e57784d560a316753455470774c3734467a677530446967464a7045375379687152536444736b4d586c79416d5a776730756f4c4443744e3861597253456a724273793752740a33333741735753534d7a6e4674797a59625631506874486830476848426455726f2f344164356f37364d7365743342636c4d3655416736554d53626a432f76760a55367950796a65387965707643666f762f47377453516269494577534f585578616d6d326574766e6f3359424d786d356c3778395a50375a667a382b7a63564a0a6d41567853352f5151477639454d464f4747595751355a6354636b512b65476e7a5a4d516d42366a5657616871553869584d332f673559384950356938374f590a7a4c486879627032345258794f6f546942327278756c7a6d4d5655594b6c676436674e6c48647973514d344b316465487738523337652f4e4b4a726d47582b330a707348494e7035454a716e42334a66513370374137434d68634a35506878336d39556d43724b6c79474d4a6446436c2b744e32503551534138644163686776420a43304c346f5a383343435a556d6d4d346c6a492b426f73634c4f67794b53506d73706c7a727a344c375472484d384b357a466f58486b5a7a5050575a544d32350a696c5479776f67735568715865397779796177365048544842792b633168765863485166664677667165794b654f356e47754b425a63707173584a672f5a67310a72714b6d725532617a64326d477459696b516d786c6b522b494f39644435384237674f416b797a414865354e617554393043744c3637716a4158322b614a52620a757532464c44317955424d6a7066557133613573516c36716f392f724338696b6e44412f684642704944334c5271444a47745961665076386f36466a5a4831550a7255437838305930726d4e656c56363558507445382b736f32486c2f686777484552644e737069547347455366534531527875754e532b6946572f67537933430a457252505330314a554342565530565349464a545153416f5430465453564d675332563549453168626d466e5a57316c626e5167535735305a584a76634756790a59574a7062476c3065534251636d393062324e7662436b67504774746158417a514774746158417559323974506f6b424e6751544151494149415543556344390a314149624c77594c4351674841774945465149494177515741674d42416834424168654141416f4a4543514d46374e737967306d523355482f3038756d455a760a45383762764a374a66304b646e396d784539735a55645a6559784861754a6567466348555648683256583965654374362b54684a6b466355677248624453476d0a6c4a425743734570674b617a2b455549704a78567056747731444c777652446c4d324d552f50484a51412f7777745157373547766b3469493868693459557a620a7043644d46384d5536454f4873792b4f5062425a53356c76616858714c71435033755a2f49306e57596b642b76347873377145463573412b2b657a7152694b390a49504b7361765470796c52713268364854375a6733626c643053594f545275724c32536b6b7a41654f4e517554436577574e752f347146664758614d627161550a536f3249434a5255392b31646a6a49715a4e2b49466c72676e5350546969615254776d50682b2b5751366a616a7152757a3647326f50346e6c5966475a66564f0a697943742f4f35587a506b793374513d0a3d766437730a2d2d2d2d2d454e44205047502050524956415445204b455920424c4f434b2d2d2d2d2d0a"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="RSA"/>
+						<CryptographicLength type="Integer" value="2048"/>
+					</KeyBlock>
+				</PGPKey>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<KeyFormatType type="Enumeration" value="Raw"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 6
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:37+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Get"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<ObjectType type="Enumeration" value="PGPKey"/>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+				<PGPKey>
+					<PGPKeyVersion type="Integer" value="4"/>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw"/>
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="2d2d2d2d2d424547494e20504750205055424c4943204b455920424c4f434b2d2d2d2d2d0a0a6d51454e424648412f645142434144676564396536746962386b6c4668507077536e69314a7365636b716a534c35775431514b4b6d4a4d4d52794931527535520a724a53426352776a4f6f6161526461766e5a454a3178756a5533325a6a2b3248327371733673536e697a434e6e6b46354843574f324a3362354d3576506b64470a505971726c6376376c7650385030776a63544f756544786e53677836496a6e3451446a642b744c6e5478544b38553059687a73475a4377752b3353366b7768670a786c57537a2b33396f50306b5435382b4a766e6c7838766f777476715a2b376e7071724d4f6f6a495665644653666b2b7a32436f31554f626a366c2b787a54740a316b71515a6658432f79794d414677544b635045792f4b4377367532627a766f755a4d4d33646b6766552f41757171704b5342414248305a2f626c6e433254790a516453754f4b787a676379494263573577526e4b746a73745757395943662f6a4936457441424542414147305430744e5356416756564e4655694253553045670a4b45394255306c544945746c6553424e595735685a3256745a57353049456c75644756796233426c636d46696157787064486b6755484a766447396a623277700a4944787262576c774d30427262576c774c6d4e766254364a415459454577454341434146416c48412f6451434779384743776b4942774d434242554343414d450a4667494441514965415149586741414b4352416b4442657a624d6f4e4a6b6431422f39504c7068476278504f32377965795839436e5a2f5a73525062475648570a586d4d52327269586f42584231465234646c562f586e677265766b34535a425846494b783277306870705351566772424b59436d732f6846434b5363566156620a634e5179384c305135544e6a46507a7879554150384d4c5546752b5272354f49695049597547464d3236516e54426644464f684468374d766a6a32775755755a0a62326f56366936676a39376d66794e4a316d4a4866722b4d624f36684265624150766e73366b596976534479724772303663705561746f6568302b32594e32350a5864456d446b30627179396b704a4d77486a6a554c6b776e73466a62762b4b6858786c326a47366d6c45714e6941695556506674585934794b6d546669425a610a344a306a30346f6d6b55384a6a3466766c6b4f6f326f366b62732b687471442b4a355748786d5831546f736772667a7556387a354d7437550a3d6e564f790a2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d0a"/>
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="RSA"/>
+						<CryptographicLength type="Integer" value="2048"/>
+					</KeyBlock>
+				</PGPKey>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 7
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:37+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+# TIME 8
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="2"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2012-04-27T08:14:37+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

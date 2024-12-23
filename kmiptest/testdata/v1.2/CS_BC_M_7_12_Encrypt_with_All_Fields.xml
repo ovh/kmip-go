@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!-- CS-BC-M-7-12 - Encrypt with Known Symmetric Key with Usage Limits.
+ Register a symmetric key and perform encrypt using the symmetric key. Then attempt to perform an encrypt beyond the usage limits. It must fail. This is otherwise the same as CS-BC-M-4-12.
+  -->
+<KMIP>
+# TIME 0
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="4"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Encrypt"/>
+    <RequestPayload>
+      <UniqueIdentifier type="TextString" value="3cad8f67-3170-4a9d-969c-169ef21e5531"/>
+      <CryptographicParameters>
+      <BlockCipherMode type="Enumeration" value="ECB"/>
+      </CryptographicParameters>
+      <Data type="ByteString" value="01020304050607080910111213141516"/>
+      <IVCounterNonce type="ByteString" value="01020304050607080910111213141516"/>
+      <CorrelationValue type="ByteString" value="01020304050607080910111213141516"/>
+      <InitIndicator type="Boolean" value="false"/>
+      <FinalIndicator type="Boolean" value="false"/>
+      <AuthenticatedEncryptionAdditionalData type="ByteString" value="01020304050607080910111213141516"/>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="4"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="Encrypt"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+      <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+      <Data type="ByteString" value="d9bcce11b0b437b90239552df3a360c9"/>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+</KMIP>

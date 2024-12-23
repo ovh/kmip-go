@@ -1,0 +1,10 @@
+name: Setup Build Env
+description: Setup build environment with go
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: "1.23"

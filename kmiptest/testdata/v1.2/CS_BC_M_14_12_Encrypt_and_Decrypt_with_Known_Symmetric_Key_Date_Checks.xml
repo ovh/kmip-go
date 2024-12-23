@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<!--  CS-BC-M-14-12 - Encrypt and Decrypt with Known Symmetric Key Date Checks
+Register a symmetric key and perform both encrypt and decrypt operations using the symmetric key
+outside of the valid Process Start Date and Protect Stop Date to confirm the operations fail.
+
+The Process Start Date is set to a future date. The Protect Stop Date is set to a past date.
+
+This is a modified version of CS-BC-M-6-12.
+  -->
+<KMIP> # TIME 0 <RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1" />
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register" />
+			<RequestPayload>
+				<ObjectType type="Enumeration" value="SymmetricKey" />
+				<TemplateAttribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Cryptographic Usage Mask" />
+						<AttributeValue type="Integer" value="Encrypt Decrypt" />
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="x-ID" />
+						<AttributeValue type="TextString" value="CS-BC-M-14-12" />
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Activation Date" />
+						<AttributeValue type="DateTime" value="$NOW-13600" />
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Process Start Date" />
+						<AttributeValue type="DateTime" value="$NOW+13600" />
+					</Attribute>
+					<Attribute>
+						<AttributeName type="TextString" value="Protect Stop Date" />
+						<AttributeValue type="DateTime" value="$NOW-13600" />
+					</Attribute>
+				</TemplateAttribute>
+				<SymmetricKey>
+					<KeyBlock>
+						<KeyFormatType type="Enumeration" value="Raw" />
+						<KeyValue>
+							<KeyMaterial type="ByteString" value="0123456789abcdef0123456789abcdef" />
+						</KeyValue>
+						<CryptographicAlgorithm type="Enumeration" value="AES" />
+						<CryptographicLength type="Integer" value="128" />
+					</KeyBlock>
+				</SymmetricKey>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00" />
+			<BatchCount type="Integer" value="1" />
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Register" />
+			<ResultStatus type="Enumeration" value="Success" />
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	# TIME 1 <RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1" />
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Encrypt" />
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+				<CryptographicParameters>
+					<BlockCipherMode type="Enumeration" value="ECB" />
+				</CryptographicParameters>
+				<Data type="ByteString" value="01020304050607080910111213141516" />
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00" />
+			<BatchCount type="Integer" value="1" />
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Encrypt" />
+			<ResultStatus type="Enumeration" value="OperationFailed" />
+			<ResultReason type="Enumeration" value="PermissionDenied" />
+			<ResultMessage type="TextString" value="DENIED" />
+		</BatchItem>
+	</ResponseMessage>
+	# TIME 2 <RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1" />
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Decrypt" />
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+				<CryptographicParameters>
+					<BlockCipherMode type="Enumeration" value="ECB" />
+				</CryptographicParameters>
+				<Data type="ByteString" value="fd912d102dbb482f6f6e91bd57119095" />
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00" />
+			<BatchCount type="Integer" value="1" />
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Decrypt" />
+			<ResultStatus type="Enumeration" value="OperationFailed" />
+			<ResultReason type="Enumeration" value="PermissionDenied" />
+			<ResultMessage type="TextString" value="DENIED" />
+		</BatchItem>
+	</ResponseMessage>
+	# TIME 3 <RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1" />
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke" />
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+				<RevocationReason>
+					<RevocationReasonCode type="Enumeration" value="Unspecified" />
+				</RevocationReason>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00" />
+			<BatchCount type="Integer" value="1" />
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Revoke" />
+			<ResultStatus type="Enumeration" value="Success" />
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+	# TIME 4 <RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<BatchCount type="Integer" value="1" />
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy" />
+			<RequestPayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1" />
+				<ProtocolVersionMinor type="Integer" value="2" />
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2013-06-21T22:18:59+00:00" />
+			<BatchCount type="Integer" value="1" />
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Destroy" />
+			<ResultStatus type="Enumeration" value="Success" />
+			<ResponsePayload>
+				<UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

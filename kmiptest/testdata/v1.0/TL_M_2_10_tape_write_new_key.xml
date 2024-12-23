@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--TL-M-2-10 - Write with new (created) key
+This case may occur when the Write operation starts with the first block on a tape. The implementation may choose which Write operations qualify for creation of a new key. Regardless of the initiating circumstances, the Tape Library requests the server to create a new AES-256 symmetric key with appropriate identifying information which is unique within the Application Namespace.
+Additional custom attributes MAY be specified in order to:
+- ensure uniqueness of the key identifier when later Locating the key via ASI
+- provide human-readable information (such as the tape Barcode value)
+- provide information to support client-specific purposes
+ -->
+<KMIP> # TIME 0 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchOrderOption type="Boolean" value="true" />
+      <BatchCount type="Integer" value="2" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Create" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <TemplateAttribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-ID" />
+            <AttributeValue type="TextString" value="TL-M-2-10" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Name" />
+            <AttributeValue>
+              <NameValue type="TextString" value="AAAAAAA1A1AA12345678901234567" />
+              <NameType type="Enumeration" value="UninterpretedTextString" />
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Algorithm" />
+            <AttributeValue type="Enumeration" value="AES" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Length" />
+            <AttributeValue type="Integer" value="256" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+            <AttributeValue type="Integer" value="Decrypt Encrypt" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Application Specific Information" />
+            <AttributeValue>
+              <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+              <ApplicationData type="TextString"
+                value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-Barcode" />
+            <AttributeValue type="TextString" value="XXA012A1" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-VendorAttribute1" />
+            <AttributeValue type="TextString" value="XXA012A1" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-VendorAttribute2" />
+            <AttributeValue type="Integer" value="0" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-VendorAttribute3" />
+            <AttributeValue type="DateTime" value="2012-10-05T22:08:19+00:00" />
+          </Attribute>
+        </TemplateAttribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="Get" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <RequestPayload>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage> 0072 0073 0074 0075 0076 0077
+  0078 0079 0080 0081 0082 0083 0084 0085 0086 0087 0088 0089 0090 0091 0092 0093 0094 0095 0096
+  0097 0098 0099 0100 0101 0102 0103 0104 0105 0106 0107 0108 0109 <ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T21:41:46+00:00" />
+      <BatchCount type="Integer" value="2" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Create" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="Get" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <SymmetricKey>
+          <KeyBlock>
+            <KeyFormatType type="Enumeration" value="Raw" />
+            <KeyValue>
+              <KeyMaterial type="ByteString"
+                value="2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a" />
+            </KeyValue>
+            <CryptographicAlgorithm type="Enumeration" value="AES" />
+            <CryptographicLength type="Integer" value="256" />
+          </KeyBlock>
+        </SymmetricKey>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+</KMIP>

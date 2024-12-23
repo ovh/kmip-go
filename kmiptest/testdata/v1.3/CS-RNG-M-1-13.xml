@@ -1,0 +1,47 @@
+<KMIP>
+<!--
+     Key Management Interoperability Protocol Profiles Version 1.3
+     OASIS Standard
+     27 December 2016
+     Copyright (c) OASIS Open 2016. All Rights Reserved.
+     Source: http://docs.oasis-open.org/kmip/profiles/v1.3/os/test-cases/kmip-v1.3/mandatory/
+     Latest version of the specification: http://docs.oasis-open.org/kmip/profiles/v1.3/kmip-profiles-v1.3.html
+     TC IPR Statement: https://www.oasis-open.org/committees/kmip/ipr.php
+
+-->
+
+<RequestMessage>
+  <RequestHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <BatchCount type="Integer" value="1"/>
+  </RequestHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="RNGRetrieve"/>
+    <RequestPayload>
+      <DataLength type="Integer" value="32"/>
+    </RequestPayload>
+  </BatchItem>
+</RequestMessage>
+
+<ResponseMessage>
+  <ResponseHeader>
+    <ProtocolVersion>
+      <ProtocolVersionMajor type="Integer" value="1"/>
+      <ProtocolVersionMinor type="Integer" value="3"/>
+    </ProtocolVersion>
+    <TimeStamp type="DateTime" value="$NOW"/>
+    <BatchCount type="Integer" value="1"/>
+  </ResponseHeader>
+  <BatchItem>
+    <Operation type="Enumeration" value="RNGRetrieve"/>
+    <ResultStatus type="Enumeration" value="Success"/>
+    <ResponsePayload>
+      <Data type="ByteString" value="9c0bcd79d775998ddc52457bbbcfce2d4a194b039e20a3adacb63fb6561ba545"/>
+    </ResponsePayload>
+  </BatchItem>
+</ResponseMessage>
+
+</KMIP>

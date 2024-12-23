@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<!--  SKLC-O-1-10 Create, GetAttributes, Destroy, GetAttributes -->
+<KMIP> 
+  # TIME 0 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Create" />
+      <RequestPayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <TemplateAttribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Algorithm" />
+            <AttributeValue type="Enumeration" value="AES" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Length" />
+            <AttributeValue type="Integer" value="256" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+            <AttributeValue type="Integer" value="Encrypt Decrypt" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Name" />
+            <AttributeValue>
+              <NameValue type="TextString" value="SKLC-O-1-10" />
+              <NameType type="Enumeration" value="UninterpretedTextString" />
+            </AttributeValue>
+          </Attribute>
+        </TemplateAttribute>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+  0037 0038 0039 0040 0041 0042 0043 0044 0045 0046 0047 0048 0049 0050 0051 0052 0053 0054 <ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-04-27T08:12:24+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Create" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  0055 0056 0057 0058 0059 0060 0061 0062 0063 0064 0065 0066 0067 0068 0069 0070 0071 0072 0073
+  0074 0075 0076 0077 0078 0079 # TIME 1 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <RequestPayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <AttributeName type="TextString" value="State" />
+        <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+        <AttributeName type="TextString" value="Unique Identifier" />
+        <AttributeName type="TextString" value="Object Type" />
+        <AttributeName type="TextString" value="Cryptographic Algorithm" />
+        <AttributeName type="TextString" value="Cryptographic Length" />
+        <AttributeName type="TextString" value="Digest" />
+        <AttributeName type="TextString" value="Initial Date" />
+        <AttributeName type="TextString" value="Last Change Date" />
+        <AttributeName type="TextString" value="Activation Date" />
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+  0080 0081 0082 0083 0084 0085 0086 0087 0088 0089 0090 0091 0092 0093 0094 0095 0096 0097 0098
+  0099 0100 0101 0102 0103 0104 0105 0106 0107 0108 0109 0110 0111 0112 0113 0114 0115 0116 0117
+  0118 0119 0120 0121 0122 0123 0124 0125 0126 0127 0128 0129 0130 0131 0132 0133 0134 0135 <ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-04-27T08:12:24+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <Attribute>
+          <AttributeName type="TextString" value="State" />
+          <AttributeValue type="Enumeration" value="PreActive" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+          <AttributeValue type="Integer" value="Decrypt Encrypt" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Unique Identifier" />
+          <AttributeValue type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Algorithm" />
+          <AttributeValue type="Enumeration" value="AES" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Length" />
+          <AttributeValue type="Integer" value="256" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Digest" />
+          <AttributeValue>
+            <HashingAlgorithm type="Enumeration" value="SHA_256" />
+            <DigestValue type="ByteString"
+              value="bc12861408b8ac72cdb3b2748ad342b7dc519bd109046a1b931fdaed73591f29" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Initial Date" />
+          <AttributeValue type="DateTime" value="2013-01-10T23:33:21+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Last Change Date" />
+          <AttributeValue type="DateTime" value="2013-01-10T23:33:21+00:00" />
+        </Attribute>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  0136 0137 0138 0139 0140 0141 0142 0143 0144 0145 0146 0147 0148 0149 0150 # TIME 2 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Destroy" />
+      <RequestPayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+  0151 0152 0153 0154 0155 0156 0157 0158 0159 0160 0161 0162 0163 0164 0165 0166 0167 <ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Destroy" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  0168 0169 0170 0171 0172 0173 0174 0175 0176 0177 0178 0179 0180 0181 0182 # TIME 3 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <RequestPayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+  0183 0184 0185 0186 0187 0188 0189 0190 0191 0192 0193 0194 0195 0196 0197 0198 0199 0200 0201
+  0202 0203 0204 0205 0206 0207 0208 0209 0210 0211 0212 0213 0214 0215 0216 0217 0218 0219 0220
+  0221 0222 0223 0224 0225 0226 0227 0228 0229 0230 0231 0232 0233 0234 0235 0236 0237 0238 0239
+  0240 0241 0242 0243 0244 0245 0246 0247 0248 0249 0250 0251 0252 0253 <ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-04-27T08:12:25+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <Attribute>
+          <AttributeName type="TextString" value="Unique Identifier" />
+          <AttributeValue type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Algorithm" />
+          <AttributeValue type="Enumeration" value="AES" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Length" />
+          <AttributeValue type="Integer" value="256" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+          <AttributeValue type="Integer" value="Decrypt Encrypt" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Destroy Date" />
+          <AttributeValue type="DateTime" value="2013-01-11T00:39:11+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Digest" />
+          <AttributeValue>
+            <HashingAlgorithm type="Enumeration" value="SHA_256" />
+            <DigestValue type="ByteString"
+              value="bf60cac2a3f82e6added839c87b0bdbc386d6280c14c8f09ca96e098365f7fe3" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Initial Date" />
+          <AttributeValue type="DateTime" value="2013-01-11T00:39:11+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Last Change Date" />
+          <AttributeValue type="DateTime" value="2013-01-11T00:39:11+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Lease Time" />
+          <AttributeValue type="Interval" value="3600" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Name" />
+          <AttributeValue>
+            <NameValue type="TextString" value="SKLC-O-1-10" />
+            <NameType type="Enumeration" value="UninterpretedTextString" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="State" />
+          <AttributeValue type="Enumeration" value="Destroyed" />
+        </Attribute>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+</KMIP>

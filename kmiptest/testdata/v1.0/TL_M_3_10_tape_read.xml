@@ -1,0 +1,416 @@
+<?xml version="1.0"?>
+<!-- TL-M-3-10 - Read an encrypted tape
+The Tape Library constructs an identifier string based on the method in 2.3, then requests the server to Locate that string via ASI. A Get is then requested based on the key's unique identifier. The Tape Library MAY update attributes associated with the Symmetric Key Managed Object.  The following test case shows extensive use of custom attributes. Custom attributes are not required if the Application Name is unique within the Application Namespace. An implementation may also use custom attributes for vendor-unique purposes, or to improve usability.
+The test case destroys the key created in the previous test case to clean up after the test. Tape Library implementations may elect to not perform this step.
+ -->
+<KMIP> # TIME 0 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchOrderOption type="Boolean" value="true" />
+      <BatchCount type="Integer" value="2" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Application Specific Information" />
+          <AttributeValue>
+            <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+            <ApplicationData type="TextString"
+              value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+          </AttributeValue>
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="Get" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <RequestPayload>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T22:00:32+00:00" />
+      <BatchCount type="Integer" value="2" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="Get" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <ObjectType type="Enumeration" value="SymmetricKey" />
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <SymmetricKey>
+          <KeyBlock>
+            <KeyFormatType type="Enumeration" value="Raw" />
+            <KeyValue>
+              <KeyMaterial type="ByteString"
+                value="2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a" />
+            </KeyValue>
+            <CryptographicAlgorithm type="Enumeration" value="AES" />
+            <CryptographicLength type="Integer" value="256" />
+          </KeyBlock>
+        </SymmetricKey>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  # TIME 1 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchOrderOption type="Boolean" value="true" />
+      <BatchCount type="Integer" value="2" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Application Specific Information" />
+          <AttributeValue>
+            <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+            <ApplicationData type="TextString"
+              value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+          </AttributeValue>
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributeList" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <RequestPayload>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T22:00:33+00:00" />
+      <BatchCount type="Integer" value="2" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributeList" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <AttributeName type="TextString" value="x-ID" />
+        <AttributeName type="TextString" value="x-Barcode" />
+        <AttributeName type="TextString" value="x-VendorAttribute1" />
+        <AttributeName type="TextString" value="x-VendorAttribute2" />
+        <AttributeName type="TextString" value="x-VendorAttribute3" />
+        <AttributeName type="TextString" value="Unique Identifier" />
+        <AttributeName type="TextString" value="Object Type" />
+        <AttributeName type="TextString" value="Cryptographic Algorithm" />
+        <AttributeName type="TextString" value="Cryptographic Length" />
+        <AttributeName type="TextString" value="Application Specific Information" />
+        <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+        <AttributeName type="TextString" value="Digest" />
+        <AttributeName type="TextString" value="Initial Date" />
+        <AttributeName type="TextString" value="Last Change Date" />
+        <AttributeName type="TextString" value="Lease Time" />
+        <AttributeName type="TextString" value="Name" />
+        <AttributeName type="TextString" value="State" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  # TIME 2 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchOrderOption type="Boolean" value="true" />
+      <BatchCount type="Integer" value="2" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Application Specific Information" />
+          <AttributeValue>
+            <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+            <ApplicationData type="TextString"
+              value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+          </AttributeValue>
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <RequestPayload>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T22:00:32+00:00" />
+      <BatchCount type="Integer" value="2" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="GetAttributes" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <Attribute>
+          <AttributeName type="TextString" value="x-ID" />
+          <AttributeValue type="TextString" value="TL-M-2-10" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-Barcode" />
+          <AttributeValue type="TextString" value="XXA012A1" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute1" />
+          <AttributeValue type="TextString" value="XXA012A1" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute2" />
+          <AttributeValue type="Integer" value="0" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute3" />
+          <AttributeValue type="DateTime" value="2012-10-05T22:08:19+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Unique Identifier" />
+          <AttributeValue type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Algorithm" />
+          <AttributeValue type="Enumeration" value="AES" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Length" />
+          <AttributeValue type="Integer" value="256" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Application Specific Information" />
+          <AttributeValue>
+            <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+            <ApplicationData type="TextString"
+              value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Cryptographic Usage Mask" />
+          <AttributeValue type="Integer" value="Decrypt Encrypt" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Digest" />
+          <AttributeValue>
+            <HashingAlgorithm type="Enumeration" value="SHA_256" />
+            <DigestValue type="ByteString"
+              value="0bd3d7ada745e4eb34cc9d26cc84d4852a15906b2f77f80d01fc31c28108c49b" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Initial Date" />
+          <AttributeValue type="DateTime" value="2012-10-05T21:41:46+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Last Change Date" />
+          <AttributeValue type="DateTime" value="2012-10-05T21:41:46+00:00" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Lease Time" />
+          <AttributeValue type="Interval" value="3600" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Name" />
+          <AttributeValue>
+            <NameValue type="TextString" value="AAAAAAA1A1AA12345678901234567" />
+            <NameType type="Enumeration" value="UninterpretedTextString" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="State" />
+          <AttributeValue type="Enumeration" value="PreActive" />
+        </Attribute>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  # TIME 3 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchOrderOption type="Boolean" value="true" />
+      <BatchCount type="Integer" value="3" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="SymmetricKey" />
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Application Specific Information" />
+          <AttributeValue>
+            <ApplicationNamespace type="TextString" value="LIBRARY-LTO" />
+            <ApplicationData type="TextString"
+              value="123456789ABCDEF123456789123456789ABCDEF123456789ABCDEF1234000000" />
+          </AttributeValue>
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="ModifyAttribute" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute2" />
+          <AttributeValue type="DateTime" value="2012-10-05T22:27:06+00:00" />
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="ModifyAttribute" />
+      <UniqueBatchItemID type="ByteString" value="03" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute3" />
+          <AttributeValue type="Integer" value="1" />
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T22:00:33+00:00" />
+      <BatchCount type="Integer" value="3" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <UniqueBatchItemID type="ByteString" value="01" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="ModifyAttribute" />
+      <UniqueBatchItemID type="ByteString" value="02" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute2" />
+          <AttributeValue type="DateTime" value="2012-10-05T22:27:06+00:00" />
+        </Attribute>
+      </ResponsePayload>
+    </BatchItem>
+    <BatchItem>
+      <Operation type="Enumeration" value="ModifyAttribute" />
+      <UniqueBatchItemID type="ByteString" value="03" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+        <Attribute>
+          <AttributeName type="TextString" value="x-VendorAttribute3" />
+          <AttributeValue type="Integer" value="1" />
+        </Attribute>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  # TIME 4 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Destroy" />
+      <RequestPayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2012-10-05T22:00:33+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Destroy" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+</KMIP>

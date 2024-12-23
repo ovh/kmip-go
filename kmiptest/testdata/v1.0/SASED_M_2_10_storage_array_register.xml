@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<!-- SASED-M-2-10 - Register the authentication key
+A template is created and the secret data for the authentication key is then registered. The server must allow the registration of managed objects for Object Groups either by allowed arbitrary values for Object Groups or by pre-configuration of specific Object Groups prior to the storage array registering the authentication key.  The authentication key may be a new authentication key or a replacement authentication key.
+ -->
+<KMIP> # TIME 0 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <RequestPayload>
+        <Attribute>
+          <AttributeName type="TextString" value="Name" />
+          <AttributeValue>
+            <NameValue type="TextString" value="SASED-M-2-10-template1" />
+            <NameType type="Enumeration" value="UninterpretedTextString" />
+          </AttributeValue>
+        </Attribute>
+        <Attribute>
+          <AttributeName type="TextString" value="Object Type" />
+          <AttributeValue type="Enumeration" value="Template" />
+        </Attribute>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2013-04-25T16:53:08+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Locate" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage> # TIME 1 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Register" />
+      <RequestPayload>
+        <ObjectType type="Enumeration" value="Template" />
+        <TemplateAttribute>
+        </TemplateAttribute>
+        <Template>
+          <Attribute>
+            <AttributeName type="TextString" value="Object Group" />
+            <AttributeValue type="TextString" value="SASED-M-2-10-group" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-CustomAttribute1" />
+            <AttributeValue type="TextString" value="CustomValue1" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-CustomAttribute2" />
+            <AttributeValue type="TextString" value="CustomValue2" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Name" />
+            <AttributeValue>
+              <NameValue type="TextString" value="SASED-M-2-10-template1" />
+              <NameType type="Enumeration" value="UninterpretedTextString" />
+            </AttributeValue>
+          </Attribute>
+        </Template>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2013-04-25T16:53:08+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Register" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+  # TIME 2 <RequestMessage>
+    <RequestHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <BatchCount type="Integer" value="1" />
+    </RequestHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Register" />
+      <RequestPayload>
+        <ObjectType type="Enumeration" value="SecretData" />
+        <TemplateAttribute>
+          <Name>
+            <NameValue type="TextString" value="SASED-M-2-10-template1" />
+            <NameType type="Enumeration" value="UninterpretedTextString" />
+          </Name>
+          <Attribute>
+            <AttributeName type="TextString" value="x-CustomAttribute3" />
+            <AttributeValue type="TextString" value="CustomValue3" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="x-CustomAttribute4" />
+            <AttributeValue type="TextString" value="CustomValue4" />
+          </Attribute>
+          <Attribute>
+            <AttributeName type="TextString" value="Name" />
+            <AttributeValue>
+              <NameValue type="TextString" value="SASED-M-2-10-name" />
+              <NameType type="Enumeration" value="UninterpretedTextString" />
+            </AttributeValue>
+          </Attribute>
+        </TemplateAttribute>
+        <SecretData>
+          <SecretDataType type="Enumeration" value="Password" />
+          <KeyBlock>
+            <KeyFormatType type="Enumeration" value="Opaque" />
+            <KeyValue>
+              <KeyMaterial type="ByteString"
+                value="2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a" />
+            </KeyValue>
+          </KeyBlock>
+        </SecretData>
+      </RequestPayload>
+    </BatchItem>
+  </RequestMessage>
+<ResponseMessage>
+    <ResponseHeader>
+      <ProtocolVersion>
+        <ProtocolVersionMajor type="Integer" value="1" />
+        <ProtocolVersionMinor type="Integer" value="0" />
+      </ProtocolVersion>
+      <TimeStamp type="DateTime" value="2013-04-25T16:53:08+00:00" />
+      <BatchCount type="Integer" value="1" />
+    </ResponseHeader>
+    <BatchItem>
+      <Operation type="Enumeration" value="Register" />
+      <ResultStatus type="Enumeration" value="Success" />
+      <ResponsePayload>
+        <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1" />
+      </ResponsePayload>
+    </BatchItem>
+  </ResponseMessage>
+</KMIP>

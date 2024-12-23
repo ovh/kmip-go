@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    # run only against tags
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - run: git fetch --force --tags
+      - uses: ./.github/actions/setup-build-env
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: .github/release-note.toml
+          args: --verbose --current
+        env:
+          OUTPUT: tmp.CHANGELOG.md
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          # prerelease: true
+          name: ${{ github.ref_name }}
+          # draft: true
+          body_path: tmp.CHANGELOG.md
+    

@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<!-- Perform a Query operation, querying the Operations and
+Objects supported by the server, with a restriction on the Maximum Response
+Size set in the request header. Since the resulting Query response is too big,
+an error is returned. Increase the Maximum Response Size, resubmit the Query
+request, and get a successful response. -->
+<KMIP>
+# TIME 0
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<MaximumResponseSize type="Integer" value="256"/>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<RequestPayload>
+				<QueryFunction type="Enumeration" value="QueryOperations"/>
+				<QueryFunction type="Enumeration" value="QueryObjects"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-15T09:49:30+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<ResultStatus type="Enumeration" value="OperationFailed"/>
+			<ResultReason type="Enumeration" value="ResponseTooLarge"/>
+			<ResultMessage type="TextString" value="Response   size: 568, Maximum Response Size indicated in request: 256"/>
+		</BatchItem>
+	</ResponseMessage>
+# TIME 1
+	<RequestMessage>
+		<RequestHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<MaximumResponseSize type="Integer" value="2048"/>
+			<BatchCount type="Integer" value="1"/>
+		</RequestHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<RequestPayload>
+				<QueryFunction type="Enumeration" value="QueryOperations"/>
+				<QueryFunction type="Enumeration" value="QueryObjects"/>
+			</RequestPayload>
+		</BatchItem>
+	</RequestMessage>
+	<ResponseMessage>
+		<ResponseHeader>
+			<ProtocolVersion>
+				<ProtocolVersionMajor type="Integer" value="1"/>
+				<ProtocolVersionMinor type="Integer" value="0"/>
+			</ProtocolVersion>
+			<TimeStamp type="DateTime" value="2010-02-15T09:49:30+00:00"/>
+			<BatchCount type="Integer" value="1"/>
+		</ResponseHeader>
+		<BatchItem>
+			<Operation type="Enumeration" value="Query"/>
+			<ResultStatus type="Enumeration" value="Success"/>
+			<ResponsePayload>
+				<Operation type="Enumeration" value="Create"/>
+				<Operation type="Enumeration" value="CreateKeyPair"/>
+				<Operation type="Enumeration" value="Register"/>
+				<Operation type="Enumeration" value="ReKey"/>
+				<Operation type="Enumeration" value="Locate"/>
+				<Operation type="Enumeration" value="Get"/>
+				<Operation type="Enumeration" value="GetAttributes"/>
+				<Operation type="Enumeration" value="GetAttributeList"/>
+				<Operation type="Enumeration" value="AddAttribute"/>
+				<Operation type="Enumeration" value="ModifyAttribute"/>
+				<Operation type="Enumeration" value="DeleteAttribute"/>
+				<Operation type="Enumeration" value="ObtainLease"/>
+				<Operation type="Enumeration" value="GetUsageAllocation"/>
+				<Operation type="Enumeration" value="Activate"/>
+				<Operation type="Enumeration" value="Revoke"/>
+				<Operation type="Enumeration" value="Destroy"/>
+				<Operation type="Enumeration" value="Archive"/>
+				<Operation type="Enumeration" value="Recover"/>
+				<Operation type="Enumeration" value="Query"/>
+				<ObjectType type="Enumeration" value="Certificate"/>
+				<ObjectType type="Enumeration" value="SymmetricKey"/>
+				<ObjectType type="Enumeration" value="PublicKey"/>
+				<ObjectType type="Enumeration" value="PrivateKey"/>
+				<ObjectType type="Enumeration" value="Template"/>
+			</ResponsePayload>
+		</BatchItem>
+	</ResponseMessage>
+</KMIP>

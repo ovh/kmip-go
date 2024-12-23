@@ -1,0 +1,6 @@
+Licences:
+BSD-3-Clause
+
+Packages:
+github.com/golang/go; BSD-3-Clause
+github.com/google/uuid; BSD-3-Clause

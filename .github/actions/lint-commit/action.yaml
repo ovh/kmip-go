@@ -1,0 +1,27 @@
+name: Lint Conventional Commits
+description: Verify that all the commits complies to the conventional commit convention
+
+inputs:
+  config:
+    description: Path to the configuration file
+    default: .github/commitlint.config.js
+
+runs:
+  using: composite
+  steps:
+    - name: Install commitlint
+      shell: bash
+      run: |
+        npm install conventional-changelog-conventionalcommits
+        npm install commitlint@latest
+        npm install @commitlint/{cli,config-conventional}
+
+    - name: Validate current commit (last commit) with commitlint
+      if: github.event_name == 'push'
+      shell: bash
+      run: npx commitlint --config ${{ inputs.config }} --last --verbose
+
+    - name: Validate PR commits with commitlint
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: npx commitlint --config ${{ inputs.config }} --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose

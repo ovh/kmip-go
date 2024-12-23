@@ -1,0 +1,491 @@
+<KMIP>
+
+    <!--
+     Key Management Interoperability Protocol Test Cases Version 1.4
+     Committee Note Draft 01 / Public Review Draft 01
+     30 March 2017
+     Copyright (c) OASIS Open 2017. All Rights Reserved.
+     Source: http://docs.oasis-open.org/kmip/testcases/v1.4/cnprd01/test-cases/kmip-v1.4/
+     Latest version of the specification: http://docs.oasis-open.org/kmip/testcases/v1.4/kmip-testcases-v1.4.html
+     TC IPR Statement: https://www.oasis-open.org/committees/kmip/ipr.php
+-->
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Register"/>
+            <RequestPayload>
+                <ObjectType type="Enumeration" value="PrivateKey"/>
+                <TemplateAttribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+                        <AttributeValue type="Integer" value="Sign"/>
+                    </Attribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="x-ID"/>
+                        <AttributeValue type="TextString" value="TC-ECDSA-SIGN-1-14-prikey1"/>
+                    </Attribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="Activation Date"/>
+                        <AttributeValue type="DateTime" value="$NOW-3600"/>
+                    </Attribute>
+                </TemplateAttribute>
+                <PrivateKey>
+                    <KeyBlock>
+                        <KeyFormatType type="Enumeration" value="ECPrivateKey"/>
+                        <KeyValue>
+                            <KeyMaterial type="ByteString" value="30740201010420db4d128c30ca309e62c4019758c00ba244dd64d9bf52a31078866b8a00c19c68a00706052b8104000aa14403420004dab5d3c253113db414abfc1c0ebf5a02559e656aa1c8b0aa8d870aa0324cda4899925ea1e6dbc259a6c7825cf46592ac7594cc40bd604b728d88b636f317d366"/>
+                        </KeyValue>
+                        <CryptographicAlgorithm type="Enumeration" value="EC"/>
+                        <CryptographicLength type="Integer" value="256"/>
+                    </KeyBlock>
+                </PrivateKey>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Register"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Register"/>
+            <RequestPayload>
+                <ObjectType type="Enumeration" value="PublicKey"/>
+                <TemplateAttribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="Cryptographic Usage Mask"/>
+                        <AttributeValue type="Integer" value="Verify"/>
+                    </Attribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="Link"/>
+                        <AttributeValue>
+                            <LinkType type="Enumeration" value="PrivateKeyLink"/>
+                            <LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                        </AttributeValue>
+                    </Attribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="x-ID"/>
+                        <AttributeValue type="TextString" value="TC-ECDSA-SIGN-1-14-pubkey1"/>
+                    </Attribute>
+                    <Attribute>
+                        <AttributeName type="TextString" value="Activation Date"/>
+                        <AttributeValue type="DateTime" value="$NOW-3600"/>
+                    </Attribute>
+                </TemplateAttribute>
+                <PublicKey>
+                    <KeyBlock>
+                        <KeyFormatType type="Enumeration" value="X_509"/>
+                        <KeyValue>
+                            <KeyMaterial type="ByteString" value="3056301006072a8648ce3d020106052b8104000a03420004dab5d3c253113db414abfc1c0ebf5a02559e656aa1c8b0aa8d870aa0324cda4899925ea1e6dbc259a6c7825cf46592ac7594cc40bd604b728d88b636f317d366"/>
+                        </KeyValue>
+                        <CryptographicAlgorithm type="Enumeration" value="EC"/>
+                        <CryptographicLength type="Integer" value="256"/>
+                    </KeyBlock>
+                </PublicKey>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Register"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="AddAttribute"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                <Attribute>
+                    <AttributeName type="TextString" value="Link"/>
+                    <AttributeValue>
+                        <LinkType type="Enumeration" value="PublicKeyLink"/>
+                        <LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                    </AttributeValue>
+                </Attribute>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="3"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="AddAttribute"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                <Attribute>
+                    <AttributeName type="TextString" value="Link"/>
+                    <AttributeValue>
+                        <LinkType type="Enumeration" value="PublicKeyLink"/>
+                        <LinkedObjectIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                    </AttributeValue>
+                </Attribute>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Sign"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                <CryptographicParameters>
+                    <HashingAlgorithm type="Enumeration" value="SHA_256"/>
+                    <CryptographicAlgorithm type="Enumeration" value="ECDSA"/>
+                </CryptographicParameters>
+                <Data type="ByteString" value="01020304050607080910111213141516"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Sign"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                <SignatureData type="ByteString" value="$SIGNATURE_DATA"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <CryptographicParameters>
+                    <HashingAlgorithm type="Enumeration" value="SHA_256"/>
+                    <CryptographicAlgorithm type="Enumeration" value="ECDSA"/>
+                </CryptographicParameters>
+                <Data type="ByteString" value="01020304050607080910111213141516"/>
+                <SignatureData type="ByteString" value="$SIGNATURE_DATA"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <ValidityIndicator type="Enumeration" value="Valid"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <!-- and now verify with a known good signature -->
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <CryptographicParameters>
+                    <HashingAlgorithm type="Enumeration" value="SHA_256"/>
+                    <CryptographicAlgorithm type="Enumeration" value="ECDSA"/>
+                </CryptographicParameters>
+                <Data type="ByteString" value="01020304050607080910111213141516"/>
+                <SignatureData type="ByteString" value="30440220078ac91570286b4b35f2bf1da113c6e25e8c45dfc7a7dc7db07f7ff34ffc08d702200135d58e21d091e60b81a0e63db3d914af9fe56de9b3cf747cd8ecc74a75ee71"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <ValidityIndicator type="Enumeration" value="Valid"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <!-- and now verify with a known bad signature where we changed the last byte -->
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <CryptographicParameters>
+                    <HashingAlgorithm type="Enumeration" value="SHA_256"/>
+                    <CryptographicAlgorithm type="Enumeration" value="ECDSA"/>
+                </CryptographicParameters>
+                <Data type="ByteString" value="01020304050607080910111213141516"/>
+                <SignatureData type="ByteString" value="30440220078ac91570286b4b35f2bf1da113c6e25e8c45dfc7a7dc7db07f7ff34ffc08d702200135d58e21d091e60b81a0e63db3d914af9fe56de9b3cf747cd8ecc74a75eeff"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="SignatureVerify"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <ValidityIndicator type="Enumeration" value="Invalid"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Revoke"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+                <RevocationReason>
+                    <RevocationReasonCode type="Enumeration" value="Unspecified"/>
+                </RevocationReason>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Revoke"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Destroy"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Destroy"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_0"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Revoke"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+                <RevocationReason>
+                    <RevocationReasonCode type="Enumeration" value="Unspecified"/>
+                </RevocationReason>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Revoke"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+    <RequestMessage>
+        <RequestHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <BatchCount type="Integer" value="1"/>
+        </RequestHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Destroy"/>
+            <RequestPayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+            </RequestPayload>
+        </BatchItem>
+    </RequestMessage>
+
+    <ResponseMessage>
+        <ResponseHeader>
+            <ProtocolVersion>
+                <ProtocolVersionMajor type="Integer" value="1"/>
+                <ProtocolVersionMinor type="Integer" value="4"/>
+            </ProtocolVersion>
+            <TimeStamp type="DateTime" value="$NOW"/>
+            <BatchCount type="Integer" value="1"/>
+        </ResponseHeader>
+        <BatchItem>
+            <Operation type="Enumeration" value="Destroy"/>
+            <ResultStatus type="Enumeration" value="Success"/>
+            <ResponsePayload>
+                <UniqueIdentifier type="TextString" value="$UNIQUE_IDENTIFIER_1"/>
+            </ResponsePayload>
+        </BatchItem>
+    </ResponseMessage>
+
+</KMIP>
