@@ -14,8 +14,17 @@ Add it to your project by running
 ```bash
 go get github.com/ovh/kmip-go@latest
 ```
+and import required packages
+```go
+import (
+	"github.com/ovh/kmip-go"
+	"github.com/ovh/kmip-go/kmipclient"
+	"github.com/ovh/kmip-go/payloads"
+	"github.com/ovh/kmip-go/ttlv"
+)
+```
 
-Then you can connect to your KMS service
+Then you can connect to your KMS service:
 ```go
 const (
 	ADDR = "eu-west-rbx.okms.ovh.net:5696"
@@ -24,30 +33,91 @@ const (
 	KEY  = "key.pem"
 )
 
-func main() {
-	client, err := kmipclient.Dial(
-		ADDR,
-		kmipclient.WithClientCertFiles(CERT, KEY),
-		kmipclient.WithMiddlewares(
-			kmipclient.CorrelationValueMiddleware(uuid.NewString)
-			kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),
-		),
-		// kmipclient.EnforceVersion(kmip.V1_4),
-	)
-	if err != nil {
-		panic(err)
-	}
-	defer client.Close()
-
-	fmt.Println("Connected using KMIP version", client.Version())
-	resp := client.Create().
-		AES(256, kmip.Encrypt|kmip.Decrypt).
-		MustExec()
-	fmt.Println("Created AES key with ID", resp.UniqueIdentifier)
+client, err := kmipclient.Dial(
+	ADDR,
+	kmipclient.WithClientCertFiles(CERT, KEY),
+	kmipclient.WithMiddlewares(
+		kmipclient.CorrelationValueMiddleware(uuid.NewString),
+		kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),
+	),
+	// kmipclient.EnforceVersion(kmip.V1_4),
+)
+if err != nil {
+	panic(err)
 }
+defer client.Close()
+fmt.Println("Connected using KMIP version", client.Version())
 ```
 
-See [examples](./examples) for more.
+You can then use the high level client helper methods to create and send requests
+to the server:
+```go
+resp := client.Create().
+	AES(256, kmip.Encrypt|kmip.Decrypt).
+	WithName("my-key").
+	MustExec()
+fmt.Println("Created AES key with ID", resp.UniqueIdentifier)
+```
+
+Or alternatively if more flexibility is required, craft your kmip requests payloads:
+```go
+request := payloads.CreateRequestPayload{
+	ObjectType: kmip.ObjectTypeSymmetricKey,
+	TemplateAttribute: kmip.TemplateAttribute{
+		Attribute: []kmip.Attribute{
+			{
+				AttributeName:  kmip.AttributeNameCryptographicAlgorithm,
+				AttributeValue: kmip.AES,
+			}, {
+				AttributeName:  kmip.AttributeNameCryptographicLength,
+				AttributeValue: int32(256),
+			}, {
+				AttributeName: kmip.AttributeNameName,
+				AttributeValue: kmip.Name{
+					NameType:  kmip.UninterpretedTextString,
+					NameValue: "another-key",
+				},
+			}, {
+				AttributeName:  kmip.AttributeNameCryptographicUsageMask,
+				AttributeValue: kmip.Encrypt | kmip.Decrypt,
+			},
+		},
+	},
+}
+
+response, err := client.Request(context.Background(), &request)
+if err != nil {
+	panic(err)
+}
+id := response.(*payloads.CreateResponsePayload).UniqueIdentifier
+fmt.Println("Created an AES key with ID", id)
+```
+
+You can also send batches of requests:
+```go
+batchResponse, err := client.Batch(context.Background(), &request, &request)
+if err != nil {
+	panic(err)
+}
+id1 := batchResponse[0].ResponsePayload.(*payloads.CreateResponsePayload).UniqueIdentifier
+id2 := batchResponse[1].ResponsePayload.(*payloads.CreateResponsePayload).UniqueIdentifier
+fmt.Println("Created 2 AES keys with IDs", id1, id2)
+```
+
+And directly craft your request message with one or more payloads batched together:
+```go
+msg := kmip.NewRequestMessage(client.Version(), &request, &request)
+rMsg, err := client.Roundtrip(context.Background(), &msg)
+if err != nil {
+	panic(err)
+}
+id1 := rMsg.BatchItem[0].ResponsePayload.(*payloads.CreateResponsePayload).UniqueIdentifier
+id2 := rMsg.BatchItem[1].ResponsePayload.(*payloads.CreateResponsePayload).UniqueIdentifier
+fmt.Println("Created a 5th and 6th AES keys with IDs", id1, id2)
+```
+}
+
+See [examples](./examples) for more possibilities.
 
 ## Implementation status
 
