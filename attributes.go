@@ -29,7 +29,7 @@ const (
 	AttributeNameProtectStopDate               AttributeName = "Protect Stop Date"
 	AttributeNameDeactivationDate              AttributeName = "Deactivation Date"
 	AttributeNameDestroyDate                   AttributeName = "Destroy Date"
-	AttributeNameCompromiseOccurenceDate       AttributeName = "Compromise Occurence Date"
+	AttributeNameCompromiseOccurrenceDate      AttributeName = "Compromise Occurrence Date"
 	AttributeNameCompromiseDate                AttributeName = "Compromise Date"
 	AttributeNameArchiveDate                   AttributeName = "Archive Date"
 	AttributeNameLastChangeDate                AttributeName = "Last Change Date"
@@ -83,7 +83,7 @@ const (
 var AllAttributeNames = []AttributeName{
 	AttributeNameUniqueIdentifier, AttributeNameName, AttributeNameObjectType, AttributeNameOperationPolicyName, AttributeNameObjectGroup,
 	AttributeNameContactInformation, AttributeNameInitialDate, AttributeNameActivationDate, AttributeNameProcessStartDate, AttributeNameProtectStopDate,
-	AttributeNameDeactivationDate, AttributeNameDestroyDate, AttributeNameCompromiseOccurenceDate, AttributeNameCompromiseDate, AttributeNameArchiveDate,
+	AttributeNameDeactivationDate, AttributeNameDestroyDate, AttributeNameCompromiseOccurrenceDate, AttributeNameCompromiseDate, AttributeNameArchiveDate,
 	AttributeNameLastChangeDate, AttributeNameCryptographicLength, AttributeNameLeaseTime, AttributeNameCryptographicAlgorithm, AttributeNameCryptographicParameters,
 	AttributeNameCryptographicDomainParameters, AttributeNameCertificateType, AttributeNameDigest, AttributeNameCryptographicUsageMask, AttributeNameState, AttributeNameRevocationReason,
 	AttributeNameLink, AttributeNameCertificateIdentifier, AttributeNameCertificateSubject, AttributeNameCertificateIssuer, AttributeNameUsageLimits,
@@ -106,7 +106,7 @@ var attrTypes = map[AttributeName]reflect.Type{
 	AttributeNameProtectStopDate:                reflect.TypeFor[time.Time](),
 	AttributeNameDeactivationDate:               reflect.TypeFor[time.Time](),
 	AttributeNameDestroyDate:                    reflect.TypeFor[time.Time](),
-	AttributeNameCompromiseOccurenceDate:        reflect.TypeFor[time.Time](),
+	AttributeNameCompromiseOccurrenceDate:       reflect.TypeFor[time.Time](),
 	AttributeNameCompromiseDate:                 reflect.TypeFor[time.Time](),
 	AttributeNameArchiveDate:                    reflect.TypeFor[time.Time](),
 	AttributeNameLastChangeDate:                 reflect.TypeFor[time.Time](),

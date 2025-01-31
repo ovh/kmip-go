@@ -64,7 +64,7 @@ func getFieldTag(fldT reflect.StructField, tagVal string) int {
 			// Check if we already know a tag with the same name as the field
 			return tg
 		} else if tg, err := getTagForType(fldT.Type); err == nil {
-			// if not check if we know the default tag for this type (either explicitely registered, or fallback to type name)
+			// if not check if we know the default tag for this type (either explicitly registered, or fallback to type name)
 			return tg
 		}
 		return 0

@@ -259,7 +259,7 @@ See [examples](./examples) for more possibilities.
 | Protect Stop Date                |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Deactivation Date                |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Destroy Date                     |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
-| Compromise Occurence Date        |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
+| Compromise Occurrence Date       |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Compromise Date                  |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Revocation Reason                |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Archive Date                     |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |

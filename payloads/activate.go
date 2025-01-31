@@ -24,7 +24,7 @@ func (a *ActivateRequestPayload) Operation() kmip.Operation {
 	return kmip.OperationActivate
 }
 
-// Reponse for the activate operation.
+// Response for the activate operation.
 type ActivateResponsePayload struct {
 	// The Unique Identifier of the object.
 	UniqueIdentifier string

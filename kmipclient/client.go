@@ -26,7 +26,7 @@ type opts struct {
 	certs             []tls.Certificate
 	serverName        string
 	//TODO: Add KMIP Authentication / Credentials
-	//TODO: Overwrite default/prefered/supported key formats for register
+	//TODO: Overwrite default/preferred/supported key formats for register
 }
 
 func (o *opts) tlsConfig() (*tls.Config, error) {
@@ -208,8 +208,8 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		addr:              addr,
 	}
 
-	// Negociate protocol version
-	if err := c.negociateVersion(ctx); err != nil {
+	// Negotiate protocol version
+	if err := c.negotiateVersion(ctx); err != nil {
 		c.Close()
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip
 	return next(ctx, msg)
 }
 
-func (c *Client) negociateVersion(ctx context.Context) error {
+func (c *Client) negotiateVersion(ctx context.Context) error {
 	if c.version != nil {
 		return nil
 	}
@@ -320,7 +320,7 @@ func (c *Client) negociateVersion(ctx context.Context) error {
 	}
 	serverVersions := bi.ResponsePayload.(*payloads.DiscoverVersionsResponsePayload).ProtocolVersion
 	if len(serverVersions) == 0 {
-		return errors.New("Protocol version negociation failed. No common version found")
+		return errors.New("Protocol version negotiation failed. No common version found")
 	}
 	c.version = &serverVersions[0]
 	return nil

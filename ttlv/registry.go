@@ -188,7 +188,7 @@ func appendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 			continue
 		}
 		// Handle case where it's not registered
-		// by writting 0x prefixed hex value
+		// by writing 0x prefixed hex value
 		dst = fmt.Appendf(dst, "0x%08X", uint32(v))
 	}
 	return dst

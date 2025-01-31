@@ -112,7 +112,7 @@ func (dec *Decoder) BigInteger(tag int) (*big.Int, error) {
 // Enum reads an enum from the internal buffer.
 // While `tag` is the tag to write with the value, which may differ from the enum's default tag,
 // `realtag` can optionally be set to non-zero to identify the real default tag associated to the enum type.
-// It's usefull for deserializing the enum value from its text representation.
+// It's useful for deserializing the enum value from its text representation.
 func (dec *Decoder) Enum(realtag, tag int) (uint32, error) {
 	return dec.r.Enum(realtag, tag)
 }
@@ -154,7 +154,7 @@ func (dec *Decoder) Interval(tag int) (time.Duration, error) {
 // Bitmaks reads a bitmask value from the internal buffer.
 // While `tag` is the tag to write with the value, which may differ from the bitmask's default tag,
 // `realtag` can optionally be set to non-zero to identify the real default tag associated to the bitmask type.
-// It's usefull for deserializing the bitmask value from its text representation.
+// It's useful for deserializing the bitmask value from its text representation.
 func (dec *Decoder) Bitmask(realtag, tag int) (int32, error) {
 	return dec.r.Bitmask(realtag, tag)
 }

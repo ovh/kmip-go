@@ -89,7 +89,7 @@ func (enc *Encoder) BigInteger(tag int, value *big.Int) {
 // Enum writes an enum to the internal buffer.
 // While `tag` is the tag to write with the value, which may differ from the enum's default tag,
 // `realtag` can optionally be set to non-zero to identify the real default tag associated to the enum type.
-// It's usefull for serializing the enum value to its text representation.
+// It's useful for serializing the enum value to its text representation.
 func (enc *Encoder) Enum(realtag, tag int, value uint32) {
 	enc.w.Enum(realtag, tag, value)
 }
@@ -131,7 +131,7 @@ func (enc *Encoder) Interval(tag int, interval time.Duration) {
 // Bitmaks writes a bitmask value to the internal buffer.
 // While `tag` is the tag to write with the value, which may differ from the bitmask's default tag,
 // `realtag` can optionally be set to non-zero to identify the real default tag associated to the bitmask type.
-// It's usefull for serializing the bitmask value to its text representation.
+// It's useful for serializing the bitmask value to its text representation.
 func (enc *Encoder) Bitmask(realtag, tag int, value int32) {
 	enc.w.Bitmask(realtag, tag, value)
 }

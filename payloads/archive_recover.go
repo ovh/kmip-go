@@ -23,7 +23,7 @@ func (pl *ArchiveRequestPayload) Operation() kmip.Operation {
 	return kmip.OperationArchive
 }
 
-// Repsonse for the archive operation.
+// Respsonse for the archive operation.
 type ArchiveResponsePayload struct {
 	// The Unique Identifier of the object.
 	UniqueIdentifier string
