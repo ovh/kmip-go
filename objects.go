@@ -546,7 +546,10 @@ type TransparentRSAPrivateKey struct {
 	CRTCoefficient  *big.Int
 }
 
+// Deprecated: deprecated in KMIP v1.3
 type TransparentECDSAPublicKey TransparentECPublicKey
+
+// Deprecated: deprecated in KMIP v1.3
 type TransparentECDSAPrivateKey TransparentECPrivateKey
 
 type TransparentECPrivateKey struct {

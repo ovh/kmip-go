@@ -389,6 +389,7 @@ func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip
 				RecommendedCurve: crv,
 			}
 		} else {
+			//nolint:staticcheck // for backward compatibility
 			keyMaterial.TransparentECDSAPrivateKey = &kmip.TransparentECDSAPrivateKey{
 				D:                *key.D,
 				RecommendedCurve: crv,
@@ -440,6 +441,7 @@ func (ex ExecRegisterWantType) EcdsaPublicKey(key *ecdsa.PublicKey, usage kmip.C
 				RecommendedCurve: crv,
 			}
 		} else {
+			//nolint:staticcheck // for backward compatibility
 			keyMaterial.TransparentECDSAPublicKey = &kmip.TransparentECDSAPublicKey{
 				//nolint:staticcheck // We need this function to marshal public key into its uncompressed form
 				QString:          elliptic.Marshal(key.Curve, key.X, key.Y),

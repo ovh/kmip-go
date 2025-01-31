@@ -17,10 +17,10 @@ var _ kmip.OperationPayload = (*GetAttributesRequestPayload)(nil)
 // If no attribute name is specified in the request, all attributes SHALL be deemed to match the Get Attributes request.
 // The same attribute name SHALL NOT be present more than once in a request.
 type GetAttributesRequestPayload struct {
-	// Determines the object whose attributes are being requested. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier. 
+	// Determines the object whose attributes are being requested. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
 	UniqueIdentifier *string
-	// Specifies the name of an attribute associated with the object. 
-	AttributeName    []kmip.AttributeName
+	// Specifies the name of an attribute associated with the object.
+	AttributeName []kmip.AttributeName
 }
 
 // Operation implements kmip.OperationPayload.
@@ -31,8 +31,8 @@ func (a *GetAttributesRequestPayload) Operation() kmip.Operation {
 type GetAttributesResponsePayload struct {
 	// The Unique Identifier of the object.
 	UniqueIdentifier string
-	// The requested attribute associated with the object. 
-	Attribute        []kmip.Attribute
+	// The requested attribute associated with the object.
+	Attribute []kmip.Attribute
 }
 
 var _ kmip.OperationPayload = (*GetAttributesResponsePayload)(nil)
