@@ -35,6 +35,8 @@ const (
 
 client, err := kmipclient.Dial(
 	ADDR,
+	// Optional if server's CA is known by the system
+	// kmipclient.WithRootCAFile(CA),
 	kmipclient.WithClientCertFiles(CERT, KEY),
 	kmipclient.WithMiddlewares(
 		kmipclient.CorrelationValueMiddleware(uuid.NewString),
