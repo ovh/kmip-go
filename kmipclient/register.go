@@ -103,7 +103,7 @@ func (ex ExecRegisterWantType) Certificate(kind kmip.CertificateType, value []by
 func (ex ExecRegisterWantType) PemCertificate(data []byte) ExecRegister {
 	block, _ := pem.Decode(data)
 	if block == nil {
-		return ex.error(fmt.Errorf("Invalid PEM data provider"))
+		return ex.error(fmt.Errorf("Invalid PEM data provided"))
 	}
 	if block.Type != "CERTIFICATE" {
 		return ex.error(fmt.Errorf("Not a certificate"))
