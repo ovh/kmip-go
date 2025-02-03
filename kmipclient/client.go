@@ -25,29 +25,38 @@ type opts struct {
 	rootCAs           [][]byte
 	certs             []tls.Certificate
 	serverName        string
+	tlsCfg            *tls.Config
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
 
 func (o *opts) tlsConfig() (*tls.Config, error) {
-	var rootCAs *x509.CertPool
-	if len(o.rootCAs) > 0 {
-		rootCAs = x509.NewCertPool()
-		for _, ca := range o.rootCAs {
-			rootCAs.AppendCertsFromPEM(ca)
-		}
-	} else {
-		var err error
-		if rootCAs, err = x509.SystemCertPool(); err != nil {
-			return nil, err
+	cfg := o.tlsCfg
+	if cfg == nil {
+		cfg = &tls.Config{}
+	}
+	if cfg.RootCAs == nil {
+		if len(o.rootCAs) > 0 {
+			cfg.RootCAs = x509.NewCertPool()
+		} else {
+			var err error
+			if cfg.RootCAs, err = x509.SystemCertPool(); err != nil {
+				return nil, err
+			}
 		}
 	}
-	return &tls.Config{
-		RootCAs:      rootCAs,
-		Certificates: o.certs,
-		ServerName:   o.serverName,
-		MinVersion:   tls.VersionTLS12, // As required by KMIP 1.4 spec
-		CipherSuites: []uint16{
+	for _, ca := range o.rootCAs {
+		cfg.RootCAs.AppendCertsFromPEM(ca)
+	}
+	cfg.Certificates = append(cfg.Certificates, o.certs...)
+	if cfg.ServerName == "" {
+		cfg.ServerName = o.serverName
+	}
+	if cfg.MinVersion == 0 {
+		cfg.MinVersion = tls.VersionTLS12 // As required by KMIP 1.4 spec
+	}
+	if len(cfg.CipherSuites) == 0 {
+		cfg.CipherSuites = []uint16{
 			// Mandatory support as per KMIP 1.4 spec
 			// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
 			tls.TLS_RSA_WITH_AES_128_CBC_SHA256,
@@ -62,8 +71,9 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-		},
-	}, nil
+		}
+	}
+	return cfg, nil
 }
 
 type Option func(*opts) error
@@ -148,6 +158,13 @@ func WithClientCertPEM(certPEMBlock, keyPEMBlock []byte) Option {
 func WithServerName(name string) Option {
 	return func(o *opts) error {
 		o.serverName = name
+		return nil
+	}
+}
+
+func WithTlsConfig(cfg *tls.Config) Option {
+	return func(o *opts) error {
+		o.tlsCfg = cfg
 		return nil
 	}
 }
