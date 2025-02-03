@@ -30,6 +30,9 @@ func (j *textWriter) writeIndent() {
 }
 
 func (j *textWriter) startElem(ty Type, tag int) {
+	if j.buf.Len() > 0 {
+		j.buf.WriteByte('\n')
+	}
 	j.writeIndent()
 	j.buf.WriteString(TagString(tag))
 	j.buf.WriteString(" (")
@@ -37,14 +40,9 @@ func (j *textWriter) startElem(ty Type, tag int) {
 	j.buf.WriteString(`): `)
 }
 
-func (j *textWriter) endElem() {
-	j.buf.WriteString("\n")
-}
-
 func (j *textWriter) encodeAppend(ty Type, tag int, f func([]byte) []byte) {
 	j.startElem(ty, tag)
 	j.buf.Write(f(j.buf.AvailableBuffer()))
-	j.endElem()
 }
 
 // Bytes implements writer.
@@ -137,7 +135,6 @@ func (j *textWriter) Interval(tag int, interval time.Duration) {
 // Struct implements writer.
 func (j *textWriter) Struct(tag int, f func(writer)) {
 	j.startElem(TypeStructure, tag)
-	j.buf.WriteString("\n")
 	oLen := j.buf.Len()
 	enc := textWriter{
 		buf:    j.buf,
@@ -145,9 +142,9 @@ func (j *textWriter) Struct(tag int, f func(writer)) {
 	}
 	f(&enc)
 	if oLen == j.buf.Len() {
+		j.buf.WriteString("\n")
 		enc.writeIndent()
 		j.buf.WriteString("... empty ...")
-		j.endElem()
 	}
 }
 

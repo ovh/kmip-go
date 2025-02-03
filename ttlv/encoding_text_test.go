@@ -36,8 +36,7 @@ func TestTextEncoding(t *testing.T) {
     0x008724 (Interval): 3m42s
     0x872573 (BigInteger): -123456789101112
     0x005642 (Integer): 0x00000001 | 0x00000002
-    0x067342 (Enumeration): 0x0000000C
-`
+    0x067342 (Enumeration): 0x0000000C`
 	assert.Equal(t, expect, string(w.Bytes()))
 	w.Clear()
 	assert.Empty(t, w.Bytes())
