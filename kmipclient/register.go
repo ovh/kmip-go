@@ -194,6 +194,59 @@ func (ex ExecRegisterWantType) PemKey(data []byte, usage kmip.CryptographicUsage
 	}
 }
 
+// PemPublicKey registeres a public key from PEM data. It also accepts PEM encoded private keys but will
+// register only the public key part of it.
+func (ex ExecRegisterWantType) PemPublicKey(data []byte, usage kmip.CryptographicUsageMask) ExecRegister {
+	block, _ := pem.Decode(data)
+	if block == nil {
+		return ex.error(fmt.Errorf("Invalid PEM data provider"))
+	}
+	switch block.Type {
+	case "RSA PUBLIC KEY":
+		return ex.Pkcs1PublicKey(block.Bytes, usage)
+	case "PUBLIC KEY":
+		return ex.X509PublicKey(block.Bytes, usage)
+	case "RSA PRIVATE KEY":
+		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return ex.error(err)
+		}
+		return ex.RsaPublicKey(&key.PublicKey, usage)
+	case "EC PRIVATE KEY":
+		key, err := x509.ParseECPrivateKey(block.Bytes)
+		if err != nil {
+			return ex.error(err)
+		}
+		return ex.EcdsaPublicKey(&key.PublicKey, usage)
+	case "PRIVATE KEY":
+		key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return ex.error(err)
+		}
+		pk := key.(interface{ Public() crypto.PublicKey })
+		return ex.PublicKey(pk.Public().(PublicKey), usage)
+	default:
+		return ex.error(fmt.Errorf("Unsupported PEM type %q", block.Type))
+	}
+}
+
+func (ex ExecRegisterWantType) PemPrivateKey(data []byte, usage kmip.CryptographicUsageMask) ExecRegister {
+	block, _ := pem.Decode(data)
+	if block == nil {
+		return ex.error(fmt.Errorf("Invalid PEM data provider"))
+	}
+	switch block.Type {
+	case "RSA PRIVATE KEY":
+		return ex.Pkcs1PrivateKey(block.Bytes, usage)
+	case "EC PRIVATE KEY":
+		return ex.Sec1PrivateKey(block.Bytes, usage)
+	case "PRIVATE KEY":
+		return ex.Pkcs8PrivateKey(block.Bytes, usage)
+	default:
+		return ex.error(fmt.Errorf("Unsupported PEM type %q", block.Type))
+	}
+}
+
 func (ex ExecRegisterWantType) Pkcs1PrivateKey(der []byte, usage kmip.CryptographicUsageMask) ExecRegister {
 	key, err := x509.ParsePKCS1PrivateKey(der)
 	if err != nil {
