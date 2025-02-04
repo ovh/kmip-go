@@ -114,6 +114,10 @@ const (
 	OperationExport Operation = 0x0000002B
 )
 
+func (enum Operation) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+
 type operationPayloadTypes struct {
 	request  reflect.Type
 	response reflect.Type

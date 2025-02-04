@@ -56,9 +56,9 @@ const (
 	TranslateUnwrap
 )
 
-// func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
-// 	return []byte(ttlv.BitmaskString(mask)), nil
-// }
+func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
+	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
+}
 
 type StorageStatusMask int32
 
@@ -67,6 +67,6 @@ const (
 	ArchivalStorage
 )
 
-// func (mask StorageStatusMask) MarshalText() ([]byte, error) {
-// 	return []byte(ttlv.BitmaskString(mask)), nil
-// }
+func (mask StorageStatusMask) MarshalText() ([]byte, error) {
+	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
+}

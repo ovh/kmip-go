@@ -1587,3 +1587,141 @@ type MaskGenerator uint32
 const (
 	MGF1 MaskGenerator = 0x00000001
 )
+
+// Text Marshalling for better display in json outputs
+
+func (enum ResultStatus) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ResultReason) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum CredentialType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum RevocationReasonCode) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum BatchErrorContinuationOption) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum NameType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ObjectType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum OpaqueDataType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum State) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum CryptographicAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum BlockCipherMode) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum PaddingMethod) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum HashingAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum KeyRoleType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum RecommendedCurve) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum SecretDataType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum KeyFormatType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum KeyCompressionType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum WrappingMethod) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum CertificateType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum LinkType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum QueryFunction) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum UsageLimitsUnit) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum CancellationResult) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum PutFunction) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum CertificateRequestType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum SplitKeyMethod) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ObjectGroupMember) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum EncodingOption) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum DigitalSignatureAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum AttestationType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum AlternativeNameType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum KeyValueLocationType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum RNGAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum DRBGAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum FIPS186Variation) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ProfileName) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ValidationAuthorityType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ValidationType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum UnwrapMode) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum DestroyAction) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ShreddingAlgorithm) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum RNGMode) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ClientRegistrationMethod) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum MaskGenerator) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
