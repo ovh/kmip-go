@@ -1,10 +1,12 @@
 package kmip
 
 import (
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"math/big"
@@ -70,6 +72,20 @@ func (sd *Certificate) X509Certificate() (*x509.Certificate, error) {
 		return nil, fmt.Errorf("Unsupported certificate type. Got %s but want %s", ttlv.EnumStr(sd.CertificateType), ttlv.EnumStr(X_509))
 	}
 	return x509.ParseCertificate(sd.CertificateValue)
+}
+
+// PemCertificate returns the PEM encoded value of an x509 certificate. It returns an error
+// if the kmip object is not a certificate of type X509, or if the certificate data is invalid.
+func (sd *Certificate) PemCertificate() (string, error) {
+	cert, err := sd.X509Certificate()
+	if err != nil {
+		return "", err
+	}
+	block := pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: cert.Raw,
+	}
+	return string(pem.EncodeToMemory(&block)), nil
 }
 
 type SymmetricKey struct {
@@ -227,6 +243,39 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 	}
 }
 
+// CryptoPublicKey parses and return the public key object into a go [crypto.PublicKey] object.
+func (key *PublicKey) CryptoPublicKey() (crypto.PublicKey, error) {
+	switch key.KeyBlock.KeyFormatType {
+	case KeyFormatTransparentECPublicKey, KeyFormatTransparentECDSAPublicKey:
+		return key.ECDSA()
+	case KeyFormatPKCS_1, KeyFormatTransparentRSAPublicKey:
+		return key.RSA()
+	case KeyFormatX_509:
+		raw, err := key.KeyBlock.GetBytes()
+		if err != nil {
+			return nil, err
+		}
+		return x509.ParsePKIXPublicKey(raw)
+	default:
+		return nil, errors.New("Unsupported key format")
+	}
+}
+
+// PkixPem format the public key value into a PEM encoding of its PKIX, ASN.1 DER form.
+// The encoded public key is a SubjectPublicKeyInfo structure
+// (see RFC 5280, Section 4.1).
+func (key *PublicKey) PkixPem() (string, error) {
+	pubkey, err := key.CryptoPublicKey()
+	if err != nil {
+		return "", err
+	}
+	bytes, err := x509.MarshalPKIXPublicKey(pubkey)
+	if err != nil {
+		return "", err
+	}
+	return string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: bytes})), nil
+}
+
 type PrivateKey struct {
 	KeyBlock KeyBlock
 }
@@ -363,6 +412,37 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 	default:
 		return nil, fmt.Errorf("Unsupported key format type %s", ttlv.EnumStr(key.KeyBlock.KeyFormatType))
 	}
+}
+
+// CryptoPrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
+func (key *PrivateKey) CryptoPrivateKey() (crypto.PrivateKey, error) {
+	switch key.KeyBlock.KeyFormatType {
+	case KeyFormatECPrivateKey, KeyFormatTransparentECPrivateKey, KeyFormatTransparentECDSAPrivateKey:
+		return key.ECDSA()
+	case KeyFormatPKCS_1, KeyFormatTransparentRSAPrivateKey:
+		return key.RSA()
+	case KeyFormatPKCS_8:
+		raw, err := key.KeyBlock.GetBytes()
+		if err != nil {
+			return nil, err
+		}
+		return x509.ParsePKCS8PrivateKey(raw)
+	default:
+		return nil, errors.New("Unsupported key format")
+	}
+}
+
+// Pkcs8Pem format the private key into the PEM encoding of its PKCS #8, ASN.1 DER form.
+func (key *PrivateKey) Pkcs8Pem() (string, error) {
+	privkey, err := key.CryptoPrivateKey()
+	if err != nil {
+		return "", err
+	}
+	bytes, err := x509.MarshalPKCS8PrivateKey(privkey)
+	if err != nil {
+		return "", err
+	}
+	return string(pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: bytes})), nil
 }
 
 type KeyBlock struct {

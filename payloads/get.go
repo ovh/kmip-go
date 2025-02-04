@@ -1,6 +1,7 @@
 package payloads
 
 import (
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/x509"
@@ -108,6 +109,16 @@ func (pl *GetResponsePayload) X509Certificate() (*x509.Certificate, error) {
 	return cert.X509Certificate()
 }
 
+// PemCertificate returns the PEM encoded value of an x509 certificate. It returns an error
+// if the kmip object is not a certificate of type X509, or if the certificate data is invalid.
+func (pl *GetResponsePayload) PemCertificate() (string, error) {
+	if pl.ObjectType != kmip.ObjectTypeCertificate {
+		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeCertificate))
+	}
+	cert := pl.Object.(*kmip.Certificate)
+	return cert.PemCertificate()
+}
+
 func (pl *GetResponsePayload) RsaPrivateKey() (*rsa.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
@@ -124,6 +135,22 @@ func (pl *GetResponsePayload) EcdsaPrivateKey() (*ecdsa.PrivateKey, error) {
 	return key.ECDSA()
 }
 
+// PrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
+func (pl *GetResponsePayload) PrivateKey() (crypto.PrivateKey, error) {
+	if pl.ObjectType != kmip.ObjectTypePrivateKey {
+		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
+	}
+	return pl.Object.(*kmip.PrivateKey).CryptoPrivateKey()
+}
+
+// PemPrivateKey format the private key into the PEM encoding of its PKCS #8, ASN.1 DER form.
+func (pl *GetResponsePayload) PemPrivateKey() (string, error) {
+	if pl.ObjectType != kmip.ObjectTypePrivateKey {
+		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
+	}
+	return pl.Object.(*kmip.PrivateKey).Pkcs8Pem()
+}
+
 func (pl *GetResponsePayload) RsaPublicKey() (*rsa.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
@@ -138,4 +165,22 @@ func (pl *GetResponsePayload) EcdsaPublicKey() (*ecdsa.PublicKey, error) {
 	}
 	key := pl.Object.(*kmip.PublicKey)
 	return key.ECDSA()
+}
+
+// PublicKey parses and return the public key object into a go [crypto.PublicKey] object.
+func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
+	if pl.ObjectType != kmip.ObjectTypePublicKey {
+		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
+	}
+	return pl.Object.(*kmip.PublicKey).CryptoPublicKey()
+}
+
+// PemPublicKey format the public key value into a PEM encoding of its PKIX, ASN.1 DER form.
+// The encoded public key is a SubjectPublicKeyInfo structure
+// (see RFC 5280, Section 4.1).
+func (pl *GetResponsePayload) PemPublicKey() (string, error) {
+	if pl.ObjectType != kmip.ObjectTypePublicKey {
+		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
+	}
+	return pl.Object.(*kmip.PublicKey).PkixPem()
 }
