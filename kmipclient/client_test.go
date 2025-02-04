@@ -180,3 +180,20 @@ func TestCreate(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "foobar", resp.UniqueIdentifier)
 }
+
+func TestRekey(t *testing.T) {
+	mux := kmipserver.NewBatchExecutor()
+	client := kmiptest.NewClientAndServer(t, mux)
+
+	req := client.Rekey("foobar").
+		WithOffset(10*time.Minute).
+		WithAttribute(kmip.AttributeNameSensitive, true)
+
+	mux.Route(kmip.OperationReKey, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.RekeyRequestPayload) (*payloads.RekeyResponsePayload, error) {
+		require.EqualValues(t, req.RequestPayload(), pl)
+		return &payloads.RekeyResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier}, nil
+	}))
+
+	resp := req.MustExec()
+	require.EqualValues(t, *req.RequestPayload().UniqueIdentifier, resp.UniqueIdentifier)
+}
