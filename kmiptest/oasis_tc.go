@@ -1,8 +1,8 @@
 package kmiptest
 
 import (
-	"embed"
 	"encoding/xml"
+	"os"
 	"regexp"
 	"strconv"
 	"time"
@@ -14,10 +14,8 @@ import (
 )
 
 var (
-	//go:embed testdata/*
-	testcases embed.FS
-	nowRe     = regexp.MustCompile(`"\$NOW((\-|\+)\d+)?"`)
-	varRe     = regexp.MustCompile(`"\$[A-Za-z0-9_]+"`)
+	nowRe = regexp.MustCompile(`"\$NOW((\-|\+)\d+)?"`)
+	varRe = regexp.MustCompile(`"\$[A-Za-z0-9_]+"`)
 )
 
 type TestCase struct {
@@ -57,9 +55,8 @@ func (ts *TestSuite) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 	return ts.DecodeTTLV(&dec)
 }
 
-func ListTestSuites(t TestingT, version string) []string {
-	direntry, err := testcases.ReadDir("testdata/" + version)
-	// direntry, err := os.ReadDir("kmiptest/testdata/" + vers)
+func ListTestSuites(t TestingT, root, version string) []string {
+	direntry, err := os.ReadDir(root + "/" + version)
 	require.NoError(t, err)
 
 	names := []string{}
@@ -72,8 +69,8 @@ func ListTestSuites(t TestingT, version string) []string {
 	return names
 }
 
-func LoadTestSuite(t TestingT, version, file string) TestSuite {
-	f, err := testcases.ReadFile("testdata/" + version + "/" + file)
+func LoadTestSuite(t TestingT, root, version, file string) TestSuite {
+	f, err := os.ReadFile(root + "/" + version + "/" + file)
 	require.NoError(t, err)
 
 	f = nowRe.ReplaceAllFunc(f, func(b []byte) []byte {

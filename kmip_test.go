@@ -103,7 +103,7 @@ func BenchmarkKmipDecode(b *testing.B) {
 
 func TestParseAndMarshalOasisTests(t *testing.T) {
 	for _, vers := range kmiptest.TestCaseVersions {
-		suites := kmiptest.ListTestSuites(t, vers)
+		suites := kmiptest.ListTestSuites(t, "kmiptest/testdata", vers)
 
 		for _, e := range suites {
 			name := vers + "/" + e
@@ -112,7 +112,7 @@ func TestParseAndMarshalOasisTests(t *testing.T) {
 					t.Skip("Test case not supported")
 				}
 
-				ts := kmiptest.LoadTestSuite(t, vers, e)
+				ts := kmiptest.LoadTestSuite(t, "kmiptest/testdata", vers, e)
 
 				var err error
 				for _, tc := range ts.TestCases {
