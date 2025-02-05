@@ -18,7 +18,7 @@ type CreateRequestPayload struct {
 	ObjectType kmip.ObjectType
 	// Specifies desired attributes using to be associated with the new object templates and/or individual attributes.
 	//
-	//The Template Managed Object is deprecated as of version 1.3 of this specification and MAY be removed from subsequent versions of the specification.
+	// The Template Managed Object is deprecated as of version 1.3 of this specification and MAY be removed from subsequent versions of the specification.
 	// Individual Attributes SHOULD be used in operations which currently support use of a Name within a Template-Attribute to reference a Template.
 	TemplateAttribute kmip.TemplateAttribute
 }

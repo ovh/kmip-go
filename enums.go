@@ -454,6 +454,11 @@ func init() {
 		KeyValueLocationTypeUninterpretedTextString: "UninterpretedTextString",
 		KeyValueLocationTypeURI:                     "URI",
 	})
+	ttlv.RegisterEnum(TagValidityIndicator, map[ValidityIndicator]string{
+		ValidityIndicatorValid:   "Valid",
+		ValidityIndicatorInvalid: "Invalid",
+		ValidityIndicatorUnknown: "Unknown",
+	})
 
 	ttlv.RegisterEnum(TagRNGAlgorithm, map[RNGAlgorithm]string{
 		RNGAlgorithmUnspecified: "Unspecified",
@@ -1318,6 +1323,14 @@ const (
 	KeyValueLocationTypeURI                     KeyValueLocationType = 0x00000002
 )
 
+type ValidityIndicator uint32
+
+const (
+	ValidityIndicatorValid   ValidityIndicator = 0x00000001
+	ValidityIndicatorInvalid ValidityIndicator = 0x00000002
+	ValidityIndicatorUnknown ValidityIndicator = 0x00000003
+)
+
 // KMIP 1.3
 
 type RNGAlgorithm uint32
@@ -1687,6 +1700,9 @@ func (enum AlternativeNameType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
 func (enum KeyValueLocationType) MarshalText() ([]byte, error) {
+	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum ValidityIndicator) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
 func (enum RNGAlgorithm) MarshalText() ([]byte, error) {

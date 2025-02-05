@@ -108,35 +108,7 @@ var UnsupportedTestCases = []string{
 	"v1.2/TC_SJ_2_12_Register_and_Split_Join.xml",
 	"v1.2/TC_SJ_3_12_Join_Split_Keys.xml",
 	"v1.2/TC_SJ_4_12_Register_and_Split_Join_with_XOR.xml",
-	"v1.3/CS-AC-M-2-13.xml",
-	"v1.3/CS-AC-M-3-13.xml",
-	"v1.3/CS-AC-M-3-ECC-13.xml",
-	"v1.3/CS-AC-M-5-13.xml",
-	"v1.3/CS-AC-M-6-13.xml",
-	"v1.4/CS-AC-M-2-14.xml",
-	"v1.4/CS-AC-M-3-14.xml",
-	"v1.4/CS-AC-M-5-14.xml",
-	"v1.4/CS-AC-M-6-14.xml",
 	"v1.4/TC-DERIVEKEY-1-10.xml",
-	"v1.4/TC-ECDSA-SIGN-1-14.xml",
 	"v1.4/TC-NP-1-14.xml",
 	"v1.4/TC-SJ-1-14.xml",
 }
-
-// func RunTestSuites(t *testing.T, f func(*testing.T, TestSuite)) {
-// 	for _, vers := range []string{"v1.0", "v1.1", "v1.2", "v1.3", "v1.4"} {
-// 		suites := ListTestSuites(t, vers)
-
-// 		for _, e := range suites {
-// 			name := vers + "/" + e
-// 			t.Run(name, func(t *testing.T) {
-// 				if slices.Contains(toSkip, name) {
-// 					t.Skip("Test case not supported")
-// 				}
-
-// 				ts := LoadTestSuite(t, vers, e)
-// 				f(t, ts)
-// 			})
-// 		}
-// 	}
-// }
