@@ -265,7 +265,10 @@ func (c *Client) Close() error {
 
 func (c *Client) reconnect(ctx context.Context) error {
 	// fmt.Println("Reconnecting")
-	c.conn.Close()
+	if c.conn != nil {
+		c.conn.Close()
+		c.conn = nil
+	}
 	stream, err := c.dialer(ctx)
 	if err != nil {
 		return err
@@ -277,6 +280,11 @@ func (c *Client) reconnect(ctx context.Context) error {
 func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	if c.conn == nil {
+		if err := c.reconnect(ctx); err != nil {
+			return nil, err
+		}
+	}
 
 	//TODO: Better reconnection loop. Do we really need a retry counter here ?
 	retry := 3
