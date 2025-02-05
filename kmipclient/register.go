@@ -194,7 +194,7 @@ func (ex ExecRegisterWantType) PemKey(data []byte, usage kmip.CryptographicUsage
 	}
 }
 
-// PemPublicKey registeres a public key from PEM data. It also accepts PEM encoded private keys but will
+// PemPublicKey registers a public key from PEM data. It also accepts PEM encoded private keys but will
 // register only the public key part of it.
 func (ex ExecRegisterWantType) PemPublicKey(data []byte, usage kmip.CryptographicUsageMask) ExecRegister {
 	block, _ := pem.Decode(data)

@@ -163,7 +163,7 @@ func RegisterBitmask[T ~int32](tag int, names ...string) {
 	}
 }
 
-// BitmaskStr returns the string representation of a bitmask value, consisting of 
+// BitmaskStr returns the string representation of a bitmask value, consisting of
 // a concatenation of all the flags values separated by `sep`. If it's known,
 // the flag string value is the normalized name, otherwise it's the 0x prefixed hex value.
 func BitmaskStr[T ~int32](value T, sep string) string {
