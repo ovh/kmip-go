@@ -62,14 +62,14 @@ func (pl *GetResponsePayload) Operation() kmip.Operation {
 
 func (pl *GetResponsePayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 	return d.Struct(tag, func(d *ttlv.Decoder) error {
-		var err error
-		if err = d.Any(&pl.ObjectType); err != nil {
+		if err := d.Any(&pl.ObjectType); err != nil {
 			return err
 		}
-		if err = d.TagAny(kmip.TagUniqueIdentifier, &pl.UniqueIdentifier); err != nil {
+		if err := d.TagAny(kmip.TagUniqueIdentifier, &pl.UniqueIdentifier); err != nil {
 			return err
 		}
 
+		var err error
 		if pl.Object, err = kmip.NewObjectForType(pl.ObjectType); err != nil {
 			return err
 		}

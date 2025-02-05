@@ -43,14 +43,14 @@ func (pl *RegisterRequestPayload) Operation() kmip.Operation {
 
 func (pl *RegisterRequestPayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 	return d.Struct(tag, func(d *ttlv.Decoder) error {
-		var err error
-		if err = d.Any(&pl.ObjectType); err != nil {
+		if err := d.Any(&pl.ObjectType); err != nil {
 			return err
 		}
-		if err = d.Any(&pl.TemplateAttribute); err != nil {
+		if err := d.Any(&pl.TemplateAttribute); err != nil {
 			return err
 		}
 
+		var err error
 		if pl.Object, err = kmip.NewObjectForType(pl.ObjectType); err != nil {
 			return err
 		}

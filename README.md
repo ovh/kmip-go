@@ -171,8 +171,8 @@ See [examples](./examples) for more possibilities.
 | Re-key Key Pair      |  N/A |  ❌  |  ❌  |  ❌  |  ❌  |
 | Encrypt              |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Decrypt              |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
-| Sign                 |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
-| Signature Verify     |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| Sign                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
+| Signature Verify     |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | MAC                  |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | MAC Verify           |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | RNG Retrieve         |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
@@ -208,20 +208,20 @@ See [examples](./examples) for more possibilities.
 | Transparent Key Structures               |  🚧  |  🚧  |  🚧  |  🚧  |  🚧  |
 | Template-Attribute Structures            |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Extension Information                    |  N/A |  ✅  |  ✅  |  ✅  |  ✅  |
-| Data                                     |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| Data                                     |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Data Length                              |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
-| Signature Data                           |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| Signature Data                           |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | MAC Data                                 |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Nonce                                    |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
-| Correlation Value                        |  N/A |  N/A |  N/A |  ❌  |  ❌  |
-| Init Indicator                           |  N/A |  N/A |  N/A |  ❌  |  ❌  |
-| Final Indicator                          |  N/A |  N/A |  N/A |  ❌  |  ❌  |
+| Correlation Value                        |  N/A |  N/A |  N/A |  ✅  |  ✅  |
+| Init Indicator                           |  N/A |  N/A |  N/A |  ✅  |  ✅  |
+| Final Indicator                          |  N/A |  N/A |  N/A |  ✅  |  ✅  |
 | RNG Parameter                            |  N/A |  N/A |  N/A |  ✅  |  ✅  |
 | Profile Information                      |  N/A |  N/A |  N/A |  ✅  |  ✅  |
 | Validation Information                   |  N/A |  N/A |  N/A |  ✅  |  ✅  |
 | Capability Information                   |  N/A |  N/A |  N/A |  ✅  |  ✅  |
-| Authenticated Encryption Additional Data |  N/A |  N/A |  N/A |  N/A |  ❌  |
-| Authenticated Encryption Tag             |  N/A |  N/A |  N/A |  N/A |  ❌  |
+| Authenticated Encryption Additional Data |  N/A |  N/A |  N/A |  N/A |  ✅  |
+| Authenticated Encryption Tag             |  N/A |  N/A |  N/A |  N/A |  ✅  |
 
 #### Transparent Key Structures
 | Object                   | v1.0 | v1.1 | v1.2 | v1.3 | v1.4 |

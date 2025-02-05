@@ -49,7 +49,7 @@ func (a *CreateKeyPairRequestPayload) Operation() kmip.Operation {
 	return kmip.OperationCreateKeyPair
 }
 
-// Response for the create key-pair operation
+// Response for the create key-pair operation.
 type CreateKeyPairResponsePayload struct {
 	// The Unique Identifier of the newly created Private Key object.
 	PrivateKeyUniqueIdentifier string
