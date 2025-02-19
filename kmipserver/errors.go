@@ -36,6 +36,7 @@ var (
 	ErrItemNotFound          = Errorf(kmip.ReasonItemNotFound, "Item not found")
 	ErrPermissionDenied      = Errorf(kmip.ReasonPermissionDenied, "Permission denied")
 	ErrInvalidMessage        = Errorf(kmip.ReasonInvalidMessage, "Invalid message")
+	ErrInvalidField          = Errorf(kmip.ReasonInvalidField, "Invalid field")
 )
 
 func handleMessageError(ctx context.Context, req *kmip.RequestMessage, err error) *kmip.ResponseMessage {
