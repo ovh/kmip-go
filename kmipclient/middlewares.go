@@ -46,3 +46,17 @@ func CorrelationValueMiddleware(fn func() string) Middleware {
 		return next(ctx, msg)
 	}
 }
+
+func TimeoutMiddleware(timeout time.Duration) Middleware {
+	if timeout == 0 {
+		return func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+			return next(ctx, msg)
+		}
+	}
+	return func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+		return next(ctx, msg)
+	}
+}
