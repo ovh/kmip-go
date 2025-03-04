@@ -33,7 +33,26 @@ type opts struct {
 func (o *opts) tlsConfig() (*tls.Config, error) {
 	cfg := o.tlsCfg
 	if cfg == nil {
-		cfg = &tls.Config{}
+		cfg = &tls.Config{
+			MinVersion: tls.VersionTLS12, // As required by KMIP 1.4 spec
+
+			// // TODO: Make cipher suites configurable and do not add by default legacy ones
+			// CipherSuites: []uint16{
+			// 	// Mandatory support as per KMIP 1.4 spec
+			// 	// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
+			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA256, // insecure
+
+			// 	// Optional support as per KMIP 1.4 spec
+			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA,            // insecure
+			// 	tls.TLS_RSA_WITH_AES_256_CBC_SHA,            // insecure
+			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, // insecure
+			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,      // insecure
+			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,   // insecure
+			// },
+		}
 	}
 	if cfg.RootCAs == nil {
 		if len(o.rootCAs) > 0 {
@@ -51,27 +70,6 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 	cfg.Certificates = append(cfg.Certificates, o.certs...)
 	if cfg.ServerName == "" {
 		cfg.ServerName = o.serverName
-	}
-	if cfg.MinVersion == 0 {
-		cfg.MinVersion = tls.VersionTLS12 // As required by KMIP 1.4 spec
-	}
-	if len(cfg.CipherSuites) == 0 {
-		cfg.CipherSuites = []uint16{
-			// Mandatory support as per KMIP 1.4 spec
-			// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
-			tls.TLS_RSA_WITH_AES_128_CBC_SHA256,
-
-			// Optional support as per KMIP 1.4 spec
-			tls.TLS_RSA_WITH_AES_128_CBC_SHA,
-			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-		}
 	}
 	return cfg, nil
 }

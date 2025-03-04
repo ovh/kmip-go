@@ -293,7 +293,7 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 		}
 	case reflect.Int64:
 		return func(e *Encoder, tag int, v reflect.Value) {
-			e.LongInteger(tag, int64(v.Int()))
+			e.LongInteger(tag, v.Int())
 		}
 	case reflect.Bool:
 		return func(e *Encoder, tag int, v reflect.Value) {

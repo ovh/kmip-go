@@ -89,7 +89,7 @@ func (enc *ttlvWriter) BigInteger(tag int, value *big.Int) {
 
 func (enc *ttlvWriter) Enum(enumtag, tag int, value uint32) {
 	enc.encodeAppend(tag, TypeEnumeration, 4, func(b []byte) []byte {
-		b = binary.BigEndian.AppendUint32(b, uint32(value))
+		b = binary.BigEndian.AppendUint32(b, value)
 		return append(b, 0, 0, 0, 0)
 	})
 }
