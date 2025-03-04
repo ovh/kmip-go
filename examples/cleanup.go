@@ -1,4 +1,3 @@
-//nolint:unused // This is a test file
 package main
 
 import (

@@ -1,4 +1,3 @@
-//nolint:unused // This is a test file
 package main
 
 import (
@@ -24,7 +23,7 @@ func test_state_transitions1(client *kmipclient.Client) {
 }
 
 // The transition from Pre-Active to Compromised is caused by a client issuing a Revoke operation
-// with a Revocation Reason of Compromised
+// with a Revocation Reason of Compromised.
 func test_state_transitions3(client *kmipclient.Client) {
 	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
 		WithName("test-state").
@@ -140,7 +139,7 @@ func test_state_transitions10(client *kmipclient.Client) {
 	assertState(client, res.UniqueIdentifier, kmip.StateDestroyedCompromised)
 }
 
-// Test some state transition defined in the KMIP spec
+// Test some state transition defined in the KMIP spec.
 func test_state_transitions(client *kmipclient.Client) {
 	test_state_transitions1(client)
 	test_state_transitions3(client)

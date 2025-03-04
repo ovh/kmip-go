@@ -77,7 +77,7 @@ func (j *textWriter) BigInteger(tag int, value *big.Int) {
 }
 
 // Bitmask implements writer.
-func (j *textWriter) Bitmask(bitmasktag int, tag int, value int32) {
+func (j *textWriter) Bitmask(bitmasktag, tag int, value int32) {
 	if bitmasktag <= 0 {
 		bitmasktag = tag
 	}
@@ -109,7 +109,7 @@ func (j *textWriter) DateTime(tag int, date time.Time) {
 }
 
 // Enum implements writer.
-func (j *textWriter) Enum(enumtag int, tag int, value uint32) {
+func (j *textWriter) Enum(enumtag, tag int, value uint32) {
 	if enumtag <= 0 {
 		enumtag = tag
 	}

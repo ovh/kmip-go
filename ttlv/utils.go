@@ -57,7 +57,7 @@ func bytesToBigInt(v []byte) *big.Int {
 	return bv
 }
 
-// revMap reverses the given map. Values in the map must be unique or the function will panic
+// revMap reverses the given map. Values in the map must be unique or the function will panic.
 func revMap[K, V comparable](m map[K]V) map[V]K {
 	res := make(map[V]K, len(m))
 	for k, v := range m {

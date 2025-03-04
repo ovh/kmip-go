@@ -376,7 +376,7 @@ func structFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 		}
 		if info.vrange != nil {
 			ff := ffunc
-			ffunc = func(e *Encoder, i int, v reflect.Value) {
+			ffunc = func(e *Encoder, _ int, v reflect.Value) {
 				if !e.versionIn(*info.vrange) {
 					return
 				}

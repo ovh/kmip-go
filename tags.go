@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	// KMIP 1.0
+	// KMIP 1.0.
 	TagActivationDate                 = 0x420001
 	TagApplicationData                = 0x420002
 	TagApplicationNamespace           = 0x420003
@@ -25,21 +25,21 @@ const (
 	TagBlockCipherMode                = 0x420011
 	TagCancellationResult             = 0x420012
 	TagCertificate                    = 0x420013
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateIdentifier = 0x420014
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateIssuer = 0x420015
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateIssuerAlternativeName = 0x420016
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateIssuerDistinguishedName = 0x420017
 	TagCertificateRequest                 = 0x420018
 	TagCertificateRequestType             = 0x420019
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateSubject = 0x42001A
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateSubjectAlternativeName = 0x42001B
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagCertificateSubjectDistinguishedName = 0x42001C
 	TagCertificateType                     = 0x42001D
 	TagCertificateValue                    = 0x42001E
@@ -71,7 +71,7 @@ const (
 	TagHashingAlgorithm                    = 0x420038
 	TagInitialDate                         = 0x420039
 	TagInitializationVector                = 0x42003A
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagIssuer                     = 0x42003B
 	TagIterationCount             = 0x42003C
 	TagIVCounterNonce             = 0x42003D
@@ -106,7 +106,7 @@ const (
 	TagOpaqueDataValue            = 0x42005A
 	TagOpaqueObject               = 0x42005B
 	TagOperation                  = 0x42005C
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	TagOperationPolicyName         = 0x42005D
 	TagP                           = 0x42005E
 	TagPaddingMethod               = 0x42005F
@@ -149,7 +149,7 @@ const (
 	TagSalt                        = 0x420084
 	TagSecretData                  = 0x420085
 	TagSecretDataType              = 0x420086
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	TagSerialNumber         = 0x420087
 	TagServerInformation    = 0x420088
 	TagSplitKey             = 0x420089
@@ -178,7 +178,7 @@ const (
 	TagY                    = 0x4200A0
 	TagPassword             = 0x4200A1
 
-	// KMIP 1.1
+	// KMIP 1.1.
 	TagDeviceIdentifier           = 0x4200A2
 	TagEncodingOption             = 0x4200A3
 	TagExtensionInformation       = 0x4200A4
@@ -202,7 +202,7 @@ const (
 	TagX_509CertificateIssuer     = 0x4200B6
 	TagX_509CertificateSubject    = 0x4200B7
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	TagKeyValueLocationValue       = 0x4200B9
 	TagKeyValueLocationType        = 0x4200BA
 	TagKeyValuePresent             = 0x4200BB
@@ -232,7 +232,7 @@ const (
 	TagAttestationCapableIndicator = 0x4200D3
 	TagKeyValueLocation            = 0x4200B8
 
-	// KMIP 1.3
+	// KMIP 1.3.
 	TagOffsetItems                     = 0x4200D4
 	TagLocatedItems                    = 0x4200D5
 	TagCorrelationValue                = 0x4200D6
@@ -270,7 +270,7 @@ const (
 	TagClientRegistrationMethod        = 0x4200F6
 	TagCapabilityInformation           = 0x4200F7
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	TagKeyWrapType                           = 0x4200F8
 	TagBatchUndoCapability                   = 0x4200F9
 	TagBatchContinueCapability               = 0x4200FA

@@ -1,4 +1,3 @@
-//nolint:unused // This is a test file
 package main
 
 import (
@@ -75,7 +74,7 @@ func main() {
 	create_ecdsa(client)
 	locate(client)
 	archive(client)
-	recover(client)
+	test_recover(client)
 
 	register_secret(client)
 	register_certificate(client)
@@ -201,7 +200,6 @@ func create_skipjack(client *kmipclient.Client) {
 		Skipjack(kmip.Encrypt | kmip.Decrypt | kmip.WrapKey | kmip.UnwrapKey).
 		WithName("Test-PH-Skipjack (go)").
 		MustExec()
-
 }
 
 func create_rsa(client *kmipclient.Client) {
@@ -231,7 +229,7 @@ func archive(client *kmipclient.Client) {
 	client.Archive(RESOURCE).MustExec()
 }
 
-func recover(client *kmipclient.Client) {
+func test_recover(client *kmipclient.Client) {
 	client.Recover(RESOURCE).MustExec()
 }
 
@@ -710,13 +708,7 @@ func time_consuming_batch(client *kmipclient.Client) {
 				{AttributeName: kmip.AttributeNameCryptographicUsageMask, AttributeValue: kmip.Sign | kmip.Verify},
 			},
 		},
-		// PrivateKeyTemplateAttribute: &kmip.TemplateAttribute{},
-		// PublicKeyTemplateAttribute:  &kmip.TemplateAttribute{},
 	}
-	// msg := kmip.NewRequestMessage(kmip.V1_4, req, req, req, req, req, req, req, req, req, req)
-	// opt := kmip.Continue
-	// msg.Header.BatchErrorContinuationOption = &opt
-	// _, err := client.Roundtrip(context.Background(), &msg)
 	_, err := client.Batch(context.Background(), req, req, req, req, req, req, req, req, req, req)
 	if err != nil {
 		panic(err)

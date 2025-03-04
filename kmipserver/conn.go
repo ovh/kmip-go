@@ -79,7 +79,7 @@ func (c *conn) terminate(err error) error {
 	}
 	c.logger.Debug("Terminating connection")
 	c.cancel(err) // Cancel the server context
-	if tx := c.tx.Swap((chan txMsg)(nil)); tx != nil && tx != (chan txMsg)(nil) {
+	if tx := c.tx.Swap(chan txMsg(nil)); tx != nil && tx != chan txMsg(nil) {
 		close(tx.(chan txMsg))
 	}
 	return c.stream.Close() // Close the connection

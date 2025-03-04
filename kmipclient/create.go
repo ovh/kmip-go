@@ -58,14 +58,14 @@ type ExecCreate struct {
 	AttributeExecutor[*payloads.CreateRequestPayload, *payloads.CreateResponsePayload, ExecCreate]
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreate) WithTemplates(names ...kmip.Name) ExecCreate {
 	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, names...)
 	return ex
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreate) WithTemplate(name string, nameType kmip.NameType) ExecCreate {
 	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, kmip.Name{NameValue: name, NameType: nameType})

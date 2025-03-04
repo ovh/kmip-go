@@ -36,14 +36,14 @@ func (ex ExecRekey) WithOffset(offset time.Duration) ExecRekey {
 	return ex
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecRekey) WithTemplates(names ...kmip.Name) ExecRekey {
 	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, names...)
 	return ex
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecRekey) WithTemplate(name string, nameType kmip.NameType) ExecRekey {
 	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, kmip.Name{NameValue: name, NameType: nameType})

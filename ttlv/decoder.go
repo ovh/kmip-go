@@ -196,7 +196,7 @@ func (dec *Decoder) TagAny(tag int, value any) (err error) {
 	default:
 		return dec.decodeValue(tag, reflect.ValueOf(value))
 	}
-	return
+	return err
 }
 
 // Any decodes `value` by deserializing it from the buffer using value's type default tag.
@@ -481,7 +481,7 @@ func structDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.V
 		}
 		if info.vrange != nil {
 			ff := ffunc
-			ffunc = func(d *Decoder, i int, v reflect.Value) error {
+			ffunc = func(d *Decoder, _ int, v reflect.Value) error {
 				if !d.versionIn(*info.vrange) {
 					return nil
 				}

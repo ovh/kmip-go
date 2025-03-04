@@ -41,7 +41,7 @@ func init() {
 		OperationReKeyKeyPair:     "ReKeyKeyPair",
 		OperationDiscoverVersions: "DiscoverVersions",
 
-		//KMIP 1.2
+		// KMIP 1.2
 		OperationEncrypt:         "Encrypt",
 		OperationDecrypt:         "Decrypt",
 		OperationSign:            "Sign",
@@ -54,7 +54,7 @@ func init() {
 		OperationCreateSplitKey:  "CreateSplitKey",
 		OperationJoinSplitKey:    "JoinSplitKey",
 
-		//KMIP 1.4
+		// KMIP 1.4
 		OperationImport: "Import",
 		OperationExport: "Export",
 	})
@@ -92,11 +92,11 @@ const (
 	OperationNotify             Operation = 0x0000001B
 	OperationPut                Operation = 0x0000001C
 
-	// KMIP 1.1
+	// KMIP 1.1.
 	OperationReKeyKeyPair     Operation = 0x0000001D
 	OperationDiscoverVersions Operation = 0x0000001E
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	OperationEncrypt         Operation = 0x0000001F
 	OperationDecrypt         Operation = 0x00000020
 	OperationSign            Operation = 0x00000021
@@ -109,7 +109,7 @@ const (
 	OperationCreateSplitKey  Operation = 0x00000028
 	OperationJoinSplitKey    Operation = 0x00000029
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	OperationImport Operation = 0x0000002A
 	OperationExport Operation = 0x0000002B
 )

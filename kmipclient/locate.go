@@ -31,8 +31,8 @@ func (ex ExecLocate) WithStorageStatusMask(mask kmip.StorageStatusMask) ExecLoca
 	return ex
 }
 
-func (ex ExecLocate) WithMaxItems(max int32) ExecLocate {
-	ex.req.MaximumItems = &max
+func (ex ExecLocate) WithMaxItems(maximum int32) ExecLocate {
+	ex.req.MaximumItems = &maximum
 	return ex
 }
 

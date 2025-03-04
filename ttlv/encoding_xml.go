@@ -423,7 +423,7 @@ func (dec *xmlReader) Bitmask(realtag, tag int) (int32, error) {
 		if err != nil {
 			return 0, err
 		}
-		result = result | int32(parsed)
+		result |= int32(parsed)
 	}
 	return result, dec.Next()
 }

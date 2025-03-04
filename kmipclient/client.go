@@ -241,8 +241,8 @@ func (c *Client) Clone() (*Client, error) {
 
 // CloneCtx clones the current kmip client into a new independent client
 // with a separate new connection. The new client inherits allt he configured parameters
-// as well as the negociated kmip protocol version. Meaning that cloning a client does not perform
-// protocol version negociation.
+// as well as the negotiated kmip protocol version. Meaning that cloning a client does not perform
+// protocol version negotiation.
 //
 // Cloning a closed client is valid and will create a new connected client.
 func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {

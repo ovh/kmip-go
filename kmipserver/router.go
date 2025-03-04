@@ -180,7 +180,7 @@ func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatch
 		if me.CriticalityIndicator {
 			//TODO: When batch item middleware support has landed, move this into a middleware maybe
 			exec.handleBatchItemError(ctx, &resp, Errorf(kmip.ReasonFeatureNotSupported, "Critical message extension not supported"))
-			return
+			return resp
 		}
 	}
 
@@ -189,7 +189,7 @@ func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatch
 		if route, ok := exec.routes[bi.Operation]; ok {
 			resp.ResponsePayload, err = route.HandleOperation(ctx, pl)
 		} else {
-			resp.ResponsePayload, err = exec.handleDiscover(pl)
+			resp.ResponsePayload = exec.handleDiscover(pl)
 		}
 	default:
 		route, ok := exec.routes[bi.Operation]
@@ -214,16 +214,16 @@ func (exec *BatchExecutor) handleMessageError(ctx context.Context, req *kmip.Req
 	return handleMessageError(ctx, req, err)
 }
 
-func (exec *BatchExecutor) handleDiscover(req *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsRequestPayload, error) {
+func (exec *BatchExecutor) handleDiscover(req *payloads.DiscoverVersionsRequestPayload) *payloads.DiscoverVersionsRequestPayload {
 	resp := &payloads.DiscoverVersionsRequestPayload{}
 	if len(req.ProtocolVersion) == 0 {
 		resp.ProtocolVersion = exec.supportedVersions
-		return resp, nil
+		return resp
 	}
 	for _, v := range exec.supportedVersions {
 		if slices.Contains(req.ProtocolVersion, v) {
 			resp.ProtocolVersion = append(resp.ProtocolVersion, v)
 		}
 	}
-	return resp, nil
+	return resp
 }

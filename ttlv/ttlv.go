@@ -25,7 +25,7 @@ type ErrEncoding struct {
 // ErrEOF is an ErrEncoding instance returned whensome data are missing while decoding.
 var ErrEOF = Errorf("unexpected end of data")
 
-// Errorf creates a new ErrEncoding
+// Errorf creates a new ErrEncoding.
 func Errorf(format string, args ...any) error {
 	return ErrEncoding{
 		cause: fmt.Errorf(format, args...),

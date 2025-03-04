@@ -109,14 +109,14 @@ type ExecCreateKeyPairAttr struct {
 	tmplFunc func(*payloads.CreateKeyPairRequestPayload) *[]kmip.Name
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreateKeyPairAttr) WithTemplates(names ...kmip.Name) ExecCreateKeyPairAttr {
 	tmpl := ex.tmplFunc(ex.req)
 	*tmpl = append(*tmpl, names...)
 	return ex
 }
 
-// Deprecated: Templates have been deprecated in KMIP v1.3
+// Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreateKeyPairAttr) WithTemplate(name string, nameType kmip.NameType) ExecCreateKeyPairAttr {
 	ex.WithTemplates(kmip.Name{NameValue: name, NameType: nameType})
 	return ex

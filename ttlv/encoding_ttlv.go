@@ -52,12 +52,12 @@ func (enc *ttlvWriter) encodeAppend(tag int, typ Type, length int, f func([]byte
 	enc.buf = f(enc.buf)
 }
 
-func (enc *ttlvWriter) encodeAppendRightPadded(tag int, typ Type, length int, padLen int, padVal byte, f func([]byte) []byte) {
+func (enc *ttlvWriter) encodeAppendRightPadded(tag int, typ Type, length, padLen int, padVal byte, f func([]byte) []byte) {
 	enc.encodeAppend(tag, typ, length, f)
 	enc.pad(padLen, padVal)
 }
 
-func (enc *ttlvWriter) encodeAppendLeftPadded(tag int, typ Type, length int, padLen int, padVal byte, f func([]byte) []byte) {
+func (enc *ttlvWriter) encodeAppendLeftPadded(tag int, typ Type, length, padLen int, padVal byte, f func([]byte) []byte) {
 	enc.encodeAppend(tag, typ, length, func(b []byte) []byte {
 		for range padLen {
 			b = append(b, padVal)

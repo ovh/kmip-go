@@ -21,9 +21,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestingT is an interface wrapper around *testing.T
+// TestingT is an interface wrapper around *testing.T.
 type TestingT interface {
-	Errorf(format string, args ...interface{})
+	Errorf(format string, args ...any)
 	FailNow()
 	Cleanup(func())
 }
@@ -45,6 +45,7 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 	require.NoError(t, err)
 	list, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{
 		Certificates: []tls.Certificate{{Certificate: [][]byte{cert}, PrivateKey: k}},
+		MinVersion:   tls.VersionTLS12,
 	})
 	require.NoError(t, err)
 

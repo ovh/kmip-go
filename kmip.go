@@ -157,19 +157,19 @@ type Digest struct {
 	KeyFormatType    *KeyFormatType `ttlv:",version=1.1.."`
 }
 
-// Deprecated: deprecated as of kmip 1.1
+// Deprecated: deprecated as of kmip 1.1.
 type CertificateIdentifier struct {
 	Issuer       string `ttlv:",omitempty"`
 	SerialNumber *string
 }
 
-// Deprecated: deprecated as of kmip 1.1
+// Deprecated: deprecated as of kmip 1.1.
 type CertificateSubject struct {
 	CertificateSubjectDistinguishedName string `ttlv:",omitempty"`
 	CertificateSubjectAlternativeName   []string
 }
 
-// Deprecated: deprecated as of kmip 1.1
+// Deprecated: deprecated as of kmip 1.1.
 type CertificateIssuer struct {
 	CertificateIssuerDistinguishedName string `ttlv:",omitempty"`
 	CertificateIssuerAlternativeName   []string
@@ -177,7 +177,7 @@ type CertificateIssuer struct {
 
 type ApplicationSpecificInformation struct {
 	ApplicationNamespace string `ttlv:",omitempty"`
-	ApplicationData      string `ttlv:",omitempty"` //TODO: Optional since kmip 1.3, not before
+	ApplicationData      string `ttlv:",omitempty"` //TODO: Optional since kmip 1.3, not before.
 }
 
 type UsageLimits struct {
@@ -194,7 +194,7 @@ func (ul UsageLimits) Equals(other *UsageLimits) bool {
 			*other.UsageLimitsCount == *ul.UsageLimitsCount)
 }
 
-// KMIP 1.1
+// KMIP 1.1.
 
 type ExtensionInformation struct {
 	ExtensionName string
@@ -217,7 +217,7 @@ type X_509CertificateIssuer struct {
 	IssuerAlternativeName   [][]byte
 }
 
-//KMIP 1.2
+// KMIP 1.2.
 
 type Nonce struct {
 	NonceID    []byte
@@ -234,7 +234,7 @@ type KeyValueLocation struct {
 	KeyValueLocationType  KeyValueLocationType `ttlv:",omitempty"`
 }
 
-// KMIP 1.3
+// KMIP 1.3.
 
 type RNGParameters struct {
 	RNGAlgorithm           RNGAlgorithm `ttlv:",omitempty"`

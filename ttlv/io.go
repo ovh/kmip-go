@@ -22,7 +22,7 @@ type Stream struct {
 
 // NewStream creates a new TTLV stream around the given I/O stream.
 // If maxSize is greater than 0, then it will limit the maximum allowed
-// size in bytes for a message to receive
+// size in bytes for a message to receive.
 func NewStream(inner io.ReadWriteCloser, maxSize int) Stream {
 	return Stream{
 		inner: inner,

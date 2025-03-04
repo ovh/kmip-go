@@ -27,7 +27,7 @@ var objectTypes = map[ObjectType]reflect.Type{
 	ObjectTypePGPKey:       reflect.TypeFor[PGPKey](),
 }
 
-// TODO: Make it private
+// TODO: Make it private.
 func NewObjectForType(objType ObjectType) (Object, error) {
 	ty, ok := objectTypes[objType]
 	if !ok {
@@ -626,10 +626,10 @@ type TransparentRSAPrivateKey struct {
 	CRTCoefficient  *big.Int
 }
 
-// Deprecated: deprecated in KMIP v1.3
+// Deprecated: deprecated in KMIP v1.3.
 type TransparentECDSAPublicKey TransparentECPublicKey
 
-// Deprecated: deprecated in KMIP v1.3
+// Deprecated: deprecated in KMIP v1.3.
 type TransparentECDSAPrivateKey TransparentECPrivateKey
 
 type TransparentECPrivateKey struct {
@@ -664,7 +664,7 @@ func (sd *OpaqueObject) ObjectType() ObjectType {
 	return ObjectTypeOpaqueObject
 }
 
-// Deprecated: deprecated as of KMIP 1.3
+// Deprecated: deprecated as of KMIP 1.3.
 type Template struct {
 	Attribute []Attribute
 }
@@ -673,7 +673,7 @@ func (sd *Template) ObjectType() ObjectType {
 	return ObjectTypeTemplate
 }
 
-// KMIP 1.2
+// KMIP 1.2.
 
 type PGPKey struct {
 	PGPKeyVersion int32

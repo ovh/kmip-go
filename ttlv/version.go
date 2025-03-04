@@ -41,7 +41,7 @@ func (ext *extension) versionIn(vrange versionRange) bool {
 		return true
 	}
 	// fmt.Printf("Check if %s is in %s\n", *ext.version, vrange)
-	return (*ext.version).isIn(vrange)
+	return ext.version.isIn(vrange)
 }
 
 func (ext *extension) setVersion(v Version) {

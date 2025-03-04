@@ -19,7 +19,7 @@ const (
 	AttributeNameUniqueIdentifier AttributeName = "Unique Identifier"
 	AttributeNameName             AttributeName = "Name"
 	AttributeNameObjectType       AttributeName = "Object Type"
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	AttributeNameOperationPolicyName           AttributeName = "Operation Policy Name"
 	AttributeNameObjectGroup                   AttributeName = "Object Group"
 	AttributeNameContactInformation            AttributeName = "Contact Information"
@@ -44,16 +44,16 @@ const (
 	AttributeNameState                         AttributeName = "State"
 	AttributeNameRevocationReason              AttributeName = "Revocation Reason"
 	AttributeNameLink                          AttributeName = "Link"
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	AttributeNameCertificateIdentifier AttributeName = "Certificate Identifier"
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	AttributeNameCertificateSubject AttributeName = "Certificate Subject"
-	// Deprecated: deprecated as of kmip 1.1
+	// Deprecated: deprecated as of kmip 1.1.
 	AttributeNameCertificateIssuer              AttributeName = "Certificate Issuer"
 	AttributeNameUsageLimits                    AttributeName = "Usage Limits"
 	AttributeNameApplicationSpecificInformation AttributeName = "Application Specific Information"
 
-	// KMIP 1.1
+	// KMIP 1.1.
 	AttributeNameCertificateLength         AttributeName = "Certificate Length"
 	AttributeNameFresh                     AttributeName = "Fresh"
 	AttributeNameX509CertificateIdentifier AttributeName = "X.509 Certificate Identifier"
@@ -61,16 +61,16 @@ const (
 	AttributeNameX509CertificateIssuer     AttributeName = "X.509 Certificate Issuer"
 	AttributeNameDigitalSignatureAlgorithm AttributeName = "Digital Signature Algorithm"
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	AttributeNameAlternativeName      AttributeName = "Alternative Name"
 	AttributeNameKeyValuePresent      AttributeName = "Key Value Present"
 	AttributeNameKeyValueLocation     AttributeName = "Key Value Location"
 	AttributeNameOriginalCreationDate AttributeName = "Original Creation Date"
 
-	// KMIP 1.3
+	// KMIP 1.3.
 	AttributeNameRandomNumberGenerator AttributeName = "Random Number Generator"
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	AttributeNamePKCS_12FriendlyName AttributeName = "PKCS#12 Friendly Name"
 	AttributeNameDescription         AttributeName = "Description"
 	AttributeNameComment             AttributeName = "Comment"

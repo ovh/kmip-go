@@ -35,28 +35,28 @@ func (ex ExecQuery) ApplicationNamespaces() ExecQuery {
 	return ex
 }
 
-// KMIP 1.1
+// KMIP 1.1.
 func (ex ExecQuery) ExtensionList() ExecQuery {
 	//TODO: Check client version first
 	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryExtensionList)
 	return ex
 }
 
-// KMIP 1.1
+// KMIP 1.1.
 func (ex ExecQuery) ExtensionMap() ExecQuery {
 	//TODO: Check client version first
 	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryExtensionMap)
 	return ex
 }
 
-// KMIP 1.2
+// KMIP 1.2.
 func (ex ExecQuery) AttestationTypes() ExecQuery {
 	//TODO: Check client version first
 	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryAttestationTypes)
 	return ex
 }
 
-// KMIP 1.3
+// KMIP 1.3.
 func (ex ExecQuery) RNGs() ExecQuery {
 	//TODO: Check client version first
 	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryRNGs)

@@ -29,22 +29,22 @@ func init() {
 		ReasonKeyFormatTypeNotSupported:        "KeyFormatTypeNotSupported",
 		ReasonKeyCompressionTypeNotSupported:   "KeyCompressionTypeNotSupported",
 		ReasonGeneralFailure:                   "GeneralFailure",
-		//KMIP 1.1
+		// KMIP 1.1.
 		ReasonEncodingOptionError: "EncodingOptionError",
-		// KMIP 1.2
+		// KMIP 1.2.
 		ReasonKeyValueNotPresent:  "KeyValueNotPresent",
 		ReasonAttestationRequired: "AttestationRequired",
 		ReasonAttestationFailed:   "AttestationFailed",
-		// KMIP 1.4
+		// KMIP 1.4.
 		Sensitive:           "Sensitive",
 		NotExtractable:      "NotExtractable",
 		ObjectAlreadyExists: "ObjectAlreadyExists",
 	})
 	ttlv.RegisterEnum(TagCredentialType, map[CredentialType]string{
 		CredentialUsernameAndPassword: "UsernameAndPassword",
-		//KMIP 1.1
+		// KMIP 1.1.
 		CredentialDevice: "Device",
-		//KMIP 1.2
+		// KMIP 1.2.
 		CredentialAttestation: "Attestation",
 	})
 	ttlv.RegisterEnum(TagRevocationReasonCode, map[RevocationReasonCode]string{
@@ -75,7 +75,7 @@ func init() {
 		ObjectTypeSecretData:   "SecretData",
 		ObjectTypeOpaqueObject: "OpaqueObject",
 
-		//KMIP 1.2
+		// KMIP 1.2.
 		ObjectTypePGPKey: "PGPKey",
 	})
 	ttlv.RegisterEnum(TagOpaqueDataType, map[OpaqueDataType]string{})
@@ -114,13 +114,13 @@ func init() {
 		SKIPJACK:   "SKIPJACK",
 		Twofish:    "Twofish",
 
-		// KMIP 1.2
+		// KMIP 1.2.
 		EC: "EC",
 
-		// KMIP 1.3
+		// KMIP 1.3.
 		OneTimePad: "OneTimePad",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		ChaCha20:         "ChaCha20",
 		Poly1305:         "Poly1305",
 		ChaCha20Poly1305: "ChaCha20Poly1305",
@@ -181,11 +181,11 @@ func init() {
 		Tiger:      "Tiger",
 		Whirlpool:  "Whirlpool",
 
-		// KMIP 1.2
+		// KMIP 1.2.
 		SHA_512_224: "SHA_512_224",
 		SHA_512_256: "SHA_512_256",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		SHA_3_224: "SHA_3_224",
 		SHA_3_256: "SHA_3_256",
 		SHA_3_384: "SHA_3_384",
@@ -214,7 +214,7 @@ func init() {
 		PVKPVV:   "PVKPVV",
 		PVKOTH:   "PVKOTH",
 
-		//KMIP 1.4
+		// KMIP 1.4
 		DUKPT: "DUKPT",
 		IV:    "IV",
 		TRKBK: "TRKBK",
@@ -314,11 +314,11 @@ func init() {
 		KeyFormatTransparentECMQVPrivateKey: "TransparentECMQVPrivateKey",
 		KeyFormatTransparentECMQVPublicKey:  "TransparentECMQVPublicKey",
 
-		// KMIP 1.3
+		// KMIP 1.3.
 		KeyFormatTransparentECPrivateKey: "TransparentECPrivateKey",
 		KeyFormatTransparentECPublicKey:  "TransparentECPublicKey",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		KeyFormatPKCS_12: "PKCS_12",
 	})
 	ttlv.RegisterEnum(TagKeyCompressionType, map[KeyCompressionType]string{
@@ -347,17 +347,17 @@ func init() {
 		ReplacementObjectLink:    "ReplacementObjectLink",
 		ReplacedObjectLink:       "ReplacedObjectLink",
 
-		// KMIP 1.2
+		// KMIP 1.2.
 		ParentLink:   "ParentLink",
 		ChildLink:    "ChildLink",
 		PreviousLink: "PreviousLink",
 		NextLink:     "NextLink",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		PKCS_12CertificateLink: "PKCS_12CertificateLink",
 		PKCS_12PasswordLink:    "PKCS_12PasswordLink",
 
-		//FIXME: This is defined in KMIP 2.0+ only
+		//FIXME: This is defined in KMIP 2.0+ only.
 		WrappingKeyLink: "WrappingKeyLink",
 	})
 	ttlv.RegisterEnum(TagQueryFunction, map[QueryFunction]string{
@@ -365,12 +365,12 @@ func init() {
 		QueryObjects:               "QueryObjects",
 		QueryServerInformation:     "QueryServerInformation",
 		QueryApplicationNamespaces: "QueryApplicationNamespaces",
-		//KMIP 1.1
+		// KMIP 1.1.
 		QueryExtensionList: "QueryExtensionList",
 		QueryExtensionMap:  "QueryExtensionMap",
-		//KMIP 1.2
+		// KMIP 1.2.
 		QueryAttestationTypes: "QueryAttestationTypes",
-		//KMIP 1.3
+		// KMIP 1.3.
 		QueryRNGs:                      "QueryRNGs",
 		QueryValidations:               "QueryValidations",
 		QueryProfiles:                  "QueryProfiles",
@@ -402,7 +402,7 @@ func init() {
 		SplitKeyMethodXOR:                         "XOR",
 		SplitKeyMethodPolynomialSharingGF216:      "PolynomialSharingGF216",
 		SplitKeyMethodPolynomialSharingPrimeField: "PolynomialSharingPrimeField",
-		//KMIP 1.2
+		// KMIP 1.2.
 		SplitKeyMethodPolynomialSharingGF28: "PolynomialSharingGF28",
 	})
 	ttlv.RegisterEnum(TagObjectGroupMember, map[ObjectGroupMember]string{
@@ -431,7 +431,7 @@ func init() {
 		ECDSAWithSHA384:                    "ECDSAWithSHA384",
 		ECDSAWithSHA512:                    "ECDSAWithSHA512",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		SHA3_256WithRSAEncryption: "SHA3_256WithRSAEncryption",
 		SHA3_384WithRSAEncryption: "SHA3_384WithRSAEncryption",
 		SHA3_512WithRSAEncryption: "SHA3_512WithRSAEncryption",
@@ -606,7 +606,7 @@ func init() {
 		XMLClientKMIPV1_3:                                 "XMLClientKMIPV1_3",
 		XMLServerKMIPV1_3:                                 "XMLServerKMIPV1_3",
 
-		// KMIP 1.4
+		// KMIP 1.4.
 		BaselineServerBasicKMIPV1_4:                       "BaselineServerBasicKMIPV1_4",
 		BaselineServerTLSV1_2KMIPV1_4:                     "BaselineServerTLSV1_2KMIPV1_4",
 		BaselineClientBasicKMIPV1_4:                       "BaselineClientBasicKMIPV1_4",
@@ -705,7 +705,6 @@ type ResultReason uint32
 
 // See https://docs.oasis-open.org/kmip/spec/v1.4/errata01/os/kmip-spec-v1.4-errata01-os-redlined.html#_Toc490660949
 const (
-	// ReasonNone                             ResultReason = 0x00000000
 	ReasonItemNotFound                     ResultReason = 0x00000001
 	ReasonResponseTooLarge                 ResultReason = 0x00000002
 	ReasonAuthenticationNotSuccessful      ResultReason = 0x00000003
@@ -723,14 +722,14 @@ const (
 	ReasonApplicationNamespaceNotSupported ResultReason = 0x0000000F
 	ReasonKeyFormatTypeNotSupported        ResultReason = 0x00000010
 	ReasonKeyCompressionTypeNotSupported   ResultReason = 0x00000011
-	// KMIP 1.1
+	// KMIP 1.1.
 	ReasonEncodingOptionError ResultReason = 0x00000012
-	// KMIP 1.2
+	// KMIP 1.2.
 	ReasonKeyValueNotPresent  ResultReason = 0x00000013
 	ReasonAttestationRequired ResultReason = 0x00000014
 	ReasonAttestationFailed   ResultReason = 0x00000015
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	Sensitive           ResultReason = 0x00000016
 	NotExtractable      ResultReason = 0x00000017
 	ObjectAlreadyExists ResultReason = 0x00000018
@@ -742,9 +741,9 @@ type CredentialType uint32
 
 const (
 	CredentialUsernameAndPassword CredentialType = 0x00000001
-	// KMIP 1.1
+	// KMIP 1.1.
 	CredentialDevice CredentialType = 0x00000002
-	//KMIP 1.2
+	// KMIP 1.2.
 	CredentialAttestation CredentialType = 0x00000003
 )
 
@@ -784,11 +783,11 @@ const (
 	ObjectTypePublicKey    ObjectType = 0x00000003
 	ObjectTypePrivateKey   ObjectType = 0x00000004
 	ObjectTypeSplitKey     ObjectType = 0x00000005
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	ObjectTypeTemplate     ObjectType = 0x00000006
 	ObjectTypeSecretData   ObjectType = 0x00000007
 	ObjectTypeOpaqueObject ObjectType = 0x00000008
-	// KMIP 1.2
+	// KMIP 1.2.
 	ObjectTypePGPKey ObjectType = 0x00000009
 )
 
@@ -834,13 +833,13 @@ const (
 	SKIPJACK   CryptographicAlgorithm = 0x00000018
 	Twofish    CryptographicAlgorithm = 0x00000019
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	EC CryptographicAlgorithm = 0x0000001A
 
-	// KMIP 1.3
+	// KMIP 1.3.
 	OneTimePad CryptographicAlgorithm = 0x0000001B
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	ChaCha20         CryptographicAlgorithm = 0x0000001C
 	Poly1305         CryptographicAlgorithm = 0x0000001D
 	ChaCha20Poly1305 CryptographicAlgorithm = 0x0000001E
@@ -876,7 +875,7 @@ const (
 	X9_102TDKW        BlockCipherMode = 0x0000000F
 	X9_102AKW1        BlockCipherMode = 0x00000010
 	X9_102AKW2        BlockCipherMode = 0x00000011
-	// KMIP 1.4
+	// KMIP 1.4.
 	AEAD BlockCipherMode = 0x00000012
 )
 
@@ -910,11 +909,11 @@ const (
 	Tiger      HashingAlgorithm = 0x0000000A
 	Whirlpool  HashingAlgorithm = 0x0000000B
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	SHA_512_224 HashingAlgorithm = 0x0000000C
 	SHA_512_256 HashingAlgorithm = 0x0000000D
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	SHA_3_224 HashingAlgorithm = 0x0000000E
 	SHA_3_256 HashingAlgorithm = 0x0000000F
 	SHA_3_384 HashingAlgorithm = 0x00000010
@@ -946,7 +945,7 @@ const (
 	PVKPVV   KeyRoleType = 0x00000014
 	PVKOTH   KeyRoleType = 0x00000015
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	DUKPT KeyRoleType = 0x00000016
 	IV    KeyRoleType = 0x00000017
 	TRKBK KeyRoleType = 0x00000018
@@ -971,7 +970,7 @@ const (
 	K_571 RecommendedCurve = 0x0000000E
 	B_571 RecommendedCurve = 0x0000000F
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	SECP112R1        RecommendedCurve = 0x00000010
 	SECP112R2        RecommendedCurve = 0x00000011
 	SECP128R1        RecommendedCurve = 0x00000012
@@ -1113,24 +1112,24 @@ const (
 	KeyFormatTransparentRSAPublicKey  KeyFormatType = 0x0000000B
 	KeyFormatTransparentDHPrivateKey  KeyFormatType = 0x0000000C
 	KeyFormatTransparentDHPublicKey   KeyFormatType = 0x0000000D
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECDSAPrivateKey KeyFormatType = 0x0000000E
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECDSAPublicKey KeyFormatType = 0x0000000F
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECDHPrivateKey KeyFormatType = 0x00000010
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECDHPublicKey KeyFormatType = 0x00000011
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECMQVPrivateKey KeyFormatType = 0x00000012
-	// Deprecated: deprecated as of kmip 1.3
+	// Deprecated: deprecated as of kmip 1.3.
 	KeyFormatTransparentECMQVPublicKey KeyFormatType = 0x00000013
 
-	// KMIP 1.3
+	// KMIP 1.3.
 	KeyFormatTransparentECPrivateKey KeyFormatType = 0x00000014
 	KeyFormatTransparentECPublicKey  KeyFormatType = 0x00000015
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	KeyFormatPKCS_12 KeyFormatType = 0x00000016
 )
 
@@ -1157,7 +1156,7 @@ type CertificateType uint32
 
 const (
 	X_509 CertificateType = 0x00000001
-	// Deprecated: deprecated as of version 1.2
+	// Deprecated: deprecated as of version 1.2.
 	PGP CertificateType = 0x00000002
 )
 
@@ -1172,17 +1171,17 @@ const (
 	ReplacementObjectLink    LinkType = 0x00000106
 	ReplacedObjectLink       LinkType = 0x00000107
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	ParentLink   LinkType = 0x00000108
 	ChildLink    LinkType = 0x00000109
 	PreviousLink LinkType = 0x0000010A
 	NextLink     LinkType = 0x0000010B
 
-	// KMPI 1.4
+	// KMPI 1.4.
 	PKCS_12CertificateLink LinkType = 0x0000010C
 	PKCS_12PasswordLink    LinkType = 0x0000010D
 
-	//FIXME: This is defined in KMIP 2.0+ only
+	//FIXME: This is defined in KMIP 2.0+ only.
 	WrappingKeyLink LinkType = 0x0000010E
 	// Extensions 8XXXXXXX
 )
@@ -1194,13 +1193,13 @@ const (
 	QueryObjects               QueryFunction = 0x00000002
 	QueryServerInformation     QueryFunction = 0x00000003
 	QueryApplicationNamespaces QueryFunction = 0x00000004
-	// KMIP 1.1
+	// KMIP 1.1.
 	QueryExtensionList QueryFunction = 0x00000005
 	QueryExtensionMap  QueryFunction = 0x00000006
-	//KMIP 1.2
+	// KMIP 1.2.
 	QueryAttestationTypes QueryFunction = 0x00000007
 
-	// KMIP 1.3
+	// KMIP 1.3.
 	QueryRNGs                      QueryFunction = 0x00000008
 	QueryValidations               QueryFunction = 0x00000009
 	QueryProfiles                  QueryFunction = 0x0000000A
@@ -1241,7 +1240,7 @@ const (
 	CertificateRequestTypePGP     CertificateRequestType = 0x00000004
 )
 
-// kmip 1.1
+// kmip 1.1.
 
 type SplitKeyMethod uint32
 
@@ -1250,7 +1249,7 @@ const (
 	SplitKeyMethodPolynomialSharingGF216      SplitKeyMethod = 0x00000002
 	SplitKeyMethodPolynomialSharingPrimeField SplitKeyMethod = 0x00000003
 
-	// KMIP 1.2
+	// KMIP 1.2.
 	SplitKeyMethodPolynomialSharingGF28 SplitKeyMethod = 0x00000004
 )
 
@@ -1288,13 +1287,13 @@ const (
 	ECDSAWithSHA384                    DigitalSignatureAlgorithm = 0x0000000F
 	ECDSAWithSHA512                    DigitalSignatureAlgorithm = 0x00000010
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	SHA3_256WithRSAEncryption DigitalSignatureAlgorithm = 0x00000011
 	SHA3_384WithRSAEncryption DigitalSignatureAlgorithm = 0x00000012
 	SHA3_512WithRSAEncryption DigitalSignatureAlgorithm = 0x00000013
 )
 
-// KMIP 1.2
+// KMIP 1.2.
 
 type AttestationType uint32
 
@@ -1331,7 +1330,7 @@ const (
 	ValidityIndicatorUnknown ValidityIndicator = 0x00000003
 )
 
-// KMIP 1.3
+// KMIP 1.3.
 
 type RNGAlgorithm uint32
 
@@ -1490,7 +1489,7 @@ const (
 	XMLClientKMIPV1_3                                 ProfileName = 0x00000077
 	XMLServerKMIPV1_3                                 ProfileName = 0x00000078
 
-	// KMIP 1.4
+	// KMIP 1.4.
 	BaselineServerBasicKMIPV1_4                       ProfileName = 0x00000079
 	BaselineServerTLSV1_2KMIPV1_4                     ProfileName = 0x0000007A
 	BaselineClientBasicKMIPV1_4                       ProfileName = 0x0000007B
@@ -1593,7 +1592,7 @@ const (
 	ClientRegistrationMethodClientRegistered   ClientRegistrationMethod = 0x00000005
 )
 
-// KMIP 1.4
+// KMIP 1.4.
 
 type MaskGenerator uint32
 
@@ -1601,7 +1600,7 @@ const (
 	MGF1 MaskGenerator = 0x00000001
 )
 
-// Text Marshalling for better display in json outputs
+// Text Marshaling for better display in json outputs.
 
 func (enum ResultStatus) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil

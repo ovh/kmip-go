@@ -13,7 +13,7 @@ import (
 )
 
 // JS Numbers are 64-bit floating point and can only represent 53-bits of precision,
-// so any number values >= 2^52 must be represented as hex strings
+// so any number values >= 2^52 must be represented as hex strings.
 const (
 	maxJsonInt int64 = 4503599627370496 // 2^52
 	minJsonInt int64 = -maxJsonInt
@@ -56,7 +56,7 @@ func (j *jsonWriter) startElem(ty Type, tag int) {
 }
 
 func (j *jsonWriter) endElem() {
-	j.buf.WriteRune('}')
+	j.buf.WriteByte('}')
 	if j.indent > 0 {
 		j.buf.WriteString(",\n")
 	}
@@ -121,7 +121,7 @@ func (j *jsonWriter) BigInteger(tag int, value *big.Int) {
 }
 
 // Bitmask implements writer.
-func (j *jsonWriter) Bitmask(bitmasktag int, tag int, value int32) {
+func (j *jsonWriter) Bitmask(bitmasktag, tag int, value int32) {
 	if bitmasktag <= 0 {
 		bitmasktag = tag
 	}
@@ -159,7 +159,7 @@ func (j *jsonWriter) DateTime(tag int, date time.Time) {
 }
 
 // Enum implements writer.
-func (j *jsonWriter) Enum(enumtag int, tag int, value uint32) {
+func (j *jsonWriter) Enum(enumtag, tag int, value uint32) {
 	if enumtag <= 0 {
 		enumtag = tag
 	}
@@ -195,9 +195,9 @@ func (j *jsonWriter) Struct(tag int, f func(writer)) {
 	f(&enc)
 	if j.buf.Len() > originalLen {
 		j.buf.Truncate(j.buf.Len() - 2)
-		j.buf.WriteRune('\n')
+		j.buf.WriteByte('\n')
 		j.writeIndent()
-		j.buf.WriteRune(']')
+		j.buf.WriteByte(']')
 	} else {
 		j.buf.Truncate(j.buf.Len() - 1)
 		j.buf.WriteString("]")
@@ -399,7 +399,7 @@ func (j *jsonReader) BigInteger(tag int) (*big.Int, error) {
 }
 
 // Enum implements reader.
-func (j *jsonReader) Enum(realtag int, tag int) (uint32, error) {
+func (j *jsonReader) Enum(realtag, tag int) (uint32, error) {
 	if err := j.assertType(TypeEnumeration, tag); err != nil {
 		return 0, err
 	}
@@ -555,7 +555,7 @@ func (j *jsonReader) Struct(tag int, f func(reader) error) error {
 }
 
 // Bitmask implements reader.
-func (j *jsonReader) Bitmask(realtag int, tag int) (int32, error) {
+func (j *jsonReader) Bitmask(realtag, tag int) (int32, error) {
 	if err := j.assertType(TypeInteger, tag); err != nil {
 		return 0, err
 	}
@@ -594,7 +594,7 @@ func (j *jsonReader) Bitmask(realtag int, tag int) (int32, error) {
 			if err != nil {
 				return 0, err
 			}
-			result = result | int32(parsed)
+			result |= int32(parsed)
 		}
 		return result, j.Next()
 	default:

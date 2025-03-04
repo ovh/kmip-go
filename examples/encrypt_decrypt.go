@@ -82,7 +82,7 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 	client.Activate(keyId).MustExec()
 
 	iv := make([]byte, 16)
-	rand.Reader.Read(iv[:])
+	_, _ = rand.Reader.Read(iv)
 
 	respPl, err := client.Request(context.Background(), &payloads.EncryptRequestPayload{
 		UniqueIdentifier: &keyId,
@@ -92,7 +92,7 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 			BlockCipherMode:        ptrTo(kmip.CBC),
 			PaddingMethod:          ptrTo(kmip.PKCS5),
 		},
-		IVCounterNonce: ptrTo(iv[:]),
+		IVCounterNonce: ptrTo(iv),
 	})
 	if err != nil {
 		panic(err)
