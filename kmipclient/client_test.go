@@ -197,3 +197,21 @@ func TestRekey(t *testing.T) {
 	resp := req.MustExec()
 	require.EqualValues(t, *req.RequestPayload().UniqueIdentifier, resp.UniqueIdentifier)
 }
+
+func TestClone(t *testing.T) {
+	client1 := kmiptest.NewClientAndServer(t, kmipserver.NewBatchExecutor())
+	client2, err := client1.Clone()
+	require.NoError(t, err)
+	require.NoError(t, client1.Close())
+
+	_, err = client1.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
+	require.Error(t, err)
+
+	client3, err := client1.Clone()
+	require.NoError(t, err)
+
+	_, err = client2.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
+	require.NoError(t, err)
+	_, err = client3.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
+	require.NoError(t, err)
+}

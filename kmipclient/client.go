@@ -234,9 +234,19 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 	return c, nil
 }
 
+// Clone is like CloneCtx but uses internally a background context.
 func (c *Client) Clone() (*Client, error) {
-	//TODO: How to pass a real context ?
-	stream, err := c.dialer(context.TODO())
+	return c.CloneCtx(context.Background())
+}
+
+// CloneCtx clones the current kmip client into a new independent client
+// with a separate new connection. The new client inherits allt he configured parameters
+// as well as the negociated kmip protocol version. Meaning that cloning a client does not perform
+// protocol version negociation.
+//
+// Cloning a closed client is valid and will create a new connected client.
+func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
+	stream, err := c.dialer(ctx)
 	if err != nil {
 		return nil, err
 	}
