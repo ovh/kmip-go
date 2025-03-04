@@ -52,6 +52,8 @@ func main() {
 	test_encrypt_decrypt_rsa_pkcs1(client)
 	test_locate_by_range(client)
 
+	test_sign_verify_rsa(client)
+
 	test_state_transitions(client)
 	test_register(client)
 	test_usage_limits(client)
