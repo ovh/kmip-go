@@ -126,7 +126,7 @@ type CryptographicParameters struct {
 	CounterLength             int32                     `ttlv:",omitempty,version=v1.2.."`
 	InitialCounterValue       *int32                    `ttlv:",version=v1.2.."`
 
-	SaltLength                    int32            `ttlv:",omitempty,version=v1.4.."`
+	SaltLength                    *int32           `ttlv:",version=v1.4.."`
 	MaskGenerator                 MaskGenerator    `ttlv:",omitempty,version=v1.4.."`
 	MaskGeneratorHashingAlgorithm HashingAlgorithm `ttlv:",omitempty,version=v1.4.."`
 	PSource                       []byte           `ttlv:",omitempty,version=v1.4.."`
