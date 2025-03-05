@@ -39,7 +39,7 @@ func PeerCertificates(ctx context.Context) []*x509.Certificate {
 
 type ctxBatch struct{}
 type batchData struct {
-	idPlaceholder *string
+	idPlaceholder string
 	header        kmip.RequestHeader
 }
 
@@ -50,20 +50,20 @@ func newBatchContext(parent context.Context, hdr kmip.RequestHeader) context.Con
 	return context.WithValue(parent, ctxBatch{}, bdata)
 }
 
-func IdPlaceholder(ctx context.Context) *string {
+func IdPlaceholder(ctx context.Context) string {
 	bd, _ := ctx.Value(ctxBatch{}).(*batchData)
 	if bd == nil {
-		return nil
+		return ""
 	}
 	return bd.idPlaceholder
 }
 
-func GetIdOrPlaceholder(ctx context.Context, reqId *string) (string, error) {
-	if reqId != nil {
-		return *reqId, nil
+func GetIdOrPlaceholder(ctx context.Context, reqId string) (string, error) {
+	if reqId != "" {
+		return reqId, nil
 	}
-	if idp := IdPlaceholder(ctx); idp != nil {
-		return *idp, nil
+	if idp := IdPlaceholder(ctx); idp != "" {
+		return idp, nil
 	}
 	//TODO: Proper error
 	return "", errors.New("ID Placeholder is empty")
@@ -74,7 +74,7 @@ func SetIdPlaceholder(ctx context.Context, id string) {
 	if bd == nil {
 		panic("not in a batch context")
 	}
-	bd.idPlaceholder = &id
+	bd.idPlaceholder = id
 }
 
 func ClearIdPlaceholder(ctx context.Context) {
@@ -83,7 +83,7 @@ func ClearIdPlaceholder(ctx context.Context) {
 		// Silently ignore if not in a batch context
 		return
 	}
-	bd.idPlaceholder = nil
+	bd.idPlaceholder = ""
 }
 
 func GetProtocolVersion(ctx context.Context) kmip.ProtocolVersion {
