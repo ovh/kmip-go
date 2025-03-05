@@ -22,7 +22,7 @@ func init() {
 // until a new allocation is obtained.
 type GetUsageAllocationRequestPayload struct {
 	// Determines the object whose usage allocation is being requested. If omitted, then the ID Placeholder is substituted by the server.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// The number of Usage Limits Units to be protected.
 	UsageLimitsCount int64
 }

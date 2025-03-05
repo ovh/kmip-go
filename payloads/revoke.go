@@ -22,7 +22,7 @@ var _ kmip.OperationPayload = (*RevokeRequestPayload)(nil)
 // the object is placed into the “deactivated” state, and the Deactivation Date is set to the current date and time.
 type RevokeRequestPayload struct {
 	// Determines the object being revoked. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Specifies the reason for revocation.
 	RevocationReason kmip.RevocationReason
 	// SHOULD be specified if the Revocation Reason is 'key compromise' or ‘CA compromise’ and SHALL NOT be specified for other Revocation Reason enumerations.

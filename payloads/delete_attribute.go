@@ -15,7 +15,7 @@ func init() {
 // requests MAY be included in a single batched request to delete multiple attributes.
 type DeleteAttributeRequestPayload struct {
 	// Determines the object whose attributes are being deleted. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Specifies the name of the attribute associated with the object to be deleted.
 	AttributeName kmip.AttributeName
 	// Specifies the Index of the Attribute.

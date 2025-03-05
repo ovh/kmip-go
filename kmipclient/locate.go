@@ -27,21 +27,21 @@ type ExecLocate struct {
 }
 
 func (ex ExecLocate) WithStorageStatusMask(mask kmip.StorageStatusMask) ExecLocate {
-	ex.req.StorageStatusMask = &mask
+	ex.req.StorageStatusMask = mask
 	return ex
 }
 
 func (ex ExecLocate) WithMaxItems(maximum int32) ExecLocate {
-	ex.req.MaximumItems = &maximum
+	ex.req.MaximumItems = maximum
 	return ex
 }
 
 func (ex ExecLocate) WithOffset(offset int32) ExecLocate {
-	ex.req.OffsetItems = &offset
+	ex.req.OffsetItems = offset
 	return ex
 }
 
 func (ex ExecLocate) WithObjectGroupMember(groupMember kmip.ObjectGroupMember) ExecLocate {
-	ex.req.ObjectGroupMember = &groupMember
+	ex.req.ObjectGroupMember = groupMember
 	return ex
 }

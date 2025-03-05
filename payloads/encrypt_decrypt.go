@@ -23,7 +23,7 @@ type EncryptRequestPayload struct {
 	// The Unique Identifier of the Managed Cryptographic Object that is the key to
 	// use for the encryption operation. If omitted, then the ID Placeholder value
 	// SHALL be used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// The Cryptographic Parameters (Block Cipher Mode, Padding Method, RandomIV) corresponding to the
 	// particular encryption method requested. If omitted then the Cryptographic Parameters associated
 	// with the Managed Cryptographic Object with the lowest Attribute Index SHALL be used. If there are no Cryptographic
@@ -33,7 +33,7 @@ type EncryptRequestPayload struct {
 	// The data to be encrypted (as a Byte String).
 	Data []byte `ttlv:",omitempty"`
 	// The initialization vector, counter or nonce to be used (where appropriate).
-	IVCounterNonce *[]byte
+	IVCounterNonce []byte `ttlv:",omitempty"`
 	// Specifies the existing stream or by-parts cryptographic operation (as returned from a previous call to this operation).
 	//
 	// The Correlation Value is used in requests and responses in cryptographic operations that support multi-
@@ -41,7 +41,7 @@ type EncryptRequestPayload struct {
 	// operation that is being performed across multiple requests. Note: the server decides which operations are
 	// supported for multi-part usage. A server-generated correlation value SHALL be specified in any
 	// subsequent cryptographic operations that pertain to the original operation.
-	CorrelationValue *[]byte `ttlv:",version=v1.3.."`
+	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 	// Initial operation as Boolean.
 	//
 	// The Init Indicator is used in requests in cryptographic operations that support multi-part (streaming)
@@ -59,7 +59,7 @@ type EncryptRequestPayload struct {
 	//
 	// The Authenticated Encryption Additional Data object is used in authenticated encryption and decryption
 	// operations that require the optional additional data to be provided by the client.
-	AuthenticatedEncryptionAdditionalData *[]byte `ttlv:",version=v1.4.."`
+	AuthenticatedEncryptionAdditionalData []byte `ttlv:",omitempty,version=v1.4.."`
 }
 
 func (pl *EncryptRequestPayload) Operation() kmip.Operation {
@@ -74,7 +74,7 @@ type EncryptResponsePayload struct {
 	Data []byte `ttlv:",omitempty"`
 	// The value used if the Cryptographic Parameters specified Random IV and the IV/Counter/Nonce value was not provided in the request
 	// and the algorithm requires the provision of an IV/Counter/Nonce.
-	IVCounterNonce *[]byte
+	IVCounterNonce []byte `ttlv:",omitempty"`
 	// Specifies the stream or by-parts value to be provided in subsequent calls to this operation for performing cryptographic operations.
 	//
 	// The Correlation Value is used in requests and responses in cryptographic operations that support multi-
@@ -82,14 +82,14 @@ type EncryptResponsePayload struct {
 	// operation that is being performed across multiple requests. Note: the server decides which operations are
 	// supported for multi-part usage. A server-generated correlation value SHALL be specified in any
 	// subsequent cryptographic operations that pertain to the original operation.
-	CorrelationValue *[]byte `ttlv:",version=v1.3.."`
+	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 	// Specifies the tag that will be needed to authenticate the decrypted data.
 	// Only returned on completion of the encryption of the last of the plaintext by an authenticated encryption cipher.
 	//
 	// The Authenticated Encryption Tag object is used to validate the integrity of the data encrypted and
 	// decrypted in Authenticated Encryption modes. It is an output from the encryption process and an input to
 	// the decryption process. See [SP800-38D].
-	AuthenticatedEncryptionTag *[]byte `ttlv:",version=v1.4.."`
+	AuthenticatedEncryptionTag []byte `ttlv:",omitempty,version=v1.4.."`
 }
 
 func (pl *EncryptResponsePayload) Operation() kmip.Operation {
@@ -104,7 +104,7 @@ func (pl *EncryptResponsePayload) Operation() kmip.Operation {
 type DecryptRequestPayload struct {
 	// The Unique Identifier of the Managed Cryptographic Object that is the key to use for the decryption operation.
 	// If omitted, then the ID Placeholder value SHALL be used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// The Cryptographic Parameters (Block Cipher Mode, Padding Method) corresponding to the particular decryption method requested.
 	// If omitted then the Cryptographic Parameters associated with the Managed Cryptographic Object with the lowest Attribute Index SHALL be used.
 	//
@@ -114,7 +114,7 @@ type DecryptRequestPayload struct {
 	// The data to be decrypted (as a Byte String).
 	Data []byte `ttlv:",omitempty"`
 	// The initialization vector, counter or nonce to be used (where appropriate).
-	IVCounterNonce *[]byte
+	IVCounterNonce []byte `ttlv:",omitempty"`
 	// Specifies the existing stream or by-parts cryptographic operation (as returned from a previous call to this operation).
 	//
 	// The Correlation Value is used in requests and responses in cryptographic operations that support multi-
@@ -122,7 +122,7 @@ type DecryptRequestPayload struct {
 	// operation that is being performed across multiple requests. Note: the server decides which operations are
 	// supported for multi-part usage. A server-generated correlation value SHALL be specified in any
 	// subsequent cryptographic operations that pertain to the original operation.
-	CorrelationValue *[]byte `ttlv:",version=v1.3.."`
+	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 	// Initial operation as Boolean.
 	//
 	// The Init Indicator is used in requests in cryptographic operations that support multi-part (streaming)
@@ -140,14 +140,14 @@ type DecryptRequestPayload struct {
 	//
 	// The Authenticated Encryption Additional Data object is used in authenticated encryption and decryption
 	// operations that require the optional additional data to be provided by the client.
-	AuthenticatedEncryptionAdditionalData *[]byte `ttlv:",version=v1.4.."`
+	AuthenticatedEncryptionAdditionalData []byte `ttlv:",omitempty,version=v1.4.."`
 	// Specifies the tag that will be needed to authenticate the decrypted data.
 	// If supplied in multi-part decryption, this data MUST be supplied on the initial Decrypt request.
 	//
 	// The Authenticated Encryption Tag object is used to validate the integrity of the data encrypted and
 	// decrypted in Authenticated Encryption modes. It is an output from the encryption process and an input to
 	// the decryption process. See [SP800-38D].
-	AuthenticatedEncryptionTag *[]byte `ttlv:",version=v1.4.."`
+	AuthenticatedEncryptionTag []byte `ttlv:",omitempty,version=v1.4.."`
 }
 
 func (pl *DecryptRequestPayload) Operation() kmip.Operation {
@@ -167,7 +167,7 @@ type DecryptResponsePayload struct {
 	// operation that is being performed across multiple requests. Note: the server decides which operations are
 	// supported for multi-part usage. A server-generated correlation value SHALL be specified in any
 	// subsequent cryptographic operations that pertain to the original operation.
-	CorrelationValue *[]byte `ttlv:",version=v1.3.."`
+	CorrelationValue []byte `ttlv:",omitempty,version=v1.3.."`
 }
 
 func (pl *DecryptResponsePayload) Operation() kmip.Operation {

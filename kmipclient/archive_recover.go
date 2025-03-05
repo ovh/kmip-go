@@ -8,7 +8,7 @@ func (c *Client) Archive(id string) ExecArchive {
 	return ExecArchive{
 		client: c,
 		req: &payloads.ArchiveRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }
@@ -19,7 +19,7 @@ func (c *Client) Recover(id string) ExecRecover {
 	return ExecRecover{
 		client: c,
 		req: &payloads.RecoverRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }

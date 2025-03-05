@@ -6,7 +6,7 @@ func (c *Client) GetAttributeList(id string) ExecGetAttributeList {
 	return ExecGetAttributeList{
 		client: c,
 		req: &payloads.GetAttributeListRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }

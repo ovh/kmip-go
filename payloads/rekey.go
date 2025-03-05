@@ -46,7 +46,7 @@ func init() {
 //   - Random Number Generator: Set to the random number generator used for creating the new managed object. Not copied from the original object.
 type RekeyRequestPayload struct {
 	// Determines the existing Symmetric Key being re-keyed. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// An Interval object indicating the difference between the Initialization Date and the Activation Date of the replacement key to be created.
 	Offset *time.Duration
 	// Specifies desired object attributes using templates and/or individual attributes.

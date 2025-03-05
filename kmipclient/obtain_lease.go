@@ -6,7 +6,7 @@ func (c *Client) ObtainLease(id string) ExecObtainLease {
 	return ExecObtainLease{
 		client: c,
 		req: &payloads.ObtainLeaseRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }

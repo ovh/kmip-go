@@ -21,7 +21,7 @@ func init() {
 // by comparing this time to the time when the attributes were previously obtained.
 type ObtainLeaseRequestPayload struct {
 	// Determines the object for which the lease is being obtained. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 func (pl *ObtainLeaseRequestPayload) Operation() kmip.Operation {

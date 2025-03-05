@@ -236,7 +236,7 @@ func TestPublicKey_ECDSA(t *testing.T) {
 		comp := ECPublicKeyTypeUncompressed
 		pkey := PublicKey{KeyBlock: KeyBlock{
 			KeyFormatType:      KeyFormatTransparentECDSAPublicKey,
-			KeyCompressionType: &comp,
+			KeyCompressionType: comp,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentECDSAPublicKey: &TransparentECDSAPublicKey{
 				RecommendedCurve: P_256,
 				//nolint:staticcheck // We need this function compute ECDSA public key
@@ -255,7 +255,7 @@ func TestPublicKey_ECDSA(t *testing.T) {
 		comp := ECPublicKeyTypeX9_62CompressedPrime
 		pkey := PublicKey{KeyBlock: KeyBlock{
 			KeyFormatType:      KeyFormatTransparentECDSAPublicKey,
-			KeyCompressionType: &comp,
+			KeyCompressionType: comp,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentECDSAPublicKey: &TransparentECDSAPublicKey{
 				RecommendedCurve: P_256,
 				QString:          elliptic.MarshalCompressed(elliptic.P256(), ecKey.X, ecKey.Y),

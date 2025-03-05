@@ -22,7 +22,7 @@ func TestHttpHandler_TTLV(t *testing.T) {
 	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, req *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
 		require.NotEmpty(t, kmipserver.RemoteAddr(ctx))
 		// require.NotEmpty(t, kmipserver.PeerCertificates(ctx))
-		return &payloads.ActivateResponsePayload{UniqueIdentifier: *req.UniqueIdentifier}, nil
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: req.UniqueIdentifier}, nil
 	}))
 
 	hdl := kmipserver.NewHTTPHandler(mux)
@@ -40,7 +40,7 @@ func TestHttpHandler_TTLV(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			uid := "foobar"
 			req := kmip.NewRequestMessage(kmip.V1_4, &payloads.ActivateRequestPayload{
-				UniqueIdentifier: &uid,
+				UniqueIdentifier: uid,
 			})
 			body := tc.marshal(req)
 			httpReq := httptest.NewRequest(http.MethodPost, "/kmip", bytes.NewReader(body))

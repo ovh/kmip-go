@@ -8,7 +8,7 @@ import (
 func test_sign_verify_rsa(client *kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
-		DigitalSignatureAlgorithm: ptrTo(kmip.SHA_256WithRSAEncryptionPKCS_1v1_5),
+		DigitalSignatureAlgorithm: kmip.SHA_256WithRSAEncryptionPKCS_1v1_5,
 	}
 
 	key := client.CreateKeyPair().RSA(2048, kmip.Sign, kmip.Verify).
@@ -24,6 +24,6 @@ func test_sign_verify_rsa(client *kmipclient.Client) {
 	client.SignatureVerify(key.PublicKeyUniqueIdentifier).
 		WithCryptographicParameters(cparams).
 		Data(data).
-		Signature(*resp.SignatureData).
+		Signature(resp.SignatureData).
 		MustExec()
 }

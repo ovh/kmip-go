@@ -60,23 +60,23 @@ func (cred *CredentialValue) decode(d *ttlv.Decoder, tag int, cType CredentialTy
 
 type CredentialValueUserPassword struct {
 	Username string
-	Password *string
+	Password string `ttlv:",omitempty"`
 }
 
 type CredentialValueDevice struct {
-	DeviceSerialNumber *string
-	Password           *string
-	DeviceIdentifier   *string
-	NetworkIdentifier  *string
-	MachineIdentifier  *string
-	MediaIdentifier    *string
+	DeviceSerialNumber string `ttlv:",omitempty"`
+	Password           string `ttlv:",omitempty"`
+	DeviceIdentifier   string `ttlv:",omitempty"`
+	NetworkIdentifier  string `ttlv:",omitempty"`
+	MachineIdentifier  string `ttlv:",omitempty"`
+	MediaIdentifier    string `ttlv:",omitempty"`
 }
 
 type CredentialValueAttestation struct {
 	Nonce                  Nonce
 	AttestationType        AttestationType
-	AttestationMeasurement *[]byte
-	AttestationAssertion   *[]byte
+	AttestationMeasurement []byte `ttlv:",omitempty"`
+	AttestationAssertion   []byte `ttlv:",omitempty"`
 }
 
 type Credential struct {
@@ -101,7 +101,7 @@ type Authentication struct {
 
 type RevocationReason struct {
 	RevocationReasonCode RevocationReasonCode `ttlv:",omitempty"`
-	RevocationMessage    *string
+	RevocationMessage    string               `ttlv:",omitempty"`
 }
 
 type MessageExtension struct {
@@ -111,31 +111,31 @@ type MessageExtension struct {
 }
 
 type CryptographicParameters struct {
-	BlockCipherMode  *BlockCipherMode
-	PaddingMethod    *PaddingMethod
-	HashingAlgorithm *HashingAlgorithm
-	KeyRoleType      *KeyRoleType
+	BlockCipherMode  BlockCipherMode  `ttlv:",omitempty"`
+	PaddingMethod    PaddingMethod    `ttlv:",omitempty"`
+	HashingAlgorithm HashingAlgorithm `ttlv:",omitempty"`
+	KeyRoleType      KeyRoleType      `ttlv:",omitempty"`
 
-	DigitalSignatureAlgorithm *DigitalSignatureAlgorithm `ttlv:",version=v1.2.."`
-	CryptographicAlgorithm    *CryptographicAlgorithm    `ttlv:",version=v1.2.."`
-	RandomIV                  *bool                      `ttlv:",version=v1.2.."`
-	IVLength                  *int32                     `ttlv:",version=v1.2.."`
-	TagLength                 *int32                     `ttlv:",version=v1.2.."`
-	FixedFieldLength          *int32                     `ttlv:",version=v1.2.."`
-	InvocationFieldLength     *int32                     `ttlv:",version=v1.2.."`
-	CounterLength             *int32                     `ttlv:",version=v1.2.."`
-	InitialCounterValue       *int32                     `ttlv:",version=v1.2.."`
+	DigitalSignatureAlgorithm DigitalSignatureAlgorithm `ttlv:",omitempty,version=v1.2.."`
+	CryptographicAlgorithm    CryptographicAlgorithm    `ttlv:",omitempty,version=v1.2.."`
+	RandomIV                  *bool                     `ttlv:",version=v1.2.."`
+	IVLength                  int32                     `ttlv:",omitempty,version=v1.2.."`
+	TagLength                 int32                     `ttlv:",omitempty,version=v1.2.."`
+	FixedFieldLength          int32                     `ttlv:",omitempty,version=v1.2.."`
+	InvocationFieldLength     int32                     `ttlv:",omitempty,version=v1.2.."`
+	CounterLength             int32                     `ttlv:",omitempty,version=v1.2.."`
+	InitialCounterValue       *int32                    `ttlv:",version=v1.2.."`
 
-	SaltLength                    *int32            `ttlv:",version=v1.4.."`
-	MaskGenerator                 *MaskGenerator    `ttlv:",version=v1.4.."`
-	MaskGeneratorHashingAlgorithm *HashingAlgorithm `ttlv:",version=v1.4.."`
-	PSource                       *[]byte           `ttlv:",version=v1.4.."`
-	TrailerField                  *int32            `ttlv:",version=v1.4.."`
+	SaltLength                    int32            `ttlv:",omitempty,version=v1.4.."`
+	MaskGenerator                 MaskGenerator    `ttlv:",omitempty,version=v1.4.."`
+	MaskGeneratorHashingAlgorithm HashingAlgorithm `ttlv:",omitempty,version=v1.4.."`
+	PSource                       []byte           `ttlv:",omitempty,version=v1.4.."`
+	TrailerField                  *int32           `ttlv:",version=v1.4.."`
 }
 
 type CryptographicDomainParameters struct {
-	Qlength          *int32
-	RecommendedCurve *RecommendedCurve
+	Qlength          int32            `ttlv:",omitempty"`
+	RecommendedCurve RecommendedCurve `ttlv:",omitempty"`
 }
 
 type KeyWrappingSpecification struct {
@@ -143,7 +143,7 @@ type KeyWrappingSpecification struct {
 	EncryptionKeyInformation   *EncryptionKeyInformation
 	MACSignatureKeyInformation *MACSignatureKeyInformation
 	AttributeName              []AttributeName
-	EncodingOption             *EncodingOption `ttlv:",version=v1.1.."`
+	EncodingOption             EncodingOption `ttlv:",omitempty,version=v1.1.."`
 }
 
 type Link struct {
@@ -154,13 +154,13 @@ type Link struct {
 type Digest struct {
 	HashingAlgorithm HashingAlgorithm
 	DigestValue      []byte
-	KeyFormatType    *KeyFormatType `ttlv:",version=1.1.."`
+	KeyFormatType    KeyFormatType `ttlv:",omitempty,version=1.1.."`
 }
 
 // Deprecated: deprecated as of kmip 1.1.
 type CertificateIdentifier struct {
 	Issuer       string `ttlv:",omitempty"`
-	SerialNumber *string
+	SerialNumber string `ttlv:",omitempty"`
 }
 
 // Deprecated: deprecated as of kmip 1.1.
@@ -198,8 +198,8 @@ func (ul UsageLimits) Equals(other *UsageLimits) bool {
 
 type ExtensionInformation struct {
 	ExtensionName string
-	ExtensionTag  *int32
-	ExtensionType *int32
+	ExtensionTag  int32 `ttlv:",omitempty"`
+	ExtensionType int32 `ttlv:",omitempty"`
 }
 
 type X_509CertificateIdentifier struct {
@@ -237,33 +237,33 @@ type KeyValueLocation struct {
 // KMIP 1.3.
 
 type RNGParameters struct {
-	RNGAlgorithm           RNGAlgorithm `ttlv:",omitempty"`
-	CryptographicAlgorithm *CryptographicAlgorithm
-	CryptographicLength    *int32
-	HashingAlgorithm       *HashingAlgorithm
-	DRBGAlgorithm          *DRBGAlgorithm
-	RecommendedCurve       *RecommendedCurve
-	FIPS186Variation       *FIPS186Variation
+	RNGAlgorithm           RNGAlgorithm           `ttlv:",omitempty"`
+	CryptographicAlgorithm CryptographicAlgorithm `ttlv:",omitempty"`
+	CryptographicLength    int32                  `ttlv:",omitempty"`
+	HashingAlgorithm       HashingAlgorithm       `ttlv:",omitempty"`
+	DRBGAlgorithm          DRBGAlgorithm          `ttlv:",omitempty"`
+	RecommendedCurve       RecommendedCurve       `ttlv:",omitempty"`
+	FIPS186Variation       FIPS186Variation       `ttlv:",omitempty"`
 	PredictionResistance   *bool
 }
 
 type ProfileInformation struct {
 	ProfileName ProfileName
-	ServerURI   *string
-	ServerPort  *int32
+	ServerURI   string `ttlv:",omitempty"`
+	ServerPort  int32  `ttlv:",omitempty"`
 }
 
 type ValidationInformation struct {
 	ValidationAuthorityType         ValidationAuthorityType
-	ValidationAuthorityCountry      *string
-	ValidationAuthorityURI          *string
+	ValidationAuthorityCountry      string `ttlv:",omitempty"`
+	ValidationAuthorityURI          string `ttlv:",omitempty"`
 	ValidationVersionMajor          int32
 	ValidationVersionMinor          *int32
 	ValidationType                  ValidationType
 	ValidationLevel                 int32
-	ValidationCertificateIdentifier *string
-	ValidationCertificateURI        *string
-	ValidationVendorURI             *string
+	ValidationCertificateIdentifier string `ttlv:",omitempty"`
+	ValidationCertificateURI        string `ttlv:",omitempty"`
+	ValidationVendorURI             string `ttlv:",omitempty"`
 	ValidationProfile               []string
 }
 
@@ -271,10 +271,10 @@ type CapabilityInformation struct {
 	StreamingCapability     *bool
 	AsynchronousCapability  *bool
 	AttestationCapability   *bool
-	BatchUndoCapability     *bool `ttlv:",version=v1.4.."`
-	BatchContinueCapability *bool `ttlv:",version=v1.4.."`
-	UnwrapMode              *UnwrapMode
-	DestroyAction           *DestroyAction
-	ShreddingAlgorithm      *ShreddingAlgorithm
-	RNGMode                 *RNGMode
+	BatchUndoCapability     *bool              `ttlv:",version=v1.4.."`
+	BatchContinueCapability *bool              `ttlv:",version=v1.4.."`
+	UnwrapMode              UnwrapMode         `ttlv:",omitempty"`
+	DestroyAction           DestroyAction      `ttlv:",omitempty"`
+	ShreddingAlgorithm      ShreddingAlgorithm `ttlv:",omitempty"`
+	RNGMode                 RNGMode            `ttlv:",omitempty"`
 }

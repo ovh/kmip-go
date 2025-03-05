@@ -13,7 +13,7 @@ func (c *Client) Rekey(id string) ExecRekey {
 			Executor[*payloads.RekeyRequestPayload, *payloads.RekeyResponsePayload]{
 				client: c,
 				req: &payloads.RekeyRequestPayload{
-					UniqueIdentifier:  &id,
+					UniqueIdentifier:  id,
 					TemplateAttribute: &kmip.TemplateAttribute{},
 				},
 			},

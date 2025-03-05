@@ -10,7 +10,7 @@ func (c *Client) GetAttributes(id string, attributes ...kmip.AttributeName) Exec
 		Executor[*payloads.GetAttributesRequestPayload, *payloads.GetAttributesResponsePayload]{
 			client: c,
 			req: &payloads.GetAttributesRequestPayload{
-				UniqueIdentifier: &id,
+				UniqueIdentifier: id,
 			},
 		},
 	}.WithAttributes(attributes...)

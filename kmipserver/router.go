@@ -107,12 +107,12 @@ func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestM
 	}
 
 	errorContinuationOption := kmip.Continue
-	if co := req.Header.BatchErrorContinuationOption; co != nil {
-		if *co == kmip.Undo {
+	if co := req.Header.BatchErrorContinuationOption; co > 0 {
+		if co == kmip.Undo {
 			// Reject request if set to Undo as we don't support transactions
 			return nil, Errorf(kmip.ReasonFeatureNotSupported, `"Undo" BatchErrorContinuationOption is not supported`)
 		}
-		errorContinuationOption = *co
+		errorContinuationOption = co
 	}
 
 	if int(req.Header.BatchCount) != len(req.BatchItem) {

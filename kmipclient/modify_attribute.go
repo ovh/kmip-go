@@ -10,7 +10,7 @@ func (c *Client) ModifyAttribute(id string, name kmip.AttributeName, value any) 
 		Executor[*payloads.ModifyAttributeRequestPayload, *payloads.ModifyAttributeResponsePayload]{
 			client: c,
 			req: &payloads.ModifyAttributeRequestPayload{
-				UniqueIdentifier: &id,
+				UniqueIdentifier: id,
 				Attribute:        kmip.Attribute{AttributeName: name, AttributeValue: value},
 			},
 		},

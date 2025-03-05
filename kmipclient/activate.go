@@ -8,7 +8,7 @@ func (c *Client) Activate(id string) ExecActivate {
 	return ExecActivate{
 		client: c,
 		req: &payloads.ActivateRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }

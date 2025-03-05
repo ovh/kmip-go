@@ -79,7 +79,7 @@ type QueryResponsePayload struct {
 	// Specifies a Managed Object Type that is supported by the server.
 	ObjectType []kmip.ObjectType
 	// SHALL be returned if Query Server Information is requested. The Vendor Identification SHALL be a text string that uniquely identifies the vendor.
-	VendorIdentification *string
+	VendorIdentification string `ttlv:",omitempty"`
 	// Contains vendor-specific information possibly be of interest to the client.
 	ServerInformation *ttlv.Value
 	// Specifies an Application Namespace supported by the server.

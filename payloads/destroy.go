@@ -17,7 +17,7 @@ var _ kmip.OperationPayload = (*DestroyRequestPayload)(nil)
 // then the object itself, including all meta-data, SHALL be destroyed. Cryptographic Objects MAY only be destroyed if they are in either Pre-Active or Deactivated state.
 type DestroyRequestPayload struct {
 	// Determines the object being destroyed. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 // Operation implements kmip.OperationPayload.

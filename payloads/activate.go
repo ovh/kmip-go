@@ -16,7 +16,7 @@ var _ kmip.OperationPayload = (*ActivateRequestPayload)(nil)
 type ActivateRequestPayload struct {
 	// Determines the object being activated.
 	// If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 // Operation implements kmip.OperationPayload.

@@ -16,7 +16,7 @@ func init() {
 type ArchiveRequestPayload struct {
 	// Determines the object being archived.
 	// If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 func (pl *ArchiveRequestPayload) Operation() kmip.Operation {
@@ -38,7 +38,7 @@ func (pl *ArchiveResponsePayload) Operation() kmip.Operation {
 // Once the response is received, the object is now on-line, and MAY be obtained (e.g., via a Get operation).
 // Special authentication and authorization SHOULD be enforced to perform this request.
 type RecoverRequestPayload struct {
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 func (pl *RecoverRequestPayload) Operation() kmip.Operation {
