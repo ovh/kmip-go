@@ -18,7 +18,7 @@ var _ kmip.OperationPayload = (*GetAttributesRequestPayload)(nil)
 // The same attribute name SHALL NOT be present more than once in a request.
 type GetAttributesRequestPayload struct {
 	// Determines the object whose attributes are being requested. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Specifies the name of an attribute associated with the object.
 	AttributeName []kmip.AttributeName
 }

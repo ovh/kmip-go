@@ -61,14 +61,14 @@ func init() {
 // objects are to be searched. Note that the server MAY store attributes of archived objects in order to expedite Locate operations that search through archived objects.
 type LocateRequestPayload struct {
 	// An Integer object that indicates the maximum number of object identifiers the server MAY return.
-	MaximumItems *int32
+	MaximumItems int32 `ttlv:",omitempty"`
 	// An Integer object that indicates the number of object identifiers to skip that satisfy the identification criteria specified in the request.
-	OffsetItems *int32 `ttlv:",version=1.3.."`
+	OffsetItems int32 `ttlv:",omitempty,version=1.3.."`
 	// An Integer object (used as a bit mask) that indicates whether only on-line objects, only archived objects,
 	// or both on-line and archived objects are to be searched. If omitted, then on-line only is assumed.
-	StorageStatusMask *kmip.StorageStatusMask
+	StorageStatusMask kmip.StorageStatusMask `ttlv:",omitempty"`
 	// An Enumeration object that indicates the object group member type.
-	ObjectGroupMember *kmip.ObjectGroupMember `ttlv:",version=1.1.."`
+	ObjectGroupMember kmip.ObjectGroupMember `ttlv:",omitempty,version=1.1.."`
 	// Specifies an attribute and its value(s) that are REQUIRED to match those in a candidate object (according to the matching rules defined above).
 	Attribute []kmip.Attribute
 }

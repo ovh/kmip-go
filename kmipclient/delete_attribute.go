@@ -10,7 +10,7 @@ func (c *Client) DeleteAttribute(id string, name kmip.AttributeName) ExecDeleteA
 		Executor[*payloads.DeleteAttributeRequestPayload, *payloads.DeleteAttributeResponsePayload]{
 			client: c,
 			req: &payloads.DeleteAttributeRequestPayload{
-				UniqueIdentifier: &id,
+				UniqueIdentifier: id,
 				AttributeName:    name,
 			},
 		},

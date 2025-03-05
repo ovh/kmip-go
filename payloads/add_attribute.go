@@ -16,7 +16,7 @@ func init() {
 type AddAttributeRequestPayload struct {
 	// The Unique Identifier of the object.
 	// If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Specifies the attribute to be added as an attribute for the object.
 	Attribute kmip.Attribute
 }

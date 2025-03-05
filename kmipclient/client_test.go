@@ -63,7 +63,7 @@ func TestActivate(t *testing.T) {
 	req := client.Activate("foobar")
 	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.ActivateResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier}, nil
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
 	}))
 	resp, err := req.Exec()
 	require.NoError(t, err)
@@ -86,7 +86,7 @@ func TestAddAttribute(t *testing.T) {
 	req := client.AddAttribute("foobar", kmip.AttributeNameName, kmip.Name{NameValue: "foo", NameType: kmip.UninterpretedTextString})
 	mux.Route(kmip.OperationAddAttribute, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.AddAttributeRequestPayload) (*payloads.AddAttributeResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.AddAttributeResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier, Attribute: pl.Attribute}, nil
+		return &payloads.AddAttributeResponsePayload{UniqueIdentifier: pl.UniqueIdentifier, Attribute: pl.Attribute}, nil
 	}))
 	resp, err := req.Exec()
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestAddAttribute(t *testing.T) {
 	req = req.WithIndex(12)
 	mux.Route(kmip.OperationAddAttribute, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.AddAttributeRequestPayload) (*payloads.AddAttributeResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.AddAttributeResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier, Attribute: pl.Attribute}, nil
+		return &payloads.AddAttributeResponsePayload{UniqueIdentifier: pl.UniqueIdentifier, Attribute: pl.Attribute}, nil
 	}))
 	resp, err = req.Exec()
 	require.NoError(t, err)
@@ -111,7 +111,7 @@ func TestArchive(t *testing.T) {
 	req := client.Archive("foobar")
 	mux.Route(kmip.OperationArchive, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.ArchiveRequestPayload) (*payloads.ArchiveResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.ArchiveResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier}, nil
+		return &payloads.ArchiveResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
 	}))
 	resp, err := req.Exec()
 	require.NoError(t, err)
@@ -125,7 +125,7 @@ func TestRecover(t *testing.T) {
 	req := client.Recover("foobar")
 	mux.Route(kmip.OperationRecover, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.RecoverRequestPayload) (*payloads.RecoverResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.RecoverResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier}, nil
+		return &payloads.RecoverResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
 	}))
 	resp, err := req.Exec()
 	require.NoError(t, err)
@@ -191,11 +191,11 @@ func TestRekey(t *testing.T) {
 
 	mux.Route(kmip.OperationReKey, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.RekeyRequestPayload) (*payloads.RekeyResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
-		return &payloads.RekeyResponsePayload{UniqueIdentifier: *pl.UniqueIdentifier}, nil
+		return &payloads.RekeyResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
 	}))
 
 	resp := req.MustExec()
-	require.EqualValues(t, *req.RequestPayload().UniqueIdentifier, resp.UniqueIdentifier)
+	require.EqualValues(t, req.RequestPayload().UniqueIdentifier, resp.UniqueIdentifier)
 }
 
 func TestClone(t *testing.T) {

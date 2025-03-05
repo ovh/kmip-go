@@ -6,7 +6,7 @@ func (c *Client) GetUsageAllocation(id string, limitCount int64) ExecGetUsageAll
 	return ExecGetUsageAllocation{
 		client: c,
 		req: &payloads.GetUsageAllocationRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 			UsageLimitsCount: limitCount,
 		},
 	}

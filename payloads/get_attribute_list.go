@@ -9,7 +9,7 @@ func init() {
 // This operation requests a list of the attribute names associated with a Managed Object. The object is specified by its Unique Identifier.
 type GetAttributeListRequestPayload struct {
 	// Determines the object whose attribute names are being requested. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 }
 
 func (pl *GetAttributeListRequestPayload) Operation() kmip.Operation {

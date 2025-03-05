@@ -27,7 +27,7 @@ func TestServerRequest(t *testing.T) {
 	client := kmiptest.NewClientAndServer(t, mux)
 
 	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, req *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
-		return &payloads.ActivateResponsePayload{UniqueIdentifier: *req.UniqueIdentifier}, nil
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: req.UniqueIdentifier}, nil
 	}))
 
 	resp, err := client.Activate("foobar").Exec()

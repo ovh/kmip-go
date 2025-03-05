@@ -17,18 +17,18 @@ type ResponseHeader struct {
 	TimeStamp              time.Time
 	Nonce                  *Nonce            `ttlv:",version=v1.2.."`
 	AttestationType        []AttestationType `ttlv:",version=v1.2.."`
-	ClientCorrelationValue *string           `ttlv:",version=v1.4.."`
-	ServerCorrelationValue *string           `ttlv:",version=v1.4.."`
+	ClientCorrelationValue string            `ttlv:",omitempty,version=v1.4.."`
+	ServerCorrelationValue string            `ttlv:",omitempty,version=v1.4.."`
 	BatchCount             int32
 }
 
 type ResponseBatchItem struct {
-	Operation                    Operation
-	UniqueBatchItemID            []byte
+	Operation                    Operation `ttlv:",omitempty"`
+	UniqueBatchItemID            []byte    `ttlv:",omitempty"`
 	ResultStatus                 ResultStatus
 	ResultReason                 ResultReason `ttlv:",omitempty"`
 	ResultMessage                string       `ttlv:",omitempty"`
-	AsynchronousCorrelationValue []byte
+	AsynchronousCorrelationValue []byte       `ttlv:",omitempty"`
 	ResponsePayload              OperationPayload
 	MessageExtension             *MessageExtension
 }

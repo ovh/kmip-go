@@ -35,7 +35,7 @@ func (ex ExecCreateKeyPair) ECDSA(curve kmip.RecommendedCurve, privateUsage, pub
 	return ex.Common().
 		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.ECDSA).
 		WithAttribute(kmip.AttributeNameCryptographicLength, curve.Bitlen()).
-		WithAttribute(kmip.AttributeNameCryptographicDomainParameters, kmip.CryptographicDomainParameters{RecommendedCurve: &curve}).
+		WithAttribute(kmip.AttributeNameCryptographicDomainParameters, kmip.CryptographicDomainParameters{RecommendedCurve: curve}).
 		PublicKey().WithAttribute(kmip.AttributeNameCryptographicUsageMask, publicUsage).
 		PrivateKey().WithAttribute(kmip.AttributeNameCryptographicUsageMask, privateUsage).
 		Common()

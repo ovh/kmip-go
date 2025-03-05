@@ -32,7 +32,7 @@ func (c *Client) Sign(id string) ExecSignWantsData {
 	return ExecSignWantsData{
 		client: c,
 		req: &payloads.SignRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }
@@ -43,7 +43,7 @@ func (ex ExecSignWantsData) WithCryptographicParameters(params kmip.Cryptographi
 }
 
 func (ex ExecSignWantsData) Data(data []byte) ExecSign {
-	ex.req.Data = &data
+	ex.req.Data = data
 	return ExecSign{
 		Executor[*payloads.SignRequestPayload, *payloads.SignResponsePayload]{
 			client: ex.client,
@@ -53,7 +53,7 @@ func (ex ExecSignWantsData) Data(data []byte) ExecSign {
 }
 
 func (ex ExecSignWantsData) DigestedData(data []byte) ExecSign {
-	ex.req.DigestedData = &data
+	ex.req.DigestedData = data
 	return ExecSign{
 		Executor[*payloads.SignRequestPayload, *payloads.SignResponsePayload]{
 			client: ex.client,
@@ -66,7 +66,7 @@ func (c *Client) SignatureVerify(id string) ExecSignatureVerifyWantsData {
 	return ExecSignatureVerifyWantsData{
 		client: c,
 		req: &payloads.SignatureVerifyRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }
@@ -77,17 +77,17 @@ func (ex ExecSignatureVerifyWantsData) WithCryptographicParameters(params kmip.C
 }
 
 func (ex ExecSignatureVerifyWantsData) Data(data []byte) ExecSignatureVerifyWantsSignature {
-	ex.req.Data = &data
+	ex.req.Data = data
 	return ExecSignatureVerifyWantsSignature(ex)
 }
 
 func (ex ExecSignatureVerifyWantsData) DigestedData(data []byte) ExecSignatureVerifyWantsSignature {
-	ex.req.DigestedData = &data
+	ex.req.DigestedData = data
 	return ExecSignatureVerifyWantsSignature(ex)
 }
 
 func (ex ExecSignatureVerifyWantsData) Signature(sig []byte) ExecSignatureVerify {
-	ex.req.SignatureData = &sig
+	ex.req.SignatureData = sig
 	return ExecSignatureVerify{
 		Executor[*payloads.SignatureVerifyRequestPayload, *payloads.SignatureVerifyResponsePayload]{
 			client: ex.client,
@@ -97,7 +97,7 @@ func (ex ExecSignatureVerifyWantsData) Signature(sig []byte) ExecSignatureVerify
 }
 
 func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureVerify {
-	ex.req.SignatureData = &sig
+	ex.req.SignatureData = sig
 	return ExecSignatureVerify{
 		Executor[*payloads.SignatureVerifyRequestPayload, *payloads.SignatureVerifyResponsePayload]{
 			client: ex.client,

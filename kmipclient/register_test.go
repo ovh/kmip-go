@@ -91,7 +91,7 @@ func TestRegister_Symmetric(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypeSymmetricKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.SymmetricKey)
 				require.True(t, ok, "Object is not a symmetric key")
-				require.Equal(t, kmip.AES, *k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.AES, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -133,7 +133,7 @@ func TestRegister_PrivateKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePrivateKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PrivateKey)
 				require.True(t, ok, "Object is not a private key")
-				require.Equal(t, kmip.RSA, *k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.RSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -183,7 +183,7 @@ func TestRegister_PrivateKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePrivateKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PrivateKey)
 				require.True(t, ok, "Object is not a private key")
-				require.Equal(t, kmip.ECDSA, *k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.ECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -233,7 +233,7 @@ func TestRegister_PublicKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePublicKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PublicKey)
 				require.True(t, ok, "Object is not a public key")
-				require.Equal(t, kmip.RSA, *k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.RSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -281,7 +281,7 @@ func TestRegister_PublicKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePublicKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PublicKey)
 				require.True(t, ok, "Object is not a public key")
-				require.Equal(t, kmip.ECDSA, *k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.ECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask

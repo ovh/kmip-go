@@ -27,18 +27,18 @@ func (c *Client) Encrypt(id string) ExecEncryptWantsData {
 	return ExecEncryptWantsData{
 		client: c,
 		req: &payloads.EncryptRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }
 
 func (ex ExecEncryptWantsData) WithIvCounterNonce(iv []byte) ExecEncryptWantsData {
-	ex.req.IVCounterNonce = &iv
+	ex.req.IVCounterNonce = iv
 	return ex
 }
 
 func (ex ExecEncryptWantsData) WithAAD(aad []byte) ExecEncryptWantsData {
-	ex.req.AuthenticatedEncryptionAdditionalData = &aad
+	ex.req.AuthenticatedEncryptionAdditionalData = aad
 	return ex
 }
 
@@ -61,18 +61,18 @@ func (c *Client) Decrypt(id string) ExecDecryptWantsData {
 	return ExecDecryptWantsData{
 		client: c,
 		req: &payloads.DecryptRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }
 
 func (ex ExecDecryptWantsData) WithIvCounterNonce(iv []byte) ExecDecryptWantsData {
-	ex.req.IVCounterNonce = &iv
+	ex.req.IVCounterNonce = iv
 	return ex
 }
 
 func (ex ExecDecryptWantsData) WithAAD(aad []byte) ExecDecryptWantsData {
-	ex.req.AuthenticatedEncryptionAdditionalData = &aad
+	ex.req.AuthenticatedEncryptionAdditionalData = aad
 	return ex
 }
 
@@ -82,7 +82,7 @@ func (ex ExecDecryptWantsData) WithCryptographicParameters(params kmip.Cryptogra
 }
 
 func (ex ExecDecryptWantsData) WithAuthTag(tag []byte) ExecDecryptWantsData {
-	ex.req.AuthenticatedEncryptionTag = &tag
+	ex.req.AuthenticatedEncryptionTag = tag
 	return ex
 }
 

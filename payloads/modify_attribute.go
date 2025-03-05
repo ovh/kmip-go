@@ -18,7 +18,7 @@ func init() {
 // Multiple Modify Attribute requests MAY be included in a single batched request to modify multiple attributes.
 type ModifyAttributeRequestPayload struct {
 	// The Unique Identifier of the object. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Specifies the attribute associated with the object to be modified.
 	Attribute kmip.Attribute
 }

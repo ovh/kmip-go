@@ -8,7 +8,7 @@ func (c *Client) Destroy(id string) ExecDestroy {
 	return ExecDestroy{
 		client: c,
 		req: &payloads.DestroyRequestPayload{
-			UniqueIdentifier: &id,
+			UniqueIdentifier: id,
 		},
 	}
 }

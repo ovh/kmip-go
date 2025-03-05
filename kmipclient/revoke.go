@@ -12,7 +12,7 @@ func (c *Client) Revoke(id string) ExecRevoke {
 		Executor[*payloads.RevokeRequestPayload, *payloads.RevokeResponsePayload]{
 			client: c,
 			req: &payloads.RevokeRequestPayload{
-				UniqueIdentifier: &id,
+				UniqueIdentifier: id,
 				RevocationReason: kmip.RevocationReason{
 					RevocationReasonCode: kmip.RevocationReasonCodeUnspecified,
 				},
@@ -32,7 +32,7 @@ func (ex ExecRevoke) WithRevocationReasonCode(code kmip.RevocationReasonCode) Ex
 
 func (ex ExecRevoke) WithRevocationMessage(msg string) ExecRevoke {
 	if msg != "" {
-		ex.req.RevocationReason.RevocationMessage = &msg
+		ex.req.RevocationReason.RevocationMessage = msg
 	}
 	return ex
 }

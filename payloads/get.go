@@ -31,13 +31,13 @@ func init() {
 // and then using each certificate’s Certificate Link to build the certificate chain.  It is an error if there is more than one valid certificate chain.
 type GetRequestPayload struct {
 	// Determines the object being requested. If omitted, then the ID Placeholder value is used by the server as the Unique Identifier.
-	UniqueIdentifier *string
+	UniqueIdentifier string `ttlv:",omitempty"`
 	// Determines the key format type to be returned.
-	KeyFormatType *kmip.KeyFormatType
+	KeyFormatType kmip.KeyFormatType `ttlv:",omitempty"`
 	// Determines the Key Wrap Type of the returned key value.
-	KeyWrapType *kmip.KeyFormatType `ttlv:",version=v1.4.."`
+	KeyWrapType kmip.KeyFormatType `ttlv:",omitempty,version=v1.4.."`
 	// Determines the compression method for elliptic curve public keys.
-	KeyCompressionType *kmip.KeyCompressionType
+	KeyCompressionType kmip.KeyCompressionType `ttlv:",omitempty"`
 	// Specifies keys and other information for wrapping the returned object. This field SHALL NOT be specified if the requested object is a Template.
 	KeyWrappingSpecification *kmip.KeyWrappingSpecification
 }

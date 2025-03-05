@@ -218,8 +218,8 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 			Curve: curve,
 		}
 		compressionType := ECPublicKeyTypeUncompressed
-		if key.KeyBlock.KeyCompressionType != nil {
-			compressionType = *key.KeyBlock.KeyCompressionType
+		if key.KeyBlock.KeyCompressionType > 0 {
+			compressionType = key.KeyBlock.KeyCompressionType
 		}
 
 		switch compressionType {
@@ -447,10 +447,10 @@ func (key *PrivateKey) Pkcs8Pem() (string, error) {
 
 type KeyBlock struct {
 	KeyFormatType          KeyFormatType
-	KeyCompressionType     *KeyCompressionType
+	KeyCompressionType     KeyCompressionType `ttlv:",omitempty"`
 	KeyValue               *KeyValue
-	CryptographicAlgorithm *CryptographicAlgorithm
-	CryptographicLength    *int32
+	CryptographicAlgorithm CryptographicAlgorithm `ttlv:",omitempty"`
+	CryptographicLength    int32                  `ttlv:",omitempty"`
 	KeyWrappingData        *KeyWrappingData
 }
 
@@ -459,7 +459,7 @@ func (kb *KeyBlock) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 		if err := d.Any(&kb.KeyFormatType); err != nil {
 			return err
 		}
-		if err := d.Any(&kb.KeyCompressionType); err != nil {
+		if err := d.Opt(TagKeyCompressionType, &kb.KeyCompressionType); err != nil {
 			return err
 		}
 		if d.Tag() == TagKeyValue {
@@ -469,10 +469,10 @@ func (kb *KeyBlock) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 				return err
 			}
 		}
-		if err := d.Any(&kb.CryptographicAlgorithm); err != nil {
+		if err := d.Opt(TagCryptographicAlgorithm, &kb.CryptographicAlgorithm); err != nil {
 			return err
 		}
-		if err := d.TagAny(TagCryptographicLength, &kb.CryptographicLength); err != nil {
+		if err := d.Opt(TagCryptographicLength, &kb.CryptographicLength); err != nil {
 			return err
 		}
 		if err := d.Any(&kb.KeyWrappingData); err != nil {
@@ -591,9 +591,9 @@ type KeyWrappingData struct {
 	WrappingMethod             WrappingMethod
 	EncryptionKeyInformation   *EncryptionKeyInformation
 	MACSignatureKeyInformation *MACSignatureKeyInformation
-	MACSignature               *[]byte
-	IVCounterNonce             *[]byte
-	EncodingOption             *EncodingOption `ttlv:",version=v1.1.."`
+	MACSignature               []byte         `ttlv:",omitempty"`
+	IVCounterNonce             []byte         `ttlv:",omitempty"`
+	EncodingOption             EncodingOption `ttlv:",omitempty,version=v1.1.."`
 }
 
 type EncryptionKeyInformation struct {

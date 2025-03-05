@@ -39,9 +39,8 @@ func CorrelationValueMiddleware(fn func() string) Middleware {
 		panic("correlation value generator function cannot be null")
 	}
 	return func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
-		if msg.Header.ClientCorrelationValue == nil && ttlv.CompareVersions(msg.Header.ProtocolVersion, kmip.V1_4) >= 0 {
-			corrVal := fn()
-			msg.Header.ClientCorrelationValue = &corrVal
+		if msg.Header.ClientCorrelationValue == "" && ttlv.CompareVersions(msg.Header.ProtocolVersion, kmip.V1_4) >= 0 {
+			msg.Header.ClientCorrelationValue = fn()
 		}
 		return next(ctx, msg)
 	}

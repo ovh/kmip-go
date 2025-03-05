@@ -292,8 +292,8 @@ func register_split_key(client *kmipclient.Client) {
 		SplitKeyMethod:    kmip.SplitKeyMethodXOR,
 		KeyBlock: kmip.KeyBlock{
 			KeyFormatType:          kmip.KeyFormatRaw,
-			CryptographicAlgorithm: &alg,  // FIXME: If alg is null, Internal server error
-			CryptographicLength:    &clen, // FIXME: Same here
+			CryptographicAlgorithm: alg,  // FIXME: If alg is null, Internal server error
+			CryptographicLength:    clen, // FIXME: Same here
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: kmip.KeyMaterial{Bytes: &[]byte{1, 2, 3, 4}},
@@ -337,7 +337,7 @@ func register_pgp(client *kmipclient.Client) {
 	clen := int32(2048)
 	client.Register().Object(&kmip.PGPKey{
 		PGPKeyVersion: 12,
-		KeyBlock:      kmip.KeyBlock{KeyFormatType: kmip.KeyFormatRaw, CryptographicAlgorithm: &alg, CryptographicLength: &clen, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &key}}}},
+		KeyBlock:      kmip.KeyBlock{KeyFormatType: kmip.KeyFormatRaw, CryptographicAlgorithm: alg, CryptographicLength: clen, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &key}}}},
 	}).WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.Sign|kmip.Verify).MustExec()
 }
 
@@ -464,8 +464,8 @@ func test_register_ecdsa_wrong_alg(client *kmipclient.Client) {
 						},
 					},
 				},
-				CryptographicAlgorithm: &alg,
-				CryptographicLength:    &clen,
+				CryptographicAlgorithm: alg,
+				CryptographicLength:    clen,
 			},
 		}).
 		WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.Sign|kmip.Verify).
@@ -615,14 +615,14 @@ func test_get_unsupported_wrapped_key(client *kmipclient.Client) {
 		MustExec()
 
 	req := payloads.GetRequestPayload{
-		UniqueIdentifier: &res.UniqueIdentifier,
+		UniqueIdentifier: res.UniqueIdentifier,
 		KeyWrappingSpecification: &kmip.KeyWrappingSpecification{
 			WrappingMethod: kmip.WrappingMethodEncrypt,
 			EncryptionKeyInformation: &kmip.EncryptionKeyInformation{
 				UniqueIdentifier: wrapKey.UniqueIdentifier,
 				CryptographicParameters: &kmip.CryptographicParameters{
-					BlockCipherMode:        ptrTo(kmip.AESKeyWrapPadding),
-					CryptographicAlgorithm: ptrTo(kmip.AES),
+					BlockCipherMode:        kmip.AESKeyWrapPadding,
+					CryptographicAlgorithm: kmip.AES,
 				},
 			},
 		},
@@ -645,8 +645,8 @@ func test_get_register_wrapped_aes_key(client *kmipclient.Client) {
 		EncryptionKeyInformation: &kmip.EncryptionKeyInformation{
 			UniqueIdentifier: wrapKey.UniqueIdentifier,
 			CryptographicParameters: &kmip.CryptographicParameters{
-				BlockCipherMode:        ptrTo(kmip.NISTKeyWrap),
-				CryptographicAlgorithm: ptrTo(kmip.AES),
+				BlockCipherMode:        kmip.NISTKeyWrap,
+				CryptographicAlgorithm: kmip.AES,
 			},
 		},
 	}).MustExec()
@@ -666,8 +666,8 @@ func test_get_register_wrapped_rsa_key(client *kmipclient.Client) {
 		EncryptionKeyInformation: &kmip.EncryptionKeyInformation{
 			UniqueIdentifier: wrapKey.UniqueIdentifier,
 			CryptographicParameters: &kmip.CryptographicParameters{
-				BlockCipherMode:        ptrTo(kmip.NISTKeyWrap),
-				CryptographicAlgorithm: ptrTo(kmip.AES),
+				BlockCipherMode:        kmip.NISTKeyWrap,
+				CryptographicAlgorithm: kmip.AES,
 			},
 		},
 	}).MustExec()
@@ -687,8 +687,8 @@ func test_get_register_wrapped_ecdsa_key(client *kmipclient.Client) {
 		EncryptionKeyInformation: &kmip.EncryptionKeyInformation{
 			UniqueIdentifier: wrapKey.UniqueIdentifier,
 			CryptographicParameters: &kmip.CryptographicParameters{
-				BlockCipherMode:        ptrTo(kmip.NISTKeyWrap),
-				CryptographicAlgorithm: ptrTo(kmip.AES),
+				BlockCipherMode:        kmip.NISTKeyWrap,
+				CryptographicAlgorithm: kmip.AES,
 			},
 		},
 	}).MustExec()

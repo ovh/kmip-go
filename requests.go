@@ -38,15 +38,15 @@ func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) Re
 
 type RequestHeader struct {
 	ProtocolVersion     ProtocolVersion `ttlv:",set-version"`
-	MaximumResponseSize *int32
+	MaximumResponseSize int32           `ttlv:",omitempty"`
 
-	ClientCorrelationValue       *string `ttlv:",version=v1.4.."`
-	ServerCorrelationValue       *string `ttlv:",version=v1.4.."`
+	ClientCorrelationValue       string `ttlv:",omitempty,version=v1.4.."`
+	ServerCorrelationValue       string `ttlv:",omitempty,version=v1.4.."`
 	AsynchronousIndicator        *bool
 	AttestationCapableIndicator  *bool             `ttlv:",version=v1.2.."`
 	AttestationType              []AttestationType `ttlv:",version=v1.2.."`
 	Authentication               *Authentication
-	BatchErrorContinuationOption *BatchErrorContinuationOption
+	BatchErrorContinuationOption BatchErrorContinuationOption `ttlv:",omitempty"`
 	BatchOrderOption             *bool
 	TimeStamp                    *time.Time
 	BatchCount                   int32
@@ -54,7 +54,7 @@ type RequestHeader struct {
 
 type RequestBatchItem struct {
 	Operation         Operation
-	UniqueBatchItemID []byte
+	UniqueBatchItemID []byte `ttlv:",omitempty"`
 	RequestPayload    OperationPayload
 	MessageExtension  *MessageExtension
 }

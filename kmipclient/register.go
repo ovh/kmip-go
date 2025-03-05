@@ -139,8 +139,8 @@ func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usa
 	return ex.Object(&kmip.SymmetricKey{
 		KeyBlock: kmip.KeyBlock{
 			KeyFormatType:          keyFmt,
-			CryptographicAlgorithm: &alg,
-			CryptographicLength:    &bitLen,
+			CryptographicAlgorithm: alg,
+			CryptographicLength:    bitLen,
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: material,
@@ -152,9 +152,9 @@ func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usa
 
 func (ex ExecRegisterWantType) rawKeyBytes(private bool, der []byte, alg kmip.CryptographicAlgorithm, bitlen int32, format kmip.KeyFormatType, usage kmip.CryptographicUsageMask) ExecRegister {
 	kb := kmip.KeyBlock{
-		CryptographicAlgorithm: &alg,
+		CryptographicAlgorithm: alg,
 		KeyFormatType:          format,
-		CryptographicLength:    &bitlen,
+		CryptographicLength:    bitlen,
 		KeyValue: &kmip.KeyValue{
 			Plain: &kmip.PlainKeyValue{
 				KeyMaterial: kmip.KeyMaterial{
@@ -347,9 +347,9 @@ func (ex ExecRegisterWantType) RsaPrivateKey(key *rsa.PrivateKey, usage kmip.Cry
 	case Transparent:
 		pkey := &kmip.PrivateKey{
 			KeyBlock: kmip.KeyBlock{
-				CryptographicAlgorithm: &alg,
+				CryptographicAlgorithm: alg,
 				KeyFormatType:          kmip.KeyFormatTransparentRSAPrivateKey,
-				CryptographicLength:    &bitlen,
+				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: kmip.KeyMaterial{
@@ -389,9 +389,9 @@ func (ex ExecRegisterWantType) RsaPublicKey(key *rsa.PublicKey, usage kmip.Crypt
 	case Transparent:
 		pkey := &kmip.PublicKey{
 			KeyBlock: kmip.KeyBlock{
-				CryptographicAlgorithm: &alg,
+				CryptographicAlgorithm: alg,
 				KeyFormatType:          kmip.KeyFormatTransparentRSAPublicKey,
-				CryptographicLength:    &bitlen,
+				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: kmip.KeyMaterial{
@@ -450,9 +450,9 @@ func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip
 		}
 		pkey := &kmip.PrivateKey{
 			KeyBlock: kmip.KeyBlock{
-				CryptographicAlgorithm: &alg,
+				CryptographicAlgorithm: alg,
 				KeyFormatType:          keyFormat,
-				CryptographicLength:    &bitlen,
+				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: keyMaterial,
@@ -503,10 +503,10 @@ func (ex ExecRegisterWantType) EcdsaPublicKey(key *ecdsa.PublicKey, usage kmip.C
 		}
 		pkey := &kmip.PublicKey{
 			KeyBlock: kmip.KeyBlock{
-				CryptographicAlgorithm: &alg,
+				CryptographicAlgorithm: alg,
 				KeyFormatType:          keyFormat,
-				KeyCompressionType:     &compressionType,
-				CryptographicLength:    &bitlen,
+				KeyCompressionType:     compressionType,
+				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: keyMaterial,
