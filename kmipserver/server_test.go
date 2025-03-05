@@ -45,7 +45,7 @@ func TestServerRequest_Error(t *testing.T) {
 
 	resp, err := client.Activate("foobar").Exec()
 	require.Nil(t, resp)
-	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ReasonItemNotFound))
+	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ResultReasonItemNotFound))
 }
 
 func TestServerRequest_Panic(t *testing.T) {
@@ -58,7 +58,7 @@ func TestServerRequest_Panic(t *testing.T) {
 
 	resp, err := client.Activate("foobar").Exec()
 	require.Nil(t, resp)
-	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ReasonGeneralFailure))
+	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ResultReasonGeneralFailure))
 }
 
 func TestServerRequest_UnsupportedOperation(t *testing.T) {
@@ -67,7 +67,7 @@ func TestServerRequest_UnsupportedOperation(t *testing.T) {
 
 	resp, err := client.Activate("foobar").Exec()
 	require.Nil(t, resp)
-	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ReasonOperationNotSupported))
+	require.ErrorContains(t, err, ttlv.EnumStr(kmip.ResultReasonOperationNotSupported))
 }
 
 func TestServerRequest_ContextCancelled(t *testing.T) {
@@ -124,8 +124,8 @@ func TestServerRequest_BadRequest(t *testing.T) {
 	err = stream.Recv(&resp)
 	require.NoError(t, err)
 	require.Len(t, resp.BatchItem, 1)
-	require.Equal(t, kmip.StatusOperationFailed, resp.BatchItem[0].ResultStatus)
-	require.Equal(t, kmip.ReasonInvalidMessage, resp.BatchItem[0].ResultReason)
+	require.Equal(t, kmip.ResultStatusOperationFailed, resp.BatchItem[0].ResultStatus)
+	require.Equal(t, kmip.ResultReasonInvalidMessage, resp.BatchItem[0].ResultReason)
 }
 
 func TestServerRequest_BadRequestMessageContent(t *testing.T) {
@@ -152,6 +152,6 @@ func TestServerRequest_BadRequestMessageContent(t *testing.T) {
 	err = stream.Recv(&resp)
 	require.NoError(t, err)
 	require.Len(t, resp.BatchItem, 1)
-	require.Equal(t, kmip.StatusOperationFailed, resp.BatchItem[0].ResultStatus)
-	require.Equal(t, kmip.ReasonInvalidMessage, resp.BatchItem[0].ResultReason)
+	require.Equal(t, kmip.ResultStatusOperationFailed, resp.BatchItem[0].ResultStatus)
+	require.Equal(t, kmip.ResultReasonInvalidMessage, resp.BatchItem[0].ResultReason)
 }

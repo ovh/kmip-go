@@ -341,8 +341,8 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 		return errors.New("Unexpected batch item count")
 	}
 	bi := resp.BatchItem[0]
-	if bi.ResultStatus == kmip.StatusOperationFailed &&
-		(bi.ResultReason == kmip.ReasonOperationNotSupported /*|| bi.ResultReason == kmip.ReasonInvalidMessage && bi.Operation == 0x00*/) {
+	if bi.ResultStatus == kmip.ResultStatusOperationFailed &&
+		(bi.ResultReason == kmip.ResultReasonOperationNotSupported /*|| bi.ResultReason == kmip.ReasonInvalidMessage && bi.Operation == 0x00*/) {
 		// If the discover opertion is not supported, then fallbacks to kmip v1.0
 		// TODO: Check that v1.0 is in the client's supported version list and return an error if not
 		c.version = &kmip.V1_0
@@ -460,14 +460,14 @@ func (ex AttributeExecutor[Req, Resp, Wrap]) WithUniqueID(id string) Wrap {
 func (ex AttributeExecutor[Req, Resp, Wrap]) WithName(name string) Wrap {
 	return ex.WithAttribute(kmip.AttributeNameName, kmip.Name{
 		NameValue: name,
-		NameType:  kmip.UninterpretedTextString,
+		NameType:  kmip.NameTypeUninterpretedTextString,
 	})
 }
 
 func (ex AttributeExecutor[Req, Resp, Wrap]) WithURI(uri string) Wrap {
 	return ex.WithAttribute(kmip.AttributeNameName, kmip.Name{
 		NameValue: uri,
-		NameType:  kmip.Uri,
+		NameType:  kmip.NameTypeUri,
 	})
 }
 

@@ -55,7 +55,7 @@ You can then use the high level client helper methods to create and send request
 to the server:
 ```go
 resp := client.Create().
-	AES(256, kmip.Encrypt|kmip.Decrypt).
+	AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 	WithName("my-key").
 	MustExec()
 fmt.Println("Created AES key with ID", resp.UniqueIdentifier)
@@ -69,19 +69,19 @@ request := payloads.CreateRequestPayload{
 		Attribute: []kmip.Attribute{
 			{
 				AttributeName:  kmip.AttributeNameCryptographicAlgorithm,
-				AttributeValue: kmip.AES,
+				AttributeValue: kmip.CryptographicAlgorithmAES,
 			}, {
 				AttributeName:  kmip.AttributeNameCryptographicLength,
 				AttributeValue: int32(256),
 			}, {
 				AttributeName: kmip.AttributeNameName,
 				AttributeValue: kmip.Name{
-					NameType:  kmip.UninterpretedTextString,
+					NameType:  kmip.NameTypeUninterpretedTextString,
 					NameValue: "another-key",
 				},
 			}, {
 				AttributeName:  kmip.AttributeNameCryptographicUsageMask,
-				AttributeValue: kmip.Encrypt | kmip.Decrypt,
+				AttributeValue: kmip.CryptographicUsageEncrypt | kmip.CryptographicUsageDecrypt,
 			},
 		},
 	},

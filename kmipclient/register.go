@@ -83,7 +83,7 @@ func (ex ExecRegisterWantType) Secret(kind kmip.SecretDataType, value []byte) Ex
 	return ex.Object(&kmip.SecretData{
 		SecretDataType: kind,
 		KeyBlock: kmip.KeyBlock{
-			KeyFormatType: kmip.KeyFormatRaw,
+			KeyFormatType: kmip.KeyFormatTypeRaw,
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: kmip.KeyMaterial{Bytes: &value},
@@ -108,11 +108,11 @@ func (ex ExecRegisterWantType) PemCertificate(data []byte) ExecRegister {
 	if block.Type != "CERTIFICATE" {
 		return ex.error(fmt.Errorf("Not a certificate"))
 	}
-	return ex.Certificate(kmip.X_509, block.Bytes)
+	return ex.Certificate(kmip.CertificateTypeX_509, block.Bytes)
 }
 
 func (ex ExecRegisterWantType) X509Certificate(cert *x509.Certificate) ExecRegister {
-	return ex.Certificate(kmip.X_509, cert.Raw)
+	return ex.Certificate(kmip.CertificateTypeX_509, cert.Raw)
 }
 
 func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usage kmip.CryptographicUsageMask, value []byte) ExecRegister {
@@ -122,12 +122,12 @@ func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usa
 
 	switch ex.keyFormat.symmetricFormat() {
 	case RAW:
-		keyFmt = kmip.KeyFormatRaw
+		keyFmt = kmip.KeyFormatTypeRaw
 		material = kmip.KeyMaterial{
 			Bytes: &value,
 		}
 	case Transparent:
-		keyFmt = kmip.KeyFormatTransparentSymmetricKey
+		keyFmt = kmip.KeyFormatTypeTransparentSymmetricKey
 		material = kmip.KeyMaterial{
 			TransparentSymmetricKey: &kmip.TransparentSymmetricKey{
 				Key: value,
@@ -333,22 +333,22 @@ func (ex ExecRegisterWantType) PublicKey(key PublicKey, usage kmip.Cryptographic
 }
 
 func (ex ExecRegisterWantType) RsaPrivateKey(key *rsa.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
-	alg := kmip.RSA
+	alg := kmip.CryptographicAlgorithmRSA
 	bitlen := int32(key.N.BitLen())
 	switch ex.keyFormat.rsaPrivFormat() {
 	case PKCS1:
-		return ex.rawKeyBytes(true, x509.MarshalPKCS1PrivateKey(key), alg, bitlen, kmip.KeyFormatPKCS_1, usage)
+		return ex.rawKeyBytes(true, x509.MarshalPKCS1PrivateKey(key), alg, bitlen, kmip.KeyFormatTypePKCS_1, usage)
 	case PKCS8:
 		kb, err := x509.MarshalPKCS8PrivateKey(key)
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatPKCS_8, usage)
+		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatTypePKCS_8, usage)
 	case Transparent:
 		pkey := &kmip.PrivateKey{
 			KeyBlock: kmip.KeyBlock{
 				CryptographicAlgorithm: alg,
-				KeyFormatType:          kmip.KeyFormatTransparentRSAPrivateKey,
+				KeyFormatType:          kmip.KeyFormatTypeTransparentRSAPrivateKey,
 				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
@@ -375,22 +375,22 @@ func (ex ExecRegisterWantType) RsaPrivateKey(key *rsa.PrivateKey, usage kmip.Cry
 }
 
 func (ex ExecRegisterWantType) RsaPublicKey(key *rsa.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
-	alg := kmip.RSA
+	alg := kmip.CryptographicAlgorithmRSA
 	bitlen := int32(key.N.BitLen())
 	switch ex.keyFormat.rsaPubFormat() {
 	case PKCS1:
-		return ex.rawKeyBytes(false, x509.MarshalPKCS1PublicKey(key), alg, bitlen, kmip.KeyFormatPKCS_1, usage)
+		return ex.rawKeyBytes(false, x509.MarshalPKCS1PublicKey(key), alg, bitlen, kmip.KeyFormatTypePKCS_1, usage)
 	case X509:
 		kb, err := x509.MarshalPKIXPublicKey(key)
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(false, kb, alg, bitlen, kmip.KeyFormatX_509, usage)
+		return ex.rawKeyBytes(false, kb, alg, bitlen, kmip.KeyFormatTypeX_509, usage)
 	case Transparent:
 		pkey := &kmip.PublicKey{
 			KeyBlock: kmip.KeyBlock{
 				CryptographicAlgorithm: alg,
-				KeyFormatType:          kmip.KeyFormatTransparentRSAPublicKey,
+				KeyFormatType:          kmip.KeyFormatTypeTransparentRSAPublicKey,
 				CryptographicLength:    bitlen,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
@@ -411,7 +411,7 @@ func (ex ExecRegisterWantType) RsaPublicKey(key *rsa.PublicKey, usage kmip.Crypt
 }
 
 func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
-	alg := kmip.ECDSA
+	alg := kmip.CryptographicAlgorithmECDSA
 	bitlen, crv, err := curveToKMIP(key.Curve)
 	if err != nil {
 		return ex.error(err)
@@ -423,20 +423,20 @@ func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatECPrivateKey, usage)
+		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatTypeECPrivateKey, usage)
 	case PKCS8:
 		kb, err := x509.MarshalPKCS8PrivateKey(key)
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatPKCS_8, usage)
+		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatTypePKCS_8, usage)
 	case Transparent:
 		keyMaterial := kmip.KeyMaterial{}
 		//nolint:staticcheck // for backward compatibility
-		keyFormat := kmip.KeyFormatTransparentECDSAPrivateKey
+		keyFormat := kmip.KeyFormatTypeTransparentECDSAPrivateKey
 		if ttlv.CompareVersions(ex.client.Version(), kmip.V1_3) >= 0 {
 			// TransparentECDSAPrivateKey is deprecated since KMIP 1.3
-			keyFormat = kmip.KeyFormatTransparentECPrivateKey
+			keyFormat = kmip.KeyFormatTypeTransparentECPrivateKey
 			keyMaterial.TransparentECPrivateKey = &kmip.TransparentECPrivateKey{
 				D:                *key.D,
 				RecommendedCurve: crv,
@@ -467,7 +467,7 @@ func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip
 }
 
 func (ex ExecRegisterWantType) EcdsaPublicKey(key *ecdsa.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
-	alg := kmip.ECDSA
+	alg := kmip.CryptographicAlgorithmECDSA
 	bitlen, crv, err := curveToKMIP(key.Curve)
 	if err != nil {
 		return ex.error(err)
@@ -479,15 +479,15 @@ func (ex ExecRegisterWantType) EcdsaPublicKey(key *ecdsa.PublicKey, usage kmip.C
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(false, kb, alg, bitlen, kmip.KeyFormatX_509, usage)
+		return ex.rawKeyBytes(false, kb, alg, bitlen, kmip.KeyFormatTypeX_509, usage)
 	case Transparent:
-		compressionType := kmip.ECPublicKeyTypeUncompressed
+		compressionType := kmip.KeyCompressionTypeECPublicKeyTypeUncompressed
 		keyMaterial := kmip.KeyMaterial{}
 		//nolint:staticcheck // for backward compatibility
-		keyFormat := kmip.KeyFormatTransparentECDSAPublicKey
+		keyFormat := kmip.KeyFormatTypeTransparentECDSAPublicKey
 		if ttlv.CompareVersions(ex.client.Version(), kmip.V1_3) >= 0 {
 			// TransparentECDSAPrivateKey is deprecated since KMIP 1.3
-			keyFormat = kmip.KeyFormatTransparentECPublicKey
+			keyFormat = kmip.KeyFormatTypeTransparentECPublicKey
 			keyMaterial.TransparentECPublicKey = &kmip.TransparentECPublicKey{
 				//nolint:staticcheck // We need this function to marshal public key into its uncompressed form
 				QString:          elliptic.Marshal(key.Curve, key.X, key.Y),
@@ -525,13 +525,13 @@ func curveToKMIP(curve elliptic.Curve) (int32, kmip.RecommendedCurve, error) {
 	var crv kmip.RecommendedCurve
 	switch curve {
 	case elliptic.P224():
-		crv = kmip.P_224
+		crv = kmip.RecommendedCurveP_224
 	case elliptic.P256():
-		crv = kmip.P_256
+		crv = kmip.RecommendedCurveP_256
 	case elliptic.P384():
-		crv = kmip.P_384
+		crv = kmip.RecommendedCurveP_384
 	case elliptic.P521():
-		crv = kmip.P_521
+		crv = kmip.RecommendedCurveP_521
 	default:
 		return 0, kmip.RecommendedCurve(0), errors.New("Unsupported curve")
 	}

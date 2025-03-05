@@ -19,67 +19,67 @@ type ExecQuery struct {
 }
 
 func (ex ExecQuery) Operations() ExecQuery {
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryOperations)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionOperations)
 	return ex
 }
 func (ex ExecQuery) Objects() ExecQuery {
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryObjects)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionObjects)
 	return ex
 }
 func (ex ExecQuery) ServerInformation() ExecQuery {
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryServerInformation)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionServerInformation)
 	return ex
 }
 func (ex ExecQuery) ApplicationNamespaces() ExecQuery {
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryApplicationNamespaces)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionApplicationNamespaces)
 	return ex
 }
 
 // KMIP 1.1.
 func (ex ExecQuery) ExtensionList() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryExtensionList)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionExtensionList)
 	return ex
 }
 
 // KMIP 1.1.
 func (ex ExecQuery) ExtensionMap() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryExtensionMap)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionExtensionMap)
 	return ex
 }
 
 // KMIP 1.2.
 func (ex ExecQuery) AttestationTypes() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryAttestationTypes)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionAttestationTypes)
 	return ex
 }
 
 // KMIP 1.3.
 func (ex ExecQuery) RNGs() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryRNGs)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionRNGs)
 	return ex
 }
 func (ex ExecQuery) Validations() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryValidations)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionValidations)
 	return ex
 }
 func (ex ExecQuery) Profiles() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryProfiles)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionProfiles)
 	return ex
 }
 func (ex ExecQuery) Capabilities() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryCapabilities)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionCapabilities)
 	return ex
 }
 func (ex ExecQuery) ClientRegistrationMethods() ExecQuery {
 	//TODO: Check client version first
-	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryClientRegistrationMethods)
+	ex.req.QueryFunction = append(ex.req.QueryFunction, kmip.QueryFunctionClientRegistrationMethods)
 	return ex
 }
 

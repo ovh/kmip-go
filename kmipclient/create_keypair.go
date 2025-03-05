@@ -24,7 +24,7 @@ type ExecCreateKeyPair struct {
 
 func (ex ExecCreateKeyPair) RSA(bitlen int, privateUsage, publicUsage kmip.CryptographicUsageMask) ExecCreateKeyPairAttr {
 	return ex.Common().
-		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.RSA).
+		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.CryptographicAlgorithmRSA).
 		WithAttribute(kmip.AttributeNameCryptographicLength, int32(bitlen)).
 		PublicKey().WithAttribute(kmip.AttributeNameCryptographicUsageMask, publicUsage).
 		PrivateKey().WithAttribute(kmip.AttributeNameCryptographicUsageMask, privateUsage).
@@ -33,7 +33,7 @@ func (ex ExecCreateKeyPair) RSA(bitlen int, privateUsage, publicUsage kmip.Crypt
 
 func (ex ExecCreateKeyPair) ECDSA(curve kmip.RecommendedCurve, privateUsage, publicUsage kmip.CryptographicUsageMask) ExecCreateKeyPairAttr {
 	return ex.Common().
-		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.ECDSA).
+		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.CryptographicAlgorithmECDSA).
 		WithAttribute(kmip.AttributeNameCryptographicLength, curve.Bitlen()).
 		WithAttribute(kmip.AttributeNameCryptographicDomainParameters, kmip.CryptographicDomainParameters{RecommendedCurve: curve}).
 		PublicKey().WithAttribute(kmip.AttributeNameCryptographicUsageMask, publicUsage).

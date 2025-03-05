@@ -11,7 +11,7 @@ import (
 // If the operation that creates or registers the object contains an Activation Date
 // that has already occurred, then the state immediately transitions from Pre-Active to Active.
 func test_state_transitions1(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now().AddDate(0, 0, -1)).
 		MustExec()
@@ -25,7 +25,7 @@ func test_state_transitions1(client *kmipclient.Client) {
 // The transition from Pre-Active to Compromised is caused by a client issuing a Revoke operation
 // with a Revocation Reason of Compromised.
 func test_state_transitions3(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		MustExec()
 
@@ -40,7 +40,7 @@ func test_state_transitions3(client *kmipclient.Client) {
 // The transition from Pre-Active to Active SHALL occur in one of three ways:
 //  1. The Activation Date is reached.
 func test_state_transitions4_1(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now().Add(15*time.Second)).
 		MustExec()
@@ -57,7 +57,7 @@ func test_state_transitions4_1(client *kmipclient.Client) {
 //  2. A client successfully issues a Modify Attribute operation, modifying the Activation Date to a
 //     date in the past, or the current date.
 func test_state_transitions4_2(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now().AddDate(1, 0, 0)).
 		MustExec()
@@ -75,7 +75,7 @@ func test_state_transitions4_2(client *kmipclient.Client) {
 // The transition from Active to Deactivated SHALL occur in one of three ways:
 //  1. The object's Deactivation Date is reached
 func test_state_transitions6_1(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now()).
 		WithAttribute(kmip.AttributeNameDeactivationDate, time.Now().Add(15*time.Second)).
@@ -92,7 +92,7 @@ func test_state_transitions6_1(client *kmipclient.Client) {
 //  3. The client successfully issues a Modify Attribute operation, modifying the Deactivation Date
 //     to a date in the past, or the current date.
 func test_state_transitions6_3(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now()).
 		WithAttribute(kmip.AttributeNameDeactivationDate, time.Now().AddDate(1, 0, 0)).
@@ -110,7 +110,7 @@ func test_state_transitions6_3(client *kmipclient.Client) {
 // The transition from Deactivated to Compromised is caused by a client issuing a Revoke operation
 // with a Revocation Reason of Compromised.
 func test_state_transitions8(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
 		WithAttribute(kmip.AttributeNameActivationDate, time.Now()).
 		WithAttribute(kmip.AttributeNameDeactivationDate, time.Now().AddDate(-11, 0, 0)).
@@ -128,9 +128,9 @@ func test_state_transitions8(client *kmipclient.Client) {
 // The transition from Destroyed to Destroyed Compromised is caused by a client issuing a Revoke
 // operation with a Revocation Reason of Compromised.
 func test_state_transitions10(client *kmipclient.Client) {
-	res := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-state").
-		WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.Encrypt|kmip.Decrypt).
+		WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		MustExec()
 	client.Destroy(res.UniqueIdentifier).MustExec()
 	assertState(client, res.UniqueIdentifier, kmip.StateDestroyed)

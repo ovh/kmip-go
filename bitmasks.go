@@ -35,25 +35,25 @@ func init() {
 type CryptographicUsageMask int32
 
 const (
-	Sign CryptographicUsageMask = 1 << iota
-	Verify
-	Encrypt
-	Decrypt
-	WrapKey
-	UnwrapKey
-	Export
-	MACGenerate
-	DeriveKey
-	ContentCommitment
-	KeyAgreement
-	CertificateSign
-	CRLSign
-	GenerateCryptogram
-	ValidateCryptogram
-	TranslateEncrypt
-	TranslateDecrypt
-	TranslateWrap
-	TranslateUnwrap
+	CryptographicUsageSign CryptographicUsageMask = 1 << iota
+	CryptographicUsageVerify
+	CryptographicUsageEncrypt
+	CryptographicUsageDecrypt
+	CryptographicUsageWrapKey
+	CryptographicUsageUnwrapKey
+	CryptographicUsageExport
+	CryptographicUsageMACGenerate
+	CryptographicUsageDeriveKey
+	CryptographicUsageContentCommitment
+	CryptographicUsageKeyAgreement
+	CryptographicUsageCertificateSign
+	CryptographicUsageCRLSign
+	CryptographicUsageGenerateCryptogram
+	CryptographicUsageValidateCryptogram
+	CryptographicUsageTranslateEncrypt
+	CryptographicUsageTranslateDecrypt
+	CryptographicUsageTranslateWrap
+	CryptographicUsageTranslateUnwrap
 )
 
 func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
@@ -63,8 +63,8 @@ func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
 type StorageStatusMask int32
 
 const (
-	OnlineStorage StorageStatusMask = 1 << iota
-	ArchivalStorage
+	StorageStatusOnlineStorage StorageStatusMask = 1 << iota
+	StorageStatusArchivalStorage
 )
 
 func (mask StorageStatusMask) MarshalText() ([]byte, error) {

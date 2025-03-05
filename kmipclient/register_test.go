@@ -33,14 +33,14 @@ func TestRegister_SecretString(t *testing.T) {
 		require.Equal(t, kmip.ObjectTypeSecretData, pl.ObjectType)
 		sec, ok := pl.Object.(*kmip.SecretData)
 		require.True(t, ok, "Object is not a secret")
-		require.Equal(t, kmip.Password, sec.SecretDataType)
+		require.Equal(t, kmip.SecretDataTypePassword, sec.SecretDataType)
 		data, err := sec.Data()
 		require.NoError(t, err)
 		require.EqualValues(t, secret, string(data))
 		return &payloads.RegisterResponsePayload{UniqueIdentifier: "foobar"}, nil
 	}))
 
-	client.Register().SecretString(kmip.Password, secret).MustExec()
+	client.Register().SecretString(kmip.SecretDataTypePassword, secret).MustExec()
 }
 
 func TestRegister_PemCertificate(t *testing.T) {
@@ -65,7 +65,7 @@ func TestRegister_PemCertificate(t *testing.T) {
 		require.Equal(t, kmip.ObjectTypeCertificate, pl.ObjectType)
 		cert, ok := pl.Object.(*kmip.Certificate)
 		require.True(t, ok, "Object is not a certificate")
-		require.Equal(t, kmip.X_509, cert.CertificateType)
+		require.Equal(t, kmip.CertificateTypeX_509, cert.CertificateType)
 		require.EqualValues(t, der, cert.CertificateValue)
 		return &payloads.RegisterResponsePayload{UniqueIdentifier: "foobar"}, nil
 	}))
@@ -78,8 +78,8 @@ func TestRegister_Symmetric(t *testing.T) {
 		kmipFmt kmip.KeyFormatType
 		fmt     kmipclient.KeyFormat
 	}{
-		{kmip.KeyFormatRaw, kmipclient.RAW},
-		{kmip.KeyFormatTransparentSymmetricKey, kmipclient.Transparent},
+		{kmip.KeyFormatTypeRaw, kmipclient.RAW},
+		{kmip.KeyFormatTypeTransparentSymmetricKey, kmipclient.Transparent},
 	} {
 		t.Run(ttlv.EnumStr(tc.kmipFmt), func(t *testing.T) {
 			mux := kmipserver.NewBatchExecutor()
@@ -91,7 +91,7 @@ func TestRegister_Symmetric(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypeSymmetricKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.SymmetricKey)
 				require.True(t, ok, "Object is not a symmetric key")
-				require.Equal(t, kmip.AES, k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.CryptographicAlgorithmAES, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -103,7 +103,7 @@ func TestRegister_Symmetric(t *testing.T) {
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				SymmetricKey(kmip.AES, kmip.Encrypt|kmip.Decrypt, []byte(secret)).
+				SymmetricKey(kmip.CryptographicAlgorithmAES, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt, []byte(secret)).
 				WithName("foo").
 				MustExec()
 		})
@@ -121,9 +121,9 @@ func TestRegister_PrivateKey_RSA(t *testing.T) {
 		derKey  []byte
 		pemType string
 	}{
-		{kmip.KeyFormatPKCS_1, kmipclient.PKCS1, pkcs1, "RSA PRIVATE KEY"},
-		{kmip.KeyFormatPKCS_8, kmipclient.PKCS8, pkcs8, "PRIVATE KEY"},
-		{kmip.KeyFormatTransparentRSAPrivateKey, kmipclient.Transparent, pkcs8, "PRIVATE KEY"},
+		{kmip.KeyFormatTypePKCS_1, kmipclient.PKCS1, pkcs1, "RSA PRIVATE KEY"},
+		{kmip.KeyFormatTypePKCS_8, kmipclient.PKCS8, pkcs8, "PRIVATE KEY"},
+		{kmip.KeyFormatTypeTransparentRSAPrivateKey, kmipclient.Transparent, pkcs8, "PRIVATE KEY"},
 	} {
 		t.Run(ttlv.EnumStr(tc.kmipFmt), func(t *testing.T) {
 			mux := kmipserver.NewBatchExecutor()
@@ -133,7 +133,7 @@ func TestRegister_PrivateKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePrivateKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PrivateKey)
 				require.True(t, ok, "Object is not a private key")
-				require.Equal(t, kmip.RSA, k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.CryptographicAlgorithmRSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -147,13 +147,13 @@ func TestRegister_PrivateKey_RSA(t *testing.T) {
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PemKey(pemKey, kmip.Sign).
+				PemKey(pemKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PrivateKey(rsaKey, kmip.Sign).
+				PrivateKey(rsaKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 		})
@@ -171,9 +171,9 @@ func TestRegister_PrivateKey_ECDSA(t *testing.T) {
 		derKey  []byte
 		pemType string
 	}{
-		{kmip.KeyFormatECPrivateKey, kmipclient.SEC1, sec1, "EC PRIVATE KEY"},
-		{kmip.KeyFormatPKCS_8, kmipclient.PKCS8, pkcs8, "PRIVATE KEY"},
-		{kmip.KeyFormatTransparentECPrivateKey, kmipclient.Transparent, pkcs8, "PRIVATE KEY"},
+		{kmip.KeyFormatTypeECPrivateKey, kmipclient.SEC1, sec1, "EC PRIVATE KEY"},
+		{kmip.KeyFormatTypePKCS_8, kmipclient.PKCS8, pkcs8, "PRIVATE KEY"},
+		{kmip.KeyFormatTypeTransparentECPrivateKey, kmipclient.Transparent, pkcs8, "PRIVATE KEY"},
 	} {
 		t.Run(ttlv.EnumStr(tc.kmipFmt), func(t *testing.T) {
 			mux := kmipserver.NewBatchExecutor()
@@ -183,7 +183,7 @@ func TestRegister_PrivateKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePrivateKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PrivateKey)
 				require.True(t, ok, "Object is not a private key")
-				require.Equal(t, kmip.ECDSA, k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.CryptographicAlgorithmECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -197,13 +197,13 @@ func TestRegister_PrivateKey_ECDSA(t *testing.T) {
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PemKey(pemKey, kmip.Sign).
+				PemKey(pemKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PrivateKey(ecKey, kmip.Sign).
+				PrivateKey(ecKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 		})
@@ -221,9 +221,9 @@ func TestRegister_PublicKey_RSA(t *testing.T) {
 		derKey  []byte
 		pemType string
 	}{
-		{kmip.KeyFormatPKCS_1, kmipclient.PKCS1, pkcs1, "RSA PUBLIC KEY"},
-		{kmip.KeyFormatX_509, kmipclient.X509, pkix, "PUBLIC KEY"},
-		{kmip.KeyFormatTransparentRSAPublicKey, kmipclient.Transparent, pkix, "PUBLIC KEY"},
+		{kmip.KeyFormatTypePKCS_1, kmipclient.PKCS1, pkcs1, "RSA PUBLIC KEY"},
+		{kmip.KeyFormatTypeX_509, kmipclient.X509, pkix, "PUBLIC KEY"},
+		{kmip.KeyFormatTypeTransparentRSAPublicKey, kmipclient.Transparent, pkix, "PUBLIC KEY"},
 	} {
 		t.Run(ttlv.EnumStr(tc.kmipFmt), func(t *testing.T) {
 			mux := kmipserver.NewBatchExecutor()
@@ -233,7 +233,7 @@ func TestRegister_PublicKey_RSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePublicKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PublicKey)
 				require.True(t, ok, "Object is not a public key")
-				require.Equal(t, kmip.RSA, k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.CryptographicAlgorithmRSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -247,13 +247,13 @@ func TestRegister_PublicKey_RSA(t *testing.T) {
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PemKey(pemKey, kmip.Sign).
+				PemKey(pemKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PublicKey(&rsaKey.PublicKey, kmip.Sign).
+				PublicKey(&rsaKey.PublicKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 		})
@@ -270,8 +270,8 @@ func TestRegister_PublicKey_ECDSA(t *testing.T) {
 		derKey  []byte
 		pemType string
 	}{
-		{kmip.KeyFormatX_509, kmipclient.X509, pkix, "PUBLIC KEY"},
-		{kmip.KeyFormatTransparentECPublicKey, kmipclient.Transparent, pkix, "PUBLIC KEY"},
+		{kmip.KeyFormatTypeX_509, kmipclient.X509, pkix, "PUBLIC KEY"},
+		{kmip.KeyFormatTypeTransparentECPublicKey, kmipclient.Transparent, pkix, "PUBLIC KEY"},
 	} {
 		t.Run(ttlv.EnumStr(tc.kmipFmt), func(t *testing.T) {
 			mux := kmipserver.NewBatchExecutor()
@@ -281,7 +281,7 @@ func TestRegister_PublicKey_ECDSA(t *testing.T) {
 				require.Equal(t, kmip.ObjectTypePublicKey, pl.ObjectType)
 				k, ok := pl.Object.(*kmip.PublicKey)
 				require.True(t, ok, "Object is not a public key")
-				require.Equal(t, kmip.ECDSA, k.KeyBlock.CryptographicAlgorithm)
+				require.Equal(t, kmip.CryptographicAlgorithmECDSA, k.KeyBlock.CryptographicAlgorithm)
 				require.Equal(t, tc.kmipFmt, k.KeyBlock.KeyFormatType)
 				// pl.TemplateAttribute.
 				//TODO: Check attributes name and cryptographic usage mask
@@ -295,13 +295,13 @@ func TestRegister_PublicKey_ECDSA(t *testing.T) {
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PemKey(pemKey, kmip.Sign).
+				PemKey(pemKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 
 			client.Register().
 				WithKeyFormat(tc.fmt).
-				PublicKey(&ecKey.PublicKey, kmip.Sign).
+				PublicKey(&ecKey.PublicKey, kmip.CryptographicUsageSign).
 				WithName("foo").
 				MustExec()
 		})

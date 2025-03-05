@@ -83,7 +83,7 @@ func TestAddAttribute(t *testing.T) {
 	mux := kmipserver.NewBatchExecutor()
 	client := kmiptest.NewClientAndServer(t, mux)
 
-	req := client.AddAttribute("foobar", kmip.AttributeNameName, kmip.Name{NameValue: "foo", NameType: kmip.UninterpretedTextString})
+	req := client.AddAttribute("foobar", kmip.AttributeNameName, kmip.Name{NameValue: "foo", NameType: kmip.NameTypeUninterpretedTextString})
 	mux.Route(kmip.OperationAddAttribute, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.AddAttributeRequestPayload) (*payloads.AddAttributeResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
 		return &payloads.AddAttributeResponsePayload{UniqueIdentifier: pl.UniqueIdentifier, Attribute: pl.Attribute}, nil
@@ -137,7 +137,7 @@ func TestCreateKeyPair(t *testing.T) {
 	client := kmiptest.NewClientAndServer(t, mux)
 
 	t.Run("RSA", func(t *testing.T) {
-		req := client.CreateKeyPair().RSA(2048, kmip.Sign, kmip.Verify).
+		req := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 			PrivateKey().WithName("privatekey").
 			PublicKey().WithName("publickey")
 		mux.Route(kmip.OperationCreateKeyPair, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.CreateKeyPairRequestPayload) (*payloads.CreateKeyPairResponsePayload, error) {
@@ -151,7 +151,7 @@ func TestCreateKeyPair(t *testing.T) {
 	})
 
 	t.Run("ECDSA", func(t *testing.T) {
-		req := client.CreateKeyPair().ECDSA(kmip.P_256, kmip.Sign, kmip.Verify).
+		req := client.CreateKeyPair().ECDSA(kmip.RecommendedCurveP_256, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 			PrivateKey().WithName("privatekey").
 			PublicKey().WithName("publickey")
 		mux.Route(kmip.OperationCreateKeyPair, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.CreateKeyPairRequestPayload) (*payloads.CreateKeyPairResponsePayload, error) {
@@ -170,7 +170,7 @@ func TestCreate(t *testing.T) {
 	mux := kmipserver.NewBatchExecutor()
 	client := kmiptest.NewClientAndServer(t, mux)
 
-	req := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt)
+	req := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt)
 	mux.Route(kmip.OperationCreate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.CreateRequestPayload) (*payloads.CreateResponsePayload, error) {
 		require.EqualValues(t, req.RequestPayload(), pl)
 		return &payloads.CreateResponsePayload{UniqueIdentifier: "foobar"}, nil

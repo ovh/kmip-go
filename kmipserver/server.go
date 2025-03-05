@@ -114,7 +114,7 @@ func (srv *Server) handleConn(conn net.Conn) {
 			logger.Error("Failed to read data from client", "err", err)
 
 			if ttlv.IsErrEncoding(err) {
-				resp := srv.handleMessageError(ctx, msg, kmip.ReasonInvalidMessage, err.Error())
+				resp := srv.handleMessageError(ctx, msg, kmip.ResultReasonInvalidMessage, err.Error())
 				if err := stream.send(resp); err != nil {
 					logger.Warn("Fail to write data", "err", err)
 				}
