@@ -35,8 +35,8 @@ func TestObjectTypes(t *testing.T) {
 func TestSecretData_Data(t *testing.T) {
 	t.Run("raw", func(t *testing.T) {
 		data := []byte("foobar")
-		secret := SecretData{SecretDataType: Password, KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatRaw,
+		secret := SecretData{SecretDataType: SecretDataTypePassword, KeyBlock: KeyBlock{
+			KeyFormatType: KeyFormatTypeRaw,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{Bytes: &data}}},
 		}}
 		s, err := secret.Data()
@@ -45,8 +45,8 @@ func TestSecretData_Data(t *testing.T) {
 	})
 	t.Run("opaque", func(t *testing.T) {
 		data := []byte("foobar")
-		secret := SecretData{SecretDataType: Password, KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatOpaque,
+		secret := SecretData{SecretDataType: SecretDataTypePassword, KeyBlock: KeyBlock{
+			KeyFormatType: KeyFormatTypeOpaque,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{Bytes: &data}}},
 		}}
 		s, err := secret.Data()
@@ -55,8 +55,8 @@ func TestSecretData_Data(t *testing.T) {
 	})
 	t.Run("invalid", func(t *testing.T) {
 		data := []byte("foobar")
-		secret := SecretData{SecretDataType: Password, KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_1,
+		secret := SecretData{SecretDataType: SecretDataTypePassword, KeyBlock: KeyBlock{
+			KeyFormatType: KeyFormatTypePKCS_1,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{Bytes: &data}}},
 		}}
 		s, err := secret.Data()
@@ -79,7 +79,7 @@ func TestCertificate_X509Certificate(t *testing.T) {
 	der, err := x509.CreateCertificate(rand.Reader, &caTpl, &caTpl, k.Public(), k)
 	require.NoError(t, err)
 	t.Run("valid", func(t *testing.T) {
-		cert := Certificate{CertificateType: X_509, CertificateValue: der}
+		cert := Certificate{CertificateType: CertificateTypeX_509, CertificateValue: der}
 		xcert, err := cert.X509Certificate()
 		require.NoError(t, err)
 		require.EqualValues(t, caTpl.SerialNumber, xcert.SerialNumber)
@@ -92,7 +92,7 @@ func TestCertificate_X509Certificate(t *testing.T) {
 	})
 
 	t.Run("invalid-data", func(t *testing.T) {
-		cert := Certificate{CertificateType: X_509, CertificateValue: []byte{1, 2, 3}}
+		cert := Certificate{CertificateType: CertificateTypeX_509, CertificateValue: []byte{1, 2, 3}}
 		xcert, err := cert.X509Certificate()
 		require.Error(t, err)
 		require.Nil(t, xcert)
@@ -102,7 +102,7 @@ func TestCertificate_X509Certificate(t *testing.T) {
 	})
 
 	t.Run("invalid-type", func(t *testing.T) {
-		cert := Certificate{CertificateType: PGP, CertificateValue: der}
+		cert := Certificate{CertificateType: CertificateTypePGP, CertificateValue: der}
 		xcert, err := cert.X509Certificate()
 		require.Error(t, err)
 		require.Nil(t, xcert)
@@ -117,7 +117,7 @@ func TestSymmetricKey_KeyMaterial(t *testing.T) {
 	_, _ = rand.Read(data)
 	t.Run("raw", func(t *testing.T) {
 		key := SymmetricKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatRaw,
+			KeyFormatType: KeyFormatTypeRaw,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{Bytes: &data}}},
 		}}
 		mat, err := key.KeyMaterial()
@@ -127,7 +127,7 @@ func TestSymmetricKey_KeyMaterial(t *testing.T) {
 
 	t.Run("transparent", func(t *testing.T) {
 		key := SymmetricKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentSymmetricKey,
+			KeyFormatType: KeyFormatTypeTransparentSymmetricKey,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentSymmetricKey: &TransparentSymmetricKey{Key: data}}}},
 		}}
 		mat, err := key.KeyMaterial()
@@ -136,7 +136,7 @@ func TestSymmetricKey_KeyMaterial(t *testing.T) {
 	})
 	t.Run("transparent-nil", func(t *testing.T) {
 		key := SymmetricKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentSymmetricKey,
+			KeyFormatType: KeyFormatTypeTransparentSymmetricKey,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentSymmetricKey: nil}}},
 		}}
 		mat, err := key.KeyMaterial()
@@ -145,7 +145,7 @@ func TestSymmetricKey_KeyMaterial(t *testing.T) {
 	})
 	t.Run("transparent-nil-material", func(t *testing.T) {
 		key := SymmetricKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentSymmetricKey,
+			KeyFormatType: KeyFormatTypeTransparentSymmetricKey,
 			KeyValue:      &KeyValue{Plain: nil},
 		}}
 		mat, err := key.KeyMaterial()
@@ -154,7 +154,7 @@ func TestSymmetricKey_KeyMaterial(t *testing.T) {
 	})
 	t.Run("invalid-format", func(t *testing.T) {
 		key := SymmetricKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_1,
+			KeyFormatType: KeyFormatTypePKCS_1,
 			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{Bytes: &data}}},
 		}}
 		mat, err := key.KeyMaterial()
@@ -168,7 +168,7 @@ func TestPublicKey_RSA(t *testing.T) {
 	t.Run("pkcs1", func(t *testing.T) {
 		der := x509.MarshalPKCS1PublicKey(&rsaKey.PublicKey)
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_1,
+			KeyFormatType: KeyFormatTypePKCS_1,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -184,7 +184,7 @@ func TestPublicKey_RSA(t *testing.T) {
 	t.Run("spki", func(t *testing.T) {
 		der, _ := x509.MarshalPKIXPublicKey(&rsaKey.PublicKey)
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatX_509,
+			KeyFormatType: KeyFormatTypeX_509,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -199,7 +199,7 @@ func TestPublicKey_RSA(t *testing.T) {
 
 	t.Run("transparent", func(t *testing.T) {
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentRSAPublicKey,
+			KeyFormatType: KeyFormatTypeTransparentRSAPublicKey,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentRSAPublicKey: &TransparentRSAPublicKey{
 				Modulus:        *rsaKey.N,
 				PublicExponent: *big.NewInt(int64(rsaKey.E)),
@@ -219,7 +219,7 @@ func TestPublicKey_ECDSA(t *testing.T) {
 	t.Run("spki", func(t *testing.T) {
 		der, _ := x509.MarshalPKIXPublicKey(&ecKey.PublicKey)
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatX_509,
+			KeyFormatType: KeyFormatTypeX_509,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -233,12 +233,12 @@ func TestPublicKey_ECDSA(t *testing.T) {
 	})
 
 	t.Run("transparent-uncompressed", func(t *testing.T) {
-		comp := ECPublicKeyTypeUncompressed
+		comp := KeyCompressionTypeECPublicKeyTypeUncompressed
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType:      KeyFormatTransparentECDSAPublicKey,
+			KeyFormatType:      KeyFormatTypeTransparentECDSAPublicKey,
 			KeyCompressionType: comp,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentECDSAPublicKey: &TransparentECDSAPublicKey{
-				RecommendedCurve: P_256,
+				RecommendedCurve: RecommendedCurveP_256,
 				//nolint:staticcheck // We need this function compute ECDSA public key
 				QString: elliptic.Marshal(elliptic.P256(), ecKey.X, ecKey.Y),
 			}}}},
@@ -252,12 +252,12 @@ func TestPublicKey_ECDSA(t *testing.T) {
 	})
 
 	t.Run("transparent-compressed-prime", func(t *testing.T) {
-		comp := ECPublicKeyTypeX9_62CompressedPrime
+		comp := KeyCompressionTypeECPublicKeyTypeX9_62CompressedPrime
 		pkey := PublicKey{KeyBlock: KeyBlock{
-			KeyFormatType:      KeyFormatTransparentECDSAPublicKey,
+			KeyFormatType:      KeyFormatTypeTransparentECDSAPublicKey,
 			KeyCompressionType: comp,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentECDSAPublicKey: &TransparentECDSAPublicKey{
-				RecommendedCurve: P_256,
+				RecommendedCurve: RecommendedCurveP_256,
 				QString:          elliptic.MarshalCompressed(elliptic.P256(), ecKey.X, ecKey.Y),
 			}}}},
 		}}
@@ -275,7 +275,7 @@ func TestPrivateKey_RSA(t *testing.T) {
 	t.Run("pkcs1", func(t *testing.T) {
 		der := x509.MarshalPKCS1PrivateKey(rsaKey)
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_1,
+			KeyFormatType: KeyFormatTypePKCS_1,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -291,7 +291,7 @@ func TestPrivateKey_RSA(t *testing.T) {
 	t.Run("pkcs8", func(t *testing.T) {
 		der, _ := x509.MarshalPKCS8PrivateKey(rsaKey)
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_8,
+			KeyFormatType: KeyFormatTypePKCS_8,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -306,7 +306,7 @@ func TestPrivateKey_RSA(t *testing.T) {
 
 	t.Run("transparent", func(t *testing.T) {
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentRSAPrivateKey,
+			KeyFormatType: KeyFormatTypeTransparentRSAPrivateKey,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentRSAPrivateKey: &TransparentRSAPrivateKey{
 				Modulus:         *rsaKey.N,
 				PrivateExponent: rsaKey.D,
@@ -332,7 +332,7 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 	t.Run("pkcs8", func(t *testing.T) {
 		der, _ := x509.MarshalPKCS8PrivateKey(ecKey)
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatPKCS_8,
+			KeyFormatType: KeyFormatTypePKCS_8,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -347,7 +347,7 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 	t.Run("sec1", func(t *testing.T) {
 		der, _ := x509.MarshalECPrivateKey(ecKey)
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatECPrivateKey,
+			KeyFormatType: KeyFormatTypeECPrivateKey,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{
 				KeyMaterial: KeyMaterial{Bytes: &der},
 			}},
@@ -362,9 +362,9 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 
 	t.Run("transparent", func(t *testing.T) {
 		pkey := PrivateKey{KeyBlock: KeyBlock{
-			KeyFormatType: KeyFormatTransparentECDSAPrivateKey,
+			KeyFormatType: KeyFormatTypeTransparentECDSAPrivateKey,
 			KeyValue: &KeyValue{Plain: &PlainKeyValue{KeyMaterial: KeyMaterial{TransparentECDSAPrivateKey: &TransparentECDSAPrivateKey{
-				RecommendedCurve: P_256,
+				RecommendedCurve: RecommendedCurveP_256,
 				D:                *ecKey.D,
 			}}}},
 		}}

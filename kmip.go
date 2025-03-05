@@ -48,11 +48,11 @@ func (cred *CredentialValue) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 
 func (cred *CredentialValue) decode(d *ttlv.Decoder, tag int, cType CredentialType) error {
 	switch cType {
-	case CredentialUsernameAndPassword:
+	case CredentialTypeUsernameAndPassword:
 		return d.TagAny(tag, &cred.UserPassword)
-	case CredentialDevice:
+	case CredentialTypeDevice:
 		return d.TagAny(tag, &cred.Device)
-	case CredentialAttestation:
+	case CredentialTypeAttestation:
 		return d.TagAny(tag, &cred.Attestation)
 	}
 	return fmt.Errorf("Unsupported credential type %X", cType)

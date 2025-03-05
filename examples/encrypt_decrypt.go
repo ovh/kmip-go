@@ -16,7 +16,7 @@ func test_encrypt_decrypt_aes(client *kmipclient.Client) {
 	aad := []byte("toto")
 
 	keyId := client.Create().
-		AES(256, kmip.Encrypt|kmip.Decrypt).
+		AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		MustExec().
 		UniqueIdentifier
 
@@ -26,8 +26,8 @@ func test_encrypt_decrypt_aes(client *kmipclient.Client) {
 		WithIvCounterNonce(iv).
 		WithAAD(aad).
 		WithCryptographicParameters(kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.GCM,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeGCM,
 		}).
 		Data(plain).
 		MustExec()
@@ -36,8 +36,8 @@ func test_encrypt_decrypt_aes(client *kmipclient.Client) {
 		WithIvCounterNonce(iv).
 		WithAAD(aad).
 		WithCryptographicParameters(kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.GCM,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeGCM,
 		}).
 		WithAuthTag(resp.AuthenticatedEncryptionTag).
 		Data(resp.Data).
@@ -49,10 +49,10 @@ func test_encrypt_decrypt_aes_default(client *kmipclient.Client) {
 	aad := []byte("toto")
 
 	keyId := client.Create().
-		AES(256, kmip.Encrypt|kmip.Decrypt).
+		AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithAttribute(kmip.AttributeNameCryptographicParameters, kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.GCM,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeGCM,
 			RandomIV:               ptrTo(true),
 		}).
 		MustExec().
@@ -74,7 +74,7 @@ func test_encrypt_decrypt_aes_default(client *kmipclient.Client) {
 }
 
 func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
-	keyId := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	keyId := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("Test-Encrypt-CBC").
 		MustExec().
 		UniqueIdentifier
@@ -88,9 +88,9 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 		UniqueIdentifier: keyId,
 		Data:             []byte("Hello World!"),
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.CBC,
-			PaddingMethod:          kmip.PKCS5,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeCBC,
+			PaddingMethod:          kmip.PaddingMethodPKCS5,
 		},
 		IVCounterNonce: iv,
 	})
@@ -103,9 +103,9 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 		UniqueIdentifier: keyId,
 		Data:             resp.Data,
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.CBC,
-			PaddingMethod:          kmip.PKCS5,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeCBC,
+			PaddingMethod:          kmip.PaddingMethodPKCS5,
 		},
 		IVCounterNonce: resp.IVCounterNonce,
 	})
@@ -118,7 +118,7 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 }
 
 func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
-	key := client.CreateKeyPair().RSA(2048, kmip.Decrypt, kmip.Encrypt).
+	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageDecrypt, kmip.CryptographicUsageEncrypt).
 		Common().
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
 		MustExec()
@@ -127,9 +127,9 @@ func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
 		UniqueIdentifier: key.PublicKeyUniqueIdentifier,
 		Data:             []byte("Hello World!"),
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.RSA,
-			PaddingMethod:          kmip.OAEP,
-			HashingAlgorithm:       kmip.SHA_256,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
+			PaddingMethod:          kmip.PaddingMethodOAEP,
+			HashingAlgorithm:       kmip.HashingAlgorithmSHA_256,
 		},
 	})
 	if err != nil {
@@ -141,9 +141,9 @@ func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
 		UniqueIdentifier: key.PrivateKeyUniqueIdentifier,
 		Data:             resp.Data,
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.RSA,
-			PaddingMethod:          kmip.OAEP,
-			HashingAlgorithm:       kmip.SHA_256,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
+			PaddingMethod:          kmip.PaddingMethodOAEP,
+			HashingAlgorithm:       kmip.HashingAlgorithmSHA_256,
 		},
 	})
 	if err != nil {
@@ -152,7 +152,7 @@ func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
 }
 
 func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
-	key := client.CreateKeyPair().RSA(2048, kmip.Decrypt, kmip.Encrypt).
+	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageDecrypt, kmip.CryptographicUsageEncrypt).
 		Common().
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
 		MustExec()
@@ -161,8 +161,8 @@ func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
 		UniqueIdentifier: key.PublicKeyUniqueIdentifier,
 		Data:             []byte("Hello World!"),
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.RSA,
-			PaddingMethod:          kmip.PKCS1V1_5,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
+			PaddingMethod:          kmip.PaddingMethodPKCS1V1_5,
 		},
 	})
 	if err != nil {
@@ -174,8 +174,8 @@ func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
 		UniqueIdentifier: key.PrivateKeyUniqueIdentifier,
 		Data:             resp.Data,
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.RSA,
-			PaddingMethod:          kmip.PKCS1V1_5,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
+			PaddingMethod:          kmip.PaddingMethodPKCS1V1_5,
 		},
 	})
 	if err != nil {
@@ -184,7 +184,7 @@ func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
 }
 
 func test_encrypt_decrypt_aes_with_usage(client *kmipclient.Client) {
-	keyId := client.Create().AES(256, kmip.Encrypt|kmip.Decrypt).
+	keyId := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithUsageLimit(1, kmip.UsageLimitsUnitByte).
 		MustExec().
 		UniqueIdentifier
@@ -195,8 +195,8 @@ func test_encrypt_decrypt_aes_with_usage(client *kmipclient.Client) {
 		UniqueIdentifier: keyId,
 		Data:             []byte("Hello World!"),
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.GCM,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeGCM,
 		},
 		IVCounterNonce:                        []byte("abcdefghijkl"),
 		AuthenticatedEncryptionAdditionalData: []byte("toto"),
@@ -210,8 +210,8 @@ func test_encrypt_decrypt_aes_with_usage(client *kmipclient.Client) {
 		UniqueIdentifier: keyId,
 		Data:             resp.Data,
 		CryptographicParameters: &kmip.CryptographicParameters{
-			CryptographicAlgorithm: kmip.AES,
-			BlockCipherMode:        kmip.GCM,
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
+			BlockCipherMode:        kmip.BlockCipherModeGCM,
 		},
 		IVCounterNonce:                        resp.IVCounterNonce,
 		AuthenticatedEncryptionTag:            resp.AuthenticatedEncryptionTag,

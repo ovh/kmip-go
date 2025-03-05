@@ -12,7 +12,7 @@ func TestAttribute_EncodeDecode(t *testing.T) {
 	attr := Attribute{
 		AttributeName: AttributeNameName,
 		AttributeValue: Name{
-			NameType:  UninterpretedTextString,
+			NameType:  NameTypeUninterpretedTextString,
 			NameValue: "foobar",
 		},
 	}

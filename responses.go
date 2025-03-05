@@ -34,7 +34,7 @@ type ResponseBatchItem struct {
 }
 
 func (bi *ResponseBatchItem) Err() error {
-	if bi.ResultStatus != StatusSuccess {
+	if bi.ResultStatus != ResultStatusSuccess {
 		msg := bi.ResultMessage
 		return fmt.Errorf("Operation failed (status=%q, reason=%q) %s", ttlv.EnumStr(bi.ResultStatus), ttlv.EnumStr(bi.ResultReason), msg)
 	}
@@ -48,7 +48,7 @@ func (pv *ResponseBatchItem) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 			e.ByteString(TagUniqueBatchItemID, pv.UniqueBatchItemID)
 		}
 		e.Any(pv.ResultStatus)
-		if pv.ResultStatus != StatusSuccess || pv.ResultReason != 0 {
+		if pv.ResultStatus != ResultStatusSuccess || pv.ResultReason != 0 {
 			e.Any(pv.ResultReason)
 		}
 		if pv.ResultMessage != "" {

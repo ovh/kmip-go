@@ -30,13 +30,13 @@ func Errorf(reason kmip.ResultReason, format string, args ...any) error {
 }
 
 var (
-	ErrOperationNotSupported = Errorf(kmip.ReasonOperationNotSupported, "Operation not supported")
-	ErrFeatureNotSupported   = Errorf(kmip.ReasonFeatureNotSupported, "Feature not supported")
-	ErrMissingData           = Errorf(kmip.ReasonMissingData, "Missing data")
-	ErrItemNotFound          = Errorf(kmip.ReasonItemNotFound, "Item not found")
-	ErrPermissionDenied      = Errorf(kmip.ReasonPermissionDenied, "Permission denied")
-	ErrInvalidMessage        = Errorf(kmip.ReasonInvalidMessage, "Invalid message")
-	ErrInvalidField          = Errorf(kmip.ReasonInvalidField, "Invalid field")
+	ErrOperationNotSupported = Errorf(kmip.ResultReasonOperationNotSupported, "Operation not supported")
+	ErrFeatureNotSupported   = Errorf(kmip.ResultReasonFeatureNotSupported, "Feature not supported")
+	ErrMissingData           = Errorf(kmip.ResultReasonMissingData, "Missing data")
+	ErrItemNotFound          = Errorf(kmip.ResultReasonItemNotFound, "Item not found")
+	ErrPermissionDenied      = Errorf(kmip.ResultReasonPermissionDenied, "Permission denied")
+	ErrInvalidMessage        = Errorf(kmip.ResultReasonInvalidMessage, "Invalid message")
+	ErrInvalidField          = Errorf(kmip.ResultReasonInvalidField, "Invalid field")
 )
 
 func handleMessageError(ctx context.Context, req *kmip.RequestMessage, err error) *kmip.ResponseMessage {
@@ -69,12 +69,12 @@ func handleBatchItemError(ctx context.Context, bi *kmip.ResponseBatchItem, err e
 	// Always clear the ID placeholder on error
 	//TODO: Double check against the KMIP specification about this
 	ClearIdPlaceholder(ctx)
-	bi.ResultStatus = kmip.StatusOperationFailed
+	bi.ResultStatus = kmip.ResultStatusOperationFailed
 	var e Error
 	if errors.As(err, &e) {
 		bi.ResultReason = e.Reason
 	} else {
-		bi.ResultReason = kmip.ReasonGeneralFailure
+		bi.ResultReason = kmip.ResultReasonGeneralFailure
 	}
 	//TODO: Do not return the error message if the error is not of type kmipserver.Error. Log it instead.
 	bi.ResultMessage = err.Error()

@@ -103,20 +103,20 @@ func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestM
 
 	// Check for version compatibility
 	if !slices.Contains(exec.supportedVersions, req.Header.ProtocolVersion) {
-		return nil, Errorf(kmip.ReasonInvalidMessage, "Unsupported protocol version")
+		return nil, Errorf(kmip.ResultReasonInvalidMessage, "Unsupported protocol version")
 	}
 
-	errorContinuationOption := kmip.Continue
+	errorContinuationOption := kmip.BatchErrorContinuationOptionContinue
 	if co := req.Header.BatchErrorContinuationOption; co > 0 {
-		if co == kmip.Undo {
+		if co == kmip.BatchErrorContinuationOptionUndo {
 			// Reject request if set to Undo as we don't support transactions
-			return nil, Errorf(kmip.ReasonFeatureNotSupported, `"Undo" BatchErrorContinuationOption is not supported`)
+			return nil, Errorf(kmip.ResultReasonFeatureNotSupported, `"Undo" BatchErrorContinuationOption is not supported`)
 		}
 		errorContinuationOption = co
 	}
 
 	if int(req.Header.BatchCount) != len(req.BatchItem) {
-		return nil, Errorf(kmip.ReasonInvalidMessage, "Batch Count Mismatch")
+		return nil, Errorf(kmip.ResultReasonInvalidMessage, "Batch Count Mismatch")
 	}
 	response := &kmip.ResponseMessage{
 		Header: kmip.ResponseHeader{
@@ -134,14 +134,14 @@ func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestM
 			response.BatchItem[i] = kmip.ResponseBatchItem{
 				Operation:         req.BatchItem[i].Operation,
 				UniqueBatchItemID: req.BatchItem[i].UniqueBatchItemID,
-				ResultStatus:      kmip.StatusOperationFailed,
-				ResultReason:      kmip.ReasonOperationCanceledByRequester,
+				ResultStatus:      kmip.ResultStatusOperationFailed,
+				ResultReason:      kmip.ResultReasonOperationCanceledByRequester,
 				ResultMessage:     "Batch has stopped because of an error",
 			}
 			continue
 		}
 		response.BatchItem[i] = exec.executeItem(ctx, req.BatchItem[i])
-		if response.BatchItem[i].ResultStatus == kmip.StatusOperationFailed && errorContinuationOption == kmip.Stop {
+		if response.BatchItem[i].ResultStatus == kmip.ResultStatusOperationFailed && errorContinuationOption == kmip.BatchErrorContinuationOptionStop {
 			stopped = true
 		}
 	}
@@ -179,7 +179,7 @@ func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatch
 	if me := bi.MessageExtension; me != nil {
 		if me.CriticalityIndicator {
 			//TODO: When batch item middleware support has landed, move this into a middleware maybe
-			exec.handleBatchItemError(ctx, &resp, Errorf(kmip.ReasonFeatureNotSupported, "Critical message extension not supported"))
+			exec.handleBatchItemError(ctx, &resp, Errorf(kmip.ResultReasonFeatureNotSupported, "Critical message extension not supported"))
 			return resp
 		}
 	}

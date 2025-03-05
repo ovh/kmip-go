@@ -32,8 +32,8 @@ func TestRegisterRequestPayload_Encode_Decode(t *testing.T) {
 		ObjectType:        kmip.ObjectTypeSecretData,
 		TemplateAttribute: kmip.TemplateAttribute{},
 		Object: &kmip.SecretData{
-			SecretDataType: kmip.Password,
-			KeyBlock:       kmip.KeyBlock{KeyFormatType: kmip.KeyFormatRaw, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &secret}}}},
+			SecretDataType: kmip.SecretDataTypePassword,
+			KeyBlock:       kmip.KeyBlock{KeyFormatType: kmip.KeyFormatTypeRaw, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &secret}}}},
 		},
 	}
 

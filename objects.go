@@ -51,7 +51,7 @@ func (sd *SecretData) ObjectType() ObjectType {
 
 func (sd *SecretData) Data() ([]byte, error) {
 	switch sd.KeyBlock.KeyFormatType {
-	case KeyFormatRaw, KeyFormatOpaque:
+	case KeyFormatTypeRaw, KeyFormatTypeOpaque:
 		return sd.KeyBlock.GetBytes()
 	default:
 		return nil, fmt.Errorf("Unsupported key format type %s", ttlv.EnumStr(sd.KeyBlock.KeyFormatType))
@@ -68,8 +68,8 @@ func (sd *Certificate) ObjectType() ObjectType {
 }
 
 func (sd *Certificate) X509Certificate() (*x509.Certificate, error) {
-	if sd.CertificateType != X_509 {
-		return nil, fmt.Errorf("Unsupported certificate type. Got %s but want %s", ttlv.EnumStr(sd.CertificateType), ttlv.EnumStr(X_509))
+	if sd.CertificateType != CertificateTypeX_509 {
+		return nil, fmt.Errorf("Unsupported certificate type. Got %s but want %s", ttlv.EnumStr(sd.CertificateType), ttlv.EnumStr(CertificateTypeX_509))
 	}
 	return x509.ParseCertificate(sd.CertificateValue)
 }
@@ -98,9 +98,9 @@ func (sd *SymmetricKey) ObjectType() ObjectType {
 
 func (sd *SymmetricKey) KeyMaterial() ([]byte, error) {
 	switch sd.KeyBlock.KeyFormatType {
-	case KeyFormatRaw:
+	case KeyFormatTypeRaw:
 		return sd.KeyBlock.GetBytes()
-	case KeyFormatTransparentSymmetricKey:
+	case KeyFormatTypeTransparentSymmetricKey:
 		mat, err := sd.KeyBlock.GetMaterial()
 		if err != nil {
 			return nil, err
@@ -124,13 +124,13 @@ func (sd *PublicKey) ObjectType() ObjectType {
 
 func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatPKCS_1:
+	case KeyFormatTypePKCS_1:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
 		}
 		return x509.ParsePKCS1PublicKey(raw)
-	case KeyFormatX_509:
+	case KeyFormatTypeX_509:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -144,7 +144,7 @@ func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 			return nil, errors.New("SPKI key is not an RSA public key")
 		}
 		return rk, nil
-	case KeyFormatTransparentRSAPublicKey:
+	case KeyFormatTypeTransparentRSAPublicKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != RSA {
 		// 	return nil, errors.New("Invalid cryptographic algorithm")
 		// }
@@ -173,7 +173,7 @@ func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 
 func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatX_509:
+	case KeyFormatTypeX_509:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -187,7 +187,7 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 			return nil, errors.New("SPKI key is not an ECDSA public key")
 		}
 		return rk, nil
-	case KeyFormatTransparentECDSAPublicKey, KeyFormatTransparentECPublicKey:
+	case KeyFormatTypeTransparentECDSAPublicKey, KeyFormatTypeTransparentECPublicKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || (*alg != ECDSA && *alg != EC) {
 		// 	return nil, errors.New("Invalid cryptographic algorithm")
 		// }
@@ -197,18 +197,18 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 		}
 		tkey := (*TransparentECPublicKey)(mat.TransparentECDSAPublicKey)
 		// KMIP 1.3 unified all elliptic curve keys into a single type
-		if key.KeyBlock.KeyFormatType == KeyFormatTransparentECPublicKey {
+		if key.KeyBlock.KeyFormatType == KeyFormatTypeTransparentECPublicKey {
 			tkey = mat.TransparentECPublicKey
 		}
 		var curve elliptic.Curve
 		switch tkey.RecommendedCurve {
-		case P_224:
+		case RecommendedCurveP_224:
 			curve = elliptic.P224()
-		case P_256:
+		case RecommendedCurveP_256:
 			curve = elliptic.P256()
-		case P_384:
+		case RecommendedCurveP_384:
 			curve = elliptic.P384()
-		case P_521:
+		case RecommendedCurveP_521:
 			curve = elliptic.P521()
 		default:
 			return nil, fmt.Errorf("Unsupported elliptic curve %s", ttlv.EnumStr(tkey.RecommendedCurve))
@@ -217,19 +217,19 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 		rkey := &ecdsa.PublicKey{
 			Curve: curve,
 		}
-		compressionType := ECPublicKeyTypeUncompressed
+		compressionType := KeyCompressionTypeECPublicKeyTypeUncompressed
 		if key.KeyBlock.KeyCompressionType > 0 {
 			compressionType = key.KeyBlock.KeyCompressionType
 		}
 
 		switch compressionType {
-		case ECPublicKeyTypeUncompressed:
+		case KeyCompressionTypeECPublicKeyTypeUncompressed:
 			//nolint:staticcheck // We need this function compute ECDSA public key
 			rkey.X, rkey.Y = elliptic.Unmarshal(curve, tkey.QString)
 			if rkey.X == nil {
 				return nil, errors.New("Invalid public key")
 			}
-		case ECPublicKeyTypeX9_62CompressedPrime:
+		case KeyCompressionTypeECPublicKeyTypeX9_62CompressedPrime:
 			rkey.X, rkey.Y = elliptic.UnmarshalCompressed(curve, tkey.QString)
 			if rkey.X == nil {
 				return nil, errors.New("Invalid public key")
@@ -246,11 +246,11 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 // CryptoPublicKey parses and return the public key object into a go [crypto.PublicKey] object.
 func (key *PublicKey) CryptoPublicKey() (crypto.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatTransparentECPublicKey, KeyFormatTransparentECDSAPublicKey:
+	case KeyFormatTypeTransparentECPublicKey, KeyFormatTypeTransparentECDSAPublicKey:
 		return key.ECDSA()
-	case KeyFormatPKCS_1, KeyFormatTransparentRSAPublicKey:
+	case KeyFormatTypePKCS_1, KeyFormatTypeTransparentRSAPublicKey:
 		return key.RSA()
-	case KeyFormatX_509:
+	case KeyFormatTypeX_509:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -286,13 +286,13 @@ func (sd *PrivateKey) ObjectType() ObjectType {
 
 func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatPKCS_1:
+	case KeyFormatTypePKCS_1:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
 		}
 		return x509.ParsePKCS1PrivateKey(raw)
-	case KeyFormatPKCS_8:
+	case KeyFormatTypePKCS_8:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -306,7 +306,7 @@ func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 			return nil, errors.New("PKCS8 key is not an RSA private key")
 		}
 		return rk, nil
-	case KeyFormatTransparentRSAPrivateKey:
+	case KeyFormatTypeTransparentRSAPrivateKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != RSA {
 		// 	return nil, errors.New("Invalid cryptographic algorithm")
 		// }
@@ -352,13 +352,13 @@ func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 
 func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatECPrivateKey:
+	case KeyFormatTypeECPrivateKey:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
 		}
 		return x509.ParseECPrivateKey(raw)
-	case KeyFormatPKCS_8:
+	case KeyFormatTypePKCS_8:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -372,7 +372,7 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 			return nil, errors.New("PKCS8 key is not an ECDSA private key")
 		}
 		return rk, nil
-	case KeyFormatTransparentECDSAPrivateKey, KeyFormatTransparentECPrivateKey:
+	case KeyFormatTypeTransparentECDSAPrivateKey, KeyFormatTypeTransparentECPrivateKey:
 		// if alg := key.KeyBlock.CryptographicAlgorithm; alg == nil || *alg != ECDSA {
 		// 	return nil, errors.New("Invalid cryptographic algorithm")
 		// }
@@ -382,19 +382,19 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 		}
 		tkey := (*TransparentECPrivateKey)(mat.TransparentECDSAPrivateKey)
 		// KMIP 1.3 unified all elliptic curve keys into a single type
-		if key.KeyBlock.KeyFormatType == KeyFormatTransparentECPrivateKey {
+		if key.KeyBlock.KeyFormatType == KeyFormatTypeTransparentECPrivateKey {
 			tkey = mat.TransparentECPrivateKey
 		}
 
 		var curve elliptic.Curve
 		switch tkey.RecommendedCurve {
-		case P_224:
+		case RecommendedCurveP_224:
 			curve = elliptic.P224()
-		case P_256:
+		case RecommendedCurveP_256:
 			curve = elliptic.P256()
-		case P_384:
+		case RecommendedCurveP_384:
 			curve = elliptic.P384()
-		case P_521:
+		case RecommendedCurveP_521:
 			curve = elliptic.P521()
 		default:
 			return nil, fmt.Errorf("Unsupported elliptic curve %s", ttlv.EnumStr(tkey.RecommendedCurve))
@@ -417,11 +417,11 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 // CryptoPrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
 func (key *PrivateKey) CryptoPrivateKey() (crypto.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
-	case KeyFormatECPrivateKey, KeyFormatTransparentECPrivateKey, KeyFormatTransparentECDSAPrivateKey:
+	case KeyFormatTypeECPrivateKey, KeyFormatTypeTransparentECPrivateKey, KeyFormatTypeTransparentECDSAPrivateKey:
 		return key.ECDSA()
-	case KeyFormatPKCS_1, KeyFormatTransparentRSAPrivateKey:
+	case KeyFormatTypePKCS_1, KeyFormatTypeTransparentRSAPrivateKey:
 		return key.RSA()
-	case KeyFormatPKCS_8:
+	case KeyFormatTypePKCS_8:
 		raw, err := key.KeyBlock.GetBytes()
 		if err != nil {
 			return nil, err
@@ -556,21 +556,21 @@ type KeyMaterial struct {
 
 func (km *KeyMaterial) decode(d *ttlv.Decoder, tag int, format KeyFormatType) error {
 	switch format {
-	case KeyFormatRaw, KeyFormatECPrivateKey, KeyFormatPKCS_1, KeyFormatPKCS_8, KeyFormatX_509, KeyFormatOpaque:
+	case KeyFormatTypeRaw, KeyFormatTypeECPrivateKey, KeyFormatTypePKCS_1, KeyFormatTypePKCS_8, KeyFormatTypeX_509, KeyFormatTypeOpaque:
 		return d.TagAny(tag, &km.Bytes)
-	case KeyFormatTransparentSymmetricKey:
+	case KeyFormatTypeTransparentSymmetricKey:
 		return d.TagAny(tag, &km.TransparentSymmetricKey)
-	case KeyFormatTransparentECDSAPrivateKey:
+	case KeyFormatTypeTransparentECDSAPrivateKey:
 		return d.TagAny(tag, &km.TransparentECDSAPrivateKey)
-	case KeyFormatTransparentECDSAPublicKey:
+	case KeyFormatTypeTransparentECDSAPublicKey:
 		return d.TagAny(tag, &km.TransparentECDSAPublicKey)
-	case KeyFormatTransparentRSAPrivateKey:
+	case KeyFormatTypeTransparentRSAPrivateKey:
 		return d.TagAny(tag, &km.TransparentRSAPrivateKey)
-	case KeyFormatTransparentRSAPublicKey:
+	case KeyFormatTypeTransparentRSAPublicKey:
 		return d.TagAny(tag, &km.TransparentRSAPublicKey)
-	case KeyFormatTransparentECPrivateKey:
+	case KeyFormatTypeTransparentECPrivateKey:
 		return d.TagAny(tag, &km.TransparentECPrivateKey)
-	case KeyFormatTransparentECPublicKey:
+	case KeyFormatTypeTransparentECPublicKey:
 		return d.TagAny(tag, &km.TransparentECPublicKey)
 	}
 	return fmt.Errorf("Unsupported key format %X", format)

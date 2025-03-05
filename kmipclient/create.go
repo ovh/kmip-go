@@ -43,15 +43,15 @@ func (ex ExecCreateWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, lengt
 }
 
 func (ex ExecCreateWantType) AES(length int, usage kmip.CryptographicUsageMask) ExecCreate {
-	return ex.SymmetricKey(kmip.AES, length, usage)
+	return ex.SymmetricKey(kmip.CryptographicAlgorithmAES, length, usage)
 }
 
 func (ex ExecCreateWantType) TDES(length int, usage kmip.CryptographicUsageMask) ExecCreate {
-	return ex.SymmetricKey(kmip.TDES, length, usage)
+	return ex.SymmetricKey(kmip.CryptographicAlgorithmTDES, length, usage)
 }
 
 func (ex ExecCreateWantType) Skipjack(usage kmip.CryptographicUsageMask) ExecCreate {
-	return ex.SymmetricKey(kmip.SKIPJACK, 80, usage)
+	return ex.SymmetricKey(kmip.CryptographicAlgorithmSKIPJACK, 80, usage)
 }
 
 type ExecCreate struct {
