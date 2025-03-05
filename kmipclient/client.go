@@ -26,6 +26,7 @@ type opts struct {
 	certs             []tls.Certificate
 	serverName        string
 	tlsCfg            *tls.Config
+	tlsCiphers        []uint16
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
@@ -36,7 +37,6 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 		cfg = &tls.Config{
 			MinVersion: tls.VersionTLS12, // As required by KMIP 1.4 spec
 
-			// // TODO: Make cipher suites configurable and do not add by default legacy ones
 			// CipherSuites: []uint16{
 			// 	// Mandatory support as per KMIP 1.4 spec
 			// 	// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
@@ -71,6 +71,13 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 	if cfg.ServerName == "" {
 		cfg.ServerName = o.serverName
 	}
+
+	for _, cipher := range o.tlsCiphers {
+		if !slices.Contains(cfg.CipherSuites, cipher) {
+			cfg.CipherSuites = append(cfg.CipherSuites, cipher)
+		}
+	}
+
 	return cfg, nil
 }
 
@@ -163,6 +170,37 @@ func WithServerName(name string) Option {
 func WithTlsConfig(cfg *tls.Config) Option {
 	return func(o *opts) error {
 		o.tlsCfg = cfg
+		return nil
+	}
+}
+
+func WithTlsCipherSuiteNames(ciphers ...string) Option {
+	return func(o *opts) error {
+	search:
+		for _, cipherName := range ciphers {
+			for _, s := range tls.CipherSuites() {
+				if s.Name != cipherName {
+					continue
+				}
+				o.tlsCiphers = append(o.tlsCiphers, s.ID)
+				continue search
+			}
+			for _, s := range tls.InsecureCipherSuites() {
+				if s.Name != cipherName {
+					continue
+				}
+				o.tlsCiphers = append(o.tlsCiphers, s.ID)
+				continue search
+			}
+			return fmt.Errorf("invalid TLS cipher name %q", cipherName)
+		}
+		return nil
+	}
+}
+
+func WithTlsCipherSuites(ciphers ...uint16) Option {
+	return func(o *opts) error {
+		o.tlsCiphers = append(o.tlsCiphers, ciphers...)
 		return nil
 	}
 }
