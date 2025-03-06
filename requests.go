@@ -13,7 +13,7 @@ type RequestMessage struct {
 }
 
 func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) RequestMessage {
-	timestamp := time.Now().Round(time.Second)
+	timestamp := time.Now().Truncate(time.Second)
 	msg := RequestMessage{
 		Header: RequestHeader{
 			ProtocolVersion: version,
