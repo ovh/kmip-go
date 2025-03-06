@@ -481,11 +481,14 @@ func structDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.V
 		}
 		if info.vrange != nil {
 			ff := ffunc
-			ffunc = func(d *Decoder, _ int, v reflect.Value) error {
-				if !d.versionIn(*info.vrange) {
+			ffunc = func(d *Decoder, i int, v reflect.Value) error {
+				// If the field is not for current version, consider it optional
+				// (but still accept and decode it if it's present)
+				if !d.versionIn(*info.vrange) && d.Tag() != i {
+					v.SetZero()
 					return nil
 				}
-				return ff(d, numTag, v)
+				return ff(d, i, v)
 			}
 		}
 		if info.setVersion {
