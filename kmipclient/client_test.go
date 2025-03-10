@@ -2,27 +2,20 @@ package kmipclient_test
 
 import (
 	"context"
+	"os"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/ovh/kmip-go"
+	"github.com/ovh/kmip-go/kmipclient"
 	"github.com/ovh/kmip-go/kmipserver"
 	"github.com/ovh/kmip-go/kmiptest"
 	"github.com/ovh/kmip-go/payloads"
+	"github.com/ovh/kmip-go/ttlv"
 
 	"github.com/stretchr/testify/require"
 )
-
-// func testClientRequest[Req, Resp kmip.OperationPayload](t *testing.T, tf func(*kmipclient.Client) *kmipclient.Executor[Req, Resp], f func(*testing.T, Req) (Resp, error)) (Resp, error) {
-// 	mux := kmipserver.NewBatchExecutor()
-// 	client := kmiptest.NewClientAndServer(t, mux)
-// 	req := tf(client)
-// 	mux.Route(req.RequestPayload().Operation(), kmipserver.HandleFunc(func(ctx context.Context, pl Req) (Resp, error) {
-// 		return f(t, pl)
-// 	}))
-// 	return req.Exec()
-// }
 
 func TestRequest_ContextTimeout(t *testing.T) {
 	mux := kmipserver.NewBatchExecutor()
@@ -214,4 +207,74 @@ func TestClone(t *testing.T) {
 	require.NoError(t, err)
 	_, err = client3.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
 	require.NoError(t, err)
+}
+
+func TestVersionNegociation(t *testing.T) {
+	router := kmipserver.NewBatchExecutor()
+	router.Route(kmip.OperationDiscoverVersions, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsResponsePayload, error) {
+		return &payloads.DiscoverVersionsResponsePayload{
+			ProtocolVersion: []kmip.ProtocolVersion{
+				kmip.V1_3, kmip.V1_2,
+			},
+		}, nil
+	}))
+	addr, ca := kmiptest.NewServer(t, router)
+	client, err := kmipclient.Dial(
+		addr,
+		kmipclient.WithRootCAPem([]byte(ca)),
+		kmipclient.WithMiddlewares(
+			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
+		),
+		kmipclient.WithKmipVersions(kmip.V1_2, kmip.V1_3),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	require.EqualValues(t, client.Version(), kmip.V1_3)
+}
+
+func TestVersionNegociation_NoCommon(t *testing.T) {
+	router := kmipserver.NewBatchExecutor()
+	router.Route(kmip.OperationDiscoverVersions, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsResponsePayload, error) {
+		return &payloads.DiscoverVersionsResponsePayload{
+			ProtocolVersion: []kmip.ProtocolVersion{},
+		}, nil
+	}))
+	addr, ca := kmiptest.NewServer(t, router)
+	client, err := kmipclient.Dial(
+		addr,
+		kmipclient.WithRootCAPem([]byte(ca)),
+		kmipclient.WithMiddlewares(
+			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
+		),
+		kmipclient.WithKmipVersions(kmip.V1_1, kmip.V1_2),
+	)
+	require.Error(t, err)
+	require.Nil(t, client)
+}
+
+func TestVersionNegociation_v1_0_Fallback(t *testing.T) {
+	router := kmipserver.NewBatchExecutor()
+	router.Route(kmip.OperationDiscoverVersions, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsResponsePayload, error) {
+		return nil, kmipserver.ErrOperationNotSupported
+	}))
+	client := kmiptest.NewClientAndServer(t, router)
+	require.EqualValues(t, client.Version(), kmip.V1_0)
+}
+
+func TestVersionNegociation_v1_0_Fallback_unsupported(t *testing.T) {
+	router := kmipserver.NewBatchExecutor()
+	router.Route(kmip.OperationDiscoverVersions, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsResponsePayload, error) {
+		return nil, kmipserver.ErrOperationNotSupported
+	}))
+	addr, ca := kmiptest.NewServer(t, router)
+	client, err := kmipclient.Dial(
+		addr,
+		kmipclient.WithRootCAPem([]byte(ca)),
+		kmipclient.WithMiddlewares(
+			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
+		),
+		kmipclient.WithKmipVersions(kmip.V1_3, kmip.V1_4),
+	)
+	require.Error(t, err)
+	require.Nil(t, client)
 }

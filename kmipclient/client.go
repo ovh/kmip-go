@@ -294,6 +294,7 @@ func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
 		dialer:            c.dialer,
 		middlewares:       slices.Clone(c.middlewares),
 		conn:              stream,
+		addr:              c.addr,
 	}, nil
 }
 
@@ -379,10 +380,12 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 		return errors.New("Unexpected batch item count")
 	}
 	bi := resp.BatchItem[0]
-	if bi.ResultStatus == kmip.ResultStatusOperationFailed &&
-		(bi.ResultReason == kmip.ResultReasonOperationNotSupported /*|| bi.ResultReason == kmip.ReasonInvalidMessage && bi.Operation == 0x00*/) {
+	if bi.ResultStatus == kmip.ResultStatusOperationFailed && bi.ResultReason == kmip.ResultReasonOperationNotSupported {
 		// If the discover opertion is not supported, then fallbacks to kmip v1.0
-		// TODO: Check that v1.0 is in the client's supported version list and return an error if not
+		// but also check that v1.0 is in the client's supported version list and return an error if not.
+		if !slices.Contains(c.supportedVersions, kmip.V1_0) {
+			return errors.New("Protocol version negotiation failed. No common version found")
+		}
 		c.version = &kmip.V1_0
 		return nil
 	}
