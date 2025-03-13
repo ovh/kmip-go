@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -91,7 +92,7 @@ func test_crypto_signer_rsa_pkcs1_15(client *kmipclient.Client) {
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
 		MustExec()
 
-	signer, err := client.Signer(key.PrivateKeyUniqueIdentifier)
+	signer, err := client.Signer(context.Background(), key.PrivateKeyUniqueIdentifier)
 	if err != nil {
 		panic(err)
 	}

@@ -115,7 +115,7 @@ func TestCryptoSignerRSA(t *testing.T) {
 
 	data := []byte("hello world")
 
-	signer, err := client.Signer("private-key-rsa")
+	signer, err := client.Signer(context.Background(), "private-key-rsa")
 	require.NoError(t, err)
 
 	for _, hashfunc := range []crypto.Hash{crypto.SHA256, crypto.SHA384, crypto.SHA512} {
@@ -254,7 +254,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 					digest := h.Sum(nil)
 
 					t.Run("ASN1", func(t *testing.T) {
-						signer, err := client.Signer("private-key-ecdsa")
+						signer, err := client.Signer(context.Background(), "private-key-ecdsa")
 						require.NoError(t, err)
 
 						sig, err := signer.Sign(rand.Reader, digest[:], hashfunc)
@@ -265,7 +265,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 					})
 
 					t.Run("RAW", func(t *testing.T) {
-						signer, err := client.Signer("private-key-ecdsa-raw")
+						signer, err := client.Signer(context.Background(), "private-key-ecdsa-raw")
 						require.NoError(t, err)
 
 						sig, err := signer.Sign(rand.Reader, digest[:], hashfunc)
