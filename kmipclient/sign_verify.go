@@ -1,6 +1,7 @@
 package kmipclient
 
 import (
+	"context"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -120,7 +121,7 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 
 // Signer returns a crypto.Signer implementation using the remote private key for signing.
 // The public key must be non sensitive and extractable. The private key must be linked to its publickey.
-func (c *Client) Signer(privateKeyId string) (crypto.Signer, error) {
+func (c *Client) Signer(ctx context.Context, privateKeyId string) (crypto.Signer, error) {
 	signer := &cryptoSigner{
 		client:       c,
 		privateKeyId: privateKeyId,
@@ -131,7 +132,7 @@ func (c *Client) Signer(privateKeyId string) (crypto.Signer, error) {
 	//        - Key has Sign usage mask
 	//        - Has public key link
 	//        - Has supported algorithm
-	pubKeyId, err := signer.verifySignerKeyAttributes(privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign)
+	pubKeyId, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign)
 	if err != nil {
 		return nil, err
 	}
@@ -142,12 +143,12 @@ func (c *Client) Signer(privateKeyId string) (crypto.Signer, error) {
 	//		  - Key is public key
 	//        - Key has same algorithm than private key
 	//        - Key has Verify usage mask
-	if _, err := signer.verifySignerKeyAttributes(pubKeyId, kmip.ObjectTypePublicKey, kmip.CryptographicUsageVerify); err != nil {
+	if _, err := signer.verifySignerKeyAttributes(ctx, pubKeyId, kmip.ObjectTypePublicKey, kmip.CryptographicUsageVerify); err != nil {
 		return nil, err
 	}
 
 	// Get and save public key material
-	resp, err := c.Get(pubKeyId).Exec()
+	resp, err := c.Get(pubKeyId).ExecContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -248,13 +249,13 @@ func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpt
 	return resp.SignatureData, nil
 }
 
-func (c *cryptoSigner) verifySignerKeyAttributes(id string, expectedObjectType kmip.ObjectType, expectedUsageMask kmip.CryptographicUsageMask) (string, error) {
+func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string, expectedObjectType kmip.ObjectType, expectedUsageMask kmip.CryptographicUsageMask) (string, error) {
 	resp, err := c.client.GetAttributes(id,
 		kmip.AttributeNameObjectType,
 		kmip.AttributeNameCryptographicAlgorithm,
 		kmip.AttributeNameLink,
 		kmip.AttributeNameCryptographicUsageMask,
-	).Exec()
+	).ExecContext(ctx)
 	if err != nil {
 		return "", err
 	}

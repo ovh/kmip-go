@@ -43,7 +43,9 @@ func (bi *ResponseBatchItem) Err() error {
 
 func (pv *ResponseBatchItem) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 	e.Struct(TagBatchItem, func(e *ttlv.Encoder) {
-		e.Any(pv.Operation)
+		if pv.Operation != 0 {
+			e.Any(pv.Operation)
+		}
 		if len(pv.UniqueBatchItemID) > 0 {
 			e.ByteString(TagUniqueBatchItemID, pv.UniqueBatchItemID)
 		}
