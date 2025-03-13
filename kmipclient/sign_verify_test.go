@@ -38,6 +38,7 @@ func TestCryptoSignerRSA(t *testing.T) {
 			resp.Attribute = []kmip.Attribute{
 				{AttributeName: kmip.AttributeNameObjectType, AttributeValue: kmip.ObjectTypePublicKey},
 				{AttributeName: kmip.AttributeNameCryptographicAlgorithm, AttributeValue: kmip.CryptographicAlgorithmRSA},
+				{AttributeName: kmip.AttributeNameLink, AttributeValue: kmip.Link{LinkType: kmip.LinkTypePrivateKeyLink, LinkedObjectIdentifier: "private-key-rsa"}},
 				{AttributeName: kmip.AttributeNameCryptographicUsageMask, AttributeValue: kmip.CryptographicUsageVerify},
 			}
 		default:
@@ -115,7 +116,7 @@ func TestCryptoSignerRSA(t *testing.T) {
 
 	data := []byte("hello world")
 
-	signer, err := client.Signer(context.Background(), "private-key-rsa")
+	signer, err := client.Signer(context.Background(), "", "public-key-rsa")
 	require.NoError(t, err)
 
 	for _, hashfunc := range []crypto.Hash{crypto.SHA256, crypto.SHA384, crypto.SHA512} {
@@ -181,6 +182,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 					resp.Attribute = []kmip.Attribute{
 						{AttributeName: kmip.AttributeNameObjectType, AttributeValue: kmip.ObjectTypePublicKey},
 						{AttributeName: kmip.AttributeNameCryptographicAlgorithm, AttributeValue: kmip.CryptographicAlgorithmEC},
+						{AttributeName: kmip.AttributeNameLink, AttributeValue: kmip.Link{LinkType: kmip.LinkTypePrivateKeyLink, LinkedObjectIdentifier: "private-key-ecdsa"}},
 						{AttributeName: kmip.AttributeNameCryptographicUsageMask, AttributeValue: kmip.CryptographicUsageVerify},
 					}
 				default:
@@ -254,7 +256,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 					digest := h.Sum(nil)
 
 					t.Run("ASN1", func(t *testing.T) {
-						signer, err := client.Signer(context.Background(), "private-key-ecdsa")
+						signer, err := client.Signer(context.Background(), "private-key-ecdsa", "public-key-ecdsa")
 						require.NoError(t, err)
 
 						sig, err := signer.Sign(rand.Reader, digest[:], hashfunc)
@@ -265,7 +267,7 @@ func TestCryptoSignerECDSA(t *testing.T) {
 					})
 
 					t.Run("RAW", func(t *testing.T) {
-						signer, err := client.Signer(context.Background(), "private-key-ecdsa-raw")
+						signer, err := client.Signer(context.Background(), "private-key-ecdsa-raw", "")
 						require.NoError(t, err)
 
 						sig, err := signer.Sign(rand.Reader, digest[:], hashfunc)

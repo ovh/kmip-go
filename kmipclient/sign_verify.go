@@ -121,34 +121,64 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 
 // Signer returns a crypto.Signer implementation using the remote private key for signing.
 // The public key must be non sensitive and extractable. The private key must be linked to its publickey.
-func (c *Client) Signer(ctx context.Context, privateKeyId string) (crypto.Signer, error) {
+//
+// At least one of privateKeyId or publicKeyId must be given. If only one of them is given, the other will be retrieved
+// from the appropriate Link attribute.
+func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
+	if privateKeyId == "" && publicKeyId == "" {
+		return nil, errors.New("at least one of public key or private key ID must be given")
+	}
 	signer := &cryptoSigner{
-		client:       c,
-		privateKeyId: privateKeyId,
+		client: c,
 	}
 
-	// Get key attributes and verify:
-	//        - Key is a private key object
-	//        - Key has Sign usage mask
-	//        - Has public key link
-	//        - Has supported algorithm
-	pubKeyId, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign)
-	if err != nil {
-		return nil, err
+	// If privateKey is given then check its attributes.
+	if privateKeyId != "" {
+		// Get key attributes and verify:
+		//        - Key is a private key object
+		//        - Key has Sign usage mask
+		//        - Has public key link
+		//        - Has supported algorithm
+		pubKeyId, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign)
+		if err != nil {
+			return nil, err
+		}
+		// If public key is not given then use the linked publicKeyId we found.
+		if publicKeyId == "" {
+			publicKeyId = pubKeyId
+		}
 	}
-	if pubKeyId == "" {
-		return nil, fmt.Errorf("failed to find public key ID")
+	// At this point, publicKeyId must not be empty, otherwise it's a failure.
+	if publicKeyId == "" {
+		return nil, fmt.Errorf("failed to find public key")
 	}
 	// Check public key attributes:
 	//		  - Key is public key
 	//        - Key has same algorithm than private key
 	//        - Key has Verify usage mask
-	if _, err := signer.verifySignerKeyAttributes(ctx, pubKeyId, kmip.ObjectTypePublicKey, kmip.CryptographicUsageVerify); err != nil {
+	privKeyId, err := signer.verifySignerKeyAttributes(ctx, publicKeyId, kmip.ObjectTypePublicKey, kmip.CryptographicUsageVerify)
+	if err != nil {
 		return nil, err
 	}
 
+	// If private key is not given, then use the linked one we found when checking the public key
+	if privateKeyId == "" {
+		privateKeyId = privKeyId
+		// At this point, if privateKeyId is still empty, it's a failure
+		if privateKeyId == "" {
+			return nil, fmt.Errorf("failed to find private key")
+		}
+		// Check the found private key attributes.
+		if _, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign); err != nil {
+			return nil, err
+		}
+	}
+
+	// Save the private key ID for later usage.
+	signer.privateKeyId = privateKeyId
+
 	// Get and save public key material
-	resp, err := c.Get(pubKeyId).ExecContext(ctx)
+	resp, err := c.Get(publicKeyId).ExecContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -209,14 +239,18 @@ func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpt
 			return nil, errors.New("rsa.PSSOptions can only be used with RSA keys")
 		}
 		cparams.PaddingMethod = kmip.PaddingMethodPSS
-		if pss.SaltLength > 0 && pss.SaltLength < math.MaxInt32 {
-			//XXX: Maybe differentiate between rsa.PSSSaltLengthEqualsHash and rsa.PSSSaltLengthAuto.
-			//     Not sure what the KMIP server would choose by default.
+		cparams.MaskGenerator = kmip.MaskGeneratorMGF1
+		cparams.MaskGeneratorHashingAlgorithm = hashAlg
+		if pss.SaltLength > rsa.PSSSaltLengthAuto && pss.SaltLength < math.MaxInt32 {
+			// In case of rsa.PSSSaltLengthAuto we don't add saltlength, and let the server decide for us.
+			// Signature verification will autodetect the salt length used.
 			saltLength := int32(pss.SaltLength)
 			cparams.SaltLength = &saltLength
 		} else if pss.SaltLength == rsa.PSSSaltLengthEqualsHash {
 			saltLength := int32(opts.HashFunc().Size())
 			cparams.SaltLength = &saltLength
+		} else if pss.SaltLength < rsa.PSSSaltLengthEqualsHash {
+			return nil, errors.New("invalide salt length given")
 		}
 	}
 
@@ -260,7 +294,7 @@ func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string,
 		return "", err
 	}
 
-	pubKeyId := ""
+	linkedKeyId := ""
 
 	for _, attr := range resp.Attribute {
 		switch attr.AttributeName {
@@ -274,27 +308,24 @@ func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string,
 			if alg != kmip.CryptographicAlgorithmRSA && alg != kmip.CryptographicAlgorithmEC && alg != kmip.CryptographicAlgorithmECDSA {
 				return "", fmt.Errorf("unsupported cryptographic algorithm %s", ttlv.EnumStr(alg))
 			}
-			if expectedObjectType == kmip.ObjectTypePrivateKey {
+			if c.alg == 0 {
 				c.alg = alg
 			} else if alg != c.alg {
 				return "", fmt.Errorf("invalid cryptographic algorithm %s", ttlv.EnumStr(alg))
 			}
 
 		case kmip.AttributeNameLink:
-			// Get public key id
-			if expectedObjectType != kmip.ObjectTypePrivateKey {
-				continue
-			}
-			if ln := attr.AttributeValue.(kmip.Link); ln.LinkType == kmip.LinkTypePublicKeyLink {
-				pubKeyId = ln.LinkedObjectIdentifier
+			// Get public or private key id
+			if ln := attr.AttributeValue.(kmip.Link); ln.LinkType == kmip.LinkTypePublicKeyLink && expectedObjectType == kmip.ObjectTypePrivateKey || ln.LinkType == kmip.LinkTypePrivateKeyLink && expectedObjectType == kmip.ObjectTypePublicKey {
+				linkedKeyId = ln.LinkedObjectIdentifier
 			}
 		case kmip.AttributeNameCryptographicUsageMask:
 			if cum := attr.AttributeValue.(kmip.CryptographicUsageMask); cum&expectedUsageMask == 0 {
-				return "", fmt.Errorf("Unexpected usage mask (got %s, wants %s)", ttlv.BitmaskStr(cum, "|"), ttlv.BitmaskStr(expectedUsageMask, "|"))
+				return "", fmt.Errorf("unexpected usage mask (got %s, wants %s)", ttlv.BitmaskStr(cum, "|"), ttlv.BitmaskStr(expectedUsageMask, "|"))
 			}
 		}
 	}
-	return pubKeyId, nil
+	return linkedKeyId, nil
 }
 
 // convertRawECDSAToASN1DER converts a raw ECDSA signature (r || s) into ASN.1 DER format.

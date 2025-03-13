@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -92,7 +93,7 @@ func test_crypto_signer_rsa_pkcs1_15(client *kmipclient.Client) {
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
 		MustExec()
 
-	signer, err := client.Signer(context.Background(), key.PrivateKeyUniqueIdentifier)
+	signer, err := client.Signer(context.Background(), key.PrivateKeyUniqueIdentifier, "")
 	if err != nil {
 		panic(err)
 	}
@@ -105,5 +106,49 @@ func test_crypto_signer_rsa_pkcs1_15(client *kmipclient.Client) {
 	err = rsa.VerifyPKCS1v15(signer.Public().(*rsa.PublicKey), crypto.SHA256, digest[:], sig)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func test_crypto_signer_rsa_pss(client *kmipclient.Client) {
+	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
+		Common().WithName("Test-Sign-RSA-4").
+		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
+		MustExec()
+
+	signer, err := client.Signer(context.Background(), "", key.PublicKeyUniqueIdentifier)
+	if err != nil {
+		panic(err)
+	}
+	data := []byte("hello world")
+	digest := sha256.Sum256(data)
+	sig, err := signer.Sign(rand.Reader, digest[:], &rsa.PSSOptions{Hash: crypto.SHA256})
+	if err != nil {
+		panic(err)
+	}
+	err = rsa.VerifyPSS(signer.Public().(*rsa.PublicKey), crypto.SHA256, digest[:], sig, &rsa.PSSOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func test_crypto_signer_ecdsa(client *kmipclient.Client) {
+	key := client.CreateKeyPair().ECDSA(kmip.RecommendedCurveP_256, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
+		Common().WithName("Test-Sign-ECDSA").
+		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
+		MustExec()
+
+	signer, err := client.Signer(context.Background(), key.PrivateKeyUniqueIdentifier, key.PublicKeyUniqueIdentifier)
+	if err != nil {
+		panic(err)
+	}
+	data := []byte("hello world")
+	digest := sha256.Sum256(data)
+	sig, err := signer.Sign(rand.Reader, digest[:], crypto.SHA256)
+	if err != nil {
+		panic(err)
+	}
+	ok := ecdsa.VerifyASN1(signer.Public().(*ecdsa.PublicKey), digest[:], sig)
+	if !ok {
+		panic("invalid signature")
 	}
 }

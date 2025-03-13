@@ -55,6 +55,8 @@ func main() {
 	test_sign_verify_rsa_pss(client)
 	test_sign_verify_ecdsa(client)
 	test_crypto_signer_rsa_pkcs1_15(client)
+	test_crypto_signer_rsa_pss(client)
+	test_crypto_signer_ecdsa(client)
 
 	test_state_transitions(client)
 	test_register(client)
