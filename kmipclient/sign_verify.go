@@ -141,7 +141,7 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 		//        - Has supported algorithm
 		pubKeyId, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid private key: %w", err)
 		}
 		// If public key is not given then use the linked publicKeyId we found.
 		if publicKeyId == "" {
@@ -150,7 +150,7 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 	}
 	// At this point, publicKeyId must not be empty, otherwise it's a failure.
 	if publicKeyId == "" {
-		return nil, fmt.Errorf("failed to find public key")
+		return nil, fmt.Errorf("link to public key is missing")
 	}
 	// Check public key attributes:
 	//		  - Key is public key
@@ -158,7 +158,7 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 	//        - Key has Verify usage mask
 	privKeyId, err := signer.verifySignerKeyAttributes(ctx, publicKeyId, kmip.ObjectTypePublicKey, kmip.CryptographicUsageVerify)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid public key: %w", err)
 	}
 
 	// If private key is not given, then use the linked one we found when checking the public key
@@ -166,11 +166,11 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 		privateKeyId = privKeyId
 		// At this point, if privateKeyId is still empty, it's a failure
 		if privateKeyId == "" {
-			return nil, fmt.Errorf("failed to find private key")
+			return nil, fmt.Errorf("link to private key is missing")
 		}
 		// Check the found private key attributes.
 		if _, err := signer.verifySignerKeyAttributes(ctx, privateKeyId, kmip.ObjectTypePrivateKey, kmip.CryptographicUsageSign); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid private key: %w", err)
 		}
 	}
 
@@ -180,11 +180,11 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 	// Get and save public key material
 	resp, err := c.Get(publicKeyId).ExecContext(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get public key material: %w", err)
 	}
 	signer.publicKey, err = resp.PublicKey()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid public key material: %w", err)
 	}
 
 	return signer, nil
@@ -250,7 +250,7 @@ func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpt
 			saltLength := int32(opts.HashFunc().Size())
 			cparams.SaltLength = &saltLength
 		} else if pss.SaltLength < rsa.PSSSaltLengthEqualsHash {
-			return nil, errors.New("invalide salt length given")
+			return nil, errors.New("invalid PSS salt length")
 		}
 	}
 
