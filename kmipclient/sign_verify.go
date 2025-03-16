@@ -247,8 +247,12 @@ func (c *cryptoSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpt
 			saltLength := int32(pss.SaltLength)
 			cparams.SaltLength = &saltLength
 		} else if pss.SaltLength == rsa.PSSSaltLengthEqualsHash {
-			saltLength := int32(opts.HashFunc().Size())
-			cparams.SaltLength = &saltLength
+			saltLength := opts.HashFunc().Size()
+			if saltLength < 0 || saltLength > math.MaxInt32 {
+				return nil, errors.New("invalid Hash size")
+			}
+			saltLength32 := int32(saltLength)
+			cparams.SaltLength = &saltLength32
 		} else if pss.SaltLength < rsa.PSSSaltLengthEqualsHash {
 			return nil, errors.New("invalid PSS salt length")
 		}

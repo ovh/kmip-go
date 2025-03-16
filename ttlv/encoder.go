@@ -230,12 +230,14 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	if isEnum(ty) {
 		enumtag, _ := getTagForType(ty)
 		return func(e *Encoder, tag int, v reflect.Value) {
+			//nolint:gosec // enums are uint32 already.
 			e.Enum(enumtag, tag, uint32(v.Uint()))
 		}
 	}
 	if isBitmask(ty) {
 		bitmasktag, _ := getTagForType(ty)
 		return func(e *Encoder, tag int, v reflect.Value) {
+			//nolint:gosec // bitmasks are int32 already.
 			e.Bitmask(bitmasktag, tag, int32(v.Int()))
 		}
 	}
@@ -281,14 +283,17 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 
 	case reflect.Uint8, reflect.Uint16:
 		return func(e *Encoder, tag int, v reflect.Value) {
+			//nolint:gosec // cast is safe as we already checked the type.
 			e.Integer(tag, int32(v.Uint()))
 		}
-	case reflect.Uint32, reflect.Uint64:
+	case reflect.Uint32:
 		return func(e *Encoder, tag int, v reflect.Value) {
+			//nolint:gosec // cast is safe as we already checked the type to be uint32.
 			e.LongInteger(tag, int64(v.Uint()))
 		}
 	case reflect.Int8, reflect.Int16, reflect.Int32:
 		return func(e *Encoder, tag int, v reflect.Value) {
+			//nolint:gosec // cast is safe as we already checked the type.
 			e.Integer(tag, int32(v.Int()))
 		}
 	case reflect.Int64:
@@ -313,7 +318,7 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 		// case reflect.Array:
 		ff := encodeFuncFor(ty.Elem())
 		return func(e *Encoder, tag int, v reflect.Value) {
-			for i := 0; i < v.Len(); i++ {
+			for i := range v.Len() {
 				ff(e, tag, v.Index(i))
 			}
 		}
@@ -334,7 +339,7 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 func structFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	fieldsEncode := []func(e *Encoder, v reflect.Value){}
 
-	for i := 0; i < ty.NumField(); i++ {
+	for i := range ty.NumField() {
 		fldT := ty.Field(i)
 		if !fldT.IsExported() {
 			continue

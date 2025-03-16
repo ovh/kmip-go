@@ -1,6 +1,8 @@
 package kmipclient
 
 import (
+	"math"
+
 	"github.com/ovh/kmip-go"
 	"github.com/ovh/kmip-go/payloads"
 )
@@ -36,6 +38,9 @@ func (ex ExecCreateWantType) Object(objectType kmip.ObjectType, attrs ...kmip.At
 }
 
 func (ex ExecCreateWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, length int, usage kmip.CryptographicUsageMask) ExecCreate {
+	if length > math.MaxInt32 || length < 0 {
+		panic("length is out of range")
+	}
 	return ex.Object(kmip.ObjectTypeSymmetricKey).
 		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, alg).
 		WithAttribute(kmip.AttributeNameCryptographicLength, int32(length)).
@@ -60,14 +65,12 @@ type ExecCreate struct {
 
 // Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreate) WithTemplates(names ...kmip.Name) ExecCreate {
-	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, names...)
 	return ex
 }
 
 // Deprecated: Templates have been deprecated in KMIP v1.3.
 func (ex ExecCreate) WithTemplate(name string, nameType kmip.NameType) ExecCreate {
-	//nolint:staticcheck // for backward compatibility
 	ex.req.TemplateAttribute.Name = append(ex.req.TemplateAttribute.Name, kmip.Name{NameValue: name, NameType: nameType})
 	return ex
 }

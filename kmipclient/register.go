@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 
 	"github.com/ovh/kmip-go"
@@ -116,7 +117,10 @@ func (ex ExecRegisterWantType) X509Certificate(cert *x509.Certificate) ExecRegis
 }
 
 func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usage kmip.CryptographicUsageMask, value []byte) ExecRegister {
-	bitLen := int32(len(value) * 8)
+	bitLen := len(value) * 8
+	if bitLen > math.MaxInt32 {
+		return ex.error(fmt.Errorf("Invalid key length: %d", bitLen))
+	}
 	var keyFmt kmip.KeyFormatType
 	var material kmip.KeyMaterial
 
@@ -140,7 +144,8 @@ func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usa
 		KeyBlock: kmip.KeyBlock{
 			KeyFormatType:          keyFmt,
 			CryptographicAlgorithm: alg,
-			CryptographicLength:    bitLen,
+			//nolint:gosec // integer bounds are checked above
+			CryptographicLength: int32(bitLen),
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: material,
@@ -224,7 +229,7 @@ func (ex ExecRegisterWantType) PemPublicKey(data []byte, usage kmip.Cryptographi
 			return ex.error(err)
 		}
 		pk := key.(interface{ Public() crypto.PublicKey })
-		return ex.PublicKey(pk.Public().(PublicKey), usage)
+		return ex.PublicKey(pk.Public(), usage)
 	default:
 		return ex.error(fmt.Errorf("Unsupported PEM type %q", block.Type))
 	}
@@ -301,16 +306,7 @@ func (ex ExecRegisterWantType) X509PublicKey(der []byte, usage kmip.Cryptographi
 	}
 }
 
-type PublicKey interface {
-	Equal(x crypto.PublicKey) bool
-}
-
-type PrivateKey interface {
-	Public() crypto.PublicKey
-	Equal(x crypto.PrivateKey) bool
-}
-
-func (ex ExecRegisterWantType) PrivateKey(key PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
+func (ex ExecRegisterWantType) PrivateKey(key crypto.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	switch pk := key.(type) {
 	case *rsa.PrivateKey:
 		return ex.RsaPrivateKey(pk, usage)
@@ -321,7 +317,7 @@ func (ex ExecRegisterWantType) PrivateKey(key PrivateKey, usage kmip.Cryptograph
 	}
 }
 
-func (ex ExecRegisterWantType) PublicKey(key PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
+func (ex ExecRegisterWantType) PublicKey(key crypto.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	switch pk := key.(type) {
 	case *rsa.PublicKey:
 		return ex.RsaPublicKey(pk, usage)
@@ -334,22 +330,26 @@ func (ex ExecRegisterWantType) PublicKey(key PublicKey, usage kmip.Cryptographic
 
 func (ex ExecRegisterWantType) RsaPrivateKey(key *rsa.PrivateKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	alg := kmip.CryptographicAlgorithmRSA
-	bitlen := int32(key.N.BitLen())
+	bitlen := key.N.BitLen()
+	if bitlen < 0 || bitlen > math.MaxInt32 {
+		return ex.error(fmt.Errorf("Invalid key length: %d", bitlen))
+	}
+	bitlen32 := int32(bitlen)
 	switch ex.keyFormat.rsaPrivFormat() {
 	case PKCS1:
-		return ex.rawKeyBytes(true, x509.MarshalPKCS1PrivateKey(key), alg, bitlen, kmip.KeyFormatTypePKCS_1, usage)
+		return ex.rawKeyBytes(true, x509.MarshalPKCS1PrivateKey(key), alg, bitlen32, kmip.KeyFormatTypePKCS_1, usage)
 	case PKCS8:
 		kb, err := x509.MarshalPKCS8PrivateKey(key)
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(true, kb, alg, bitlen, kmip.KeyFormatTypePKCS_8, usage)
+		return ex.rawKeyBytes(true, kb, alg, bitlen32, kmip.KeyFormatTypePKCS_8, usage)
 	case Transparent:
 		pkey := &kmip.PrivateKey{
 			KeyBlock: kmip.KeyBlock{
 				CryptographicAlgorithm: alg,
 				KeyFormatType:          kmip.KeyFormatTypeTransparentRSAPrivateKey,
-				CryptographicLength:    bitlen,
+				CryptographicLength:    bitlen32,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: kmip.KeyMaterial{
@@ -376,22 +376,26 @@ func (ex ExecRegisterWantType) RsaPrivateKey(key *rsa.PrivateKey, usage kmip.Cry
 
 func (ex ExecRegisterWantType) RsaPublicKey(key *rsa.PublicKey, usage kmip.CryptographicUsageMask) ExecRegister {
 	alg := kmip.CryptographicAlgorithmRSA
-	bitlen := int32(key.N.BitLen())
+	bitlen := key.N.BitLen()
+	if bitlen < 0 || bitlen > math.MaxInt32 {
+		return ex.error(fmt.Errorf("Invalid key length: %d", bitlen))
+	}
+	bitlen32 := int32(bitlen)
 	switch ex.keyFormat.rsaPubFormat() {
 	case PKCS1:
-		return ex.rawKeyBytes(false, x509.MarshalPKCS1PublicKey(key), alg, bitlen, kmip.KeyFormatTypePKCS_1, usage)
+		return ex.rawKeyBytes(false, x509.MarshalPKCS1PublicKey(key), alg, bitlen32, kmip.KeyFormatTypePKCS_1, usage)
 	case X509:
 		kb, err := x509.MarshalPKIXPublicKey(key)
 		if err != nil {
 			return ex.error(err)
 		}
-		return ex.rawKeyBytes(false, kb, alg, bitlen, kmip.KeyFormatTypeX_509, usage)
+		return ex.rawKeyBytes(false, kb, alg, bitlen32, kmip.KeyFormatTypeX_509, usage)
 	case Transparent:
 		pkey := &kmip.PublicKey{
 			KeyBlock: kmip.KeyBlock{
 				CryptographicAlgorithm: alg,
 				KeyFormatType:          kmip.KeyFormatTypeTransparentRSAPublicKey,
-				CryptographicLength:    bitlen,
+				CryptographicLength:    bitlen32,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: kmip.KeyMaterial{
@@ -521,7 +525,6 @@ func (ex ExecRegisterWantType) EcdsaPublicKey(key *ecdsa.PublicKey, usage kmip.C
 }
 
 func curveToKMIP(curve elliptic.Curve) (int32, kmip.RecommendedCurve, error) {
-	bitlen := int32(curve.Params().BitSize)
 	var crv kmip.RecommendedCurve
 	switch curve {
 	case elliptic.P224():
@@ -535,7 +538,7 @@ func curveToKMIP(curve elliptic.Curve) (int32, kmip.RecommendedCurve, error) {
 	default:
 		return 0, kmip.RecommendedCurve(0), errors.New("Unsupported curve")
 	}
-	return bitlen, crv, nil
+	return crv.Bitlen(), crv, nil
 }
 
 type KeyFormat uint8

@@ -47,6 +47,7 @@ func (enc *xmlWriter) startElement(ty Type, tag int) xml.StartElement {
 	if tagName := getTagName(tag); tagName != "" {
 		start.Name.Local = tagName
 	} else {
+		//nolint:gosec // this cast is safe as we are appending a hex value
 		start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "tag"}, Value: fmt.Sprintf("0x%06X", uint(tag))})
 	}
 	if ty != TypeStructure {
@@ -156,7 +157,10 @@ func newXMLReaderFromDecoder(r *xml.Decoder) (*xmlReader, error) {
 		r,
 		nil,
 	}
-	return dec, dec.Next()
+	if err := dec.Next(); err != nil {
+		return nil, err
+	}
+	return dec, nil
 }
 
 func newXMLReader(data []byte) (*xmlReader, error) {
@@ -274,6 +278,7 @@ func (dec *xmlReader) Integer(tag int) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
+	//nolint:gosec // this cast is safe as we are parsing a 32 bits value
 	return int32(parsed), dec.Next()
 }
 
@@ -392,6 +397,7 @@ func (dec *xmlReader) Interval(tag int) (time.Duration, error) {
 	if err != nil {
 		return 0, err
 	}
+	//nolint:gosec // this cast is safe as we are parsing a 32 bits value
 	return time.Duration(parsed) * time.Second, dec.Next()
 }
 

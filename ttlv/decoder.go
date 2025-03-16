@@ -3,6 +3,7 @@ package ttlv
 import (
 	"encoding/xml"
 	"fmt"
+	"math"
 	"math/big"
 	"reflect"
 	"sync"
@@ -166,14 +167,23 @@ func (dec *Decoder) TagAny(tag int, value any) (err error) {
 	case *byte:
 		var x int32
 		x, err = dec.Integer(tag)
+		if x < 0 || x > math.MaxUint8 {
+			return fmt.Errorf("value %d overflows uint8", x)
+		}
 		*v = byte(x)
 	case *int8:
 		var x int32
 		x, err = dec.Integer(tag)
+		if x < math.MinInt8 || x > math.MaxInt8 {
+			return fmt.Errorf("value %d overflows int8", x)
+		}
 		*v = int8(x)
 	case *int16:
 		var x int32
 		x, err = dec.Integer(tag)
+		if x < math.MinInt16 || x > math.MaxInt16 {
+			return fmt.Errorf("value %d overflows int16", x)
+		}
 		*v = int16(x)
 	case *int32:
 		*v, err = dec.Integer(tag)
@@ -354,6 +364,9 @@ func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) 
 			if err != nil {
 				return err
 			}
+			if v < 0 {
+				return fmt.Errorf("negative value %d for uint", v)
+			}
 			value.SetUint(uint64(v))
 			return nil
 		}
@@ -362,6 +375,9 @@ func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) 
 			v, err := d.LongInteger(tag)
 			if err != nil {
 				return err
+			}
+			if v < 0 {
+				return fmt.Errorf("negative value %d for uint", v)
 			}
 			value.SetUint(uint64(v))
 			return nil
@@ -441,7 +457,7 @@ func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) 
 func structDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	fieldsDecode := []func(d *Decoder, value reflect.Value) error{}
 
-	for i := 0; i < ty.NumField(); i++ {
+	for i := range ty.NumField() {
 		fldT := ty.Field(i)
 		if !fldT.IsExported() {
 			continue

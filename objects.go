@@ -406,7 +406,7 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 			},
 			D: &tkey.D,
 		}
-		//nolint:staticcheck // We need this function compute ECDSA public key
+		// We need this function compute ECDSA public key.
 		rkey.X, rkey.Y = curve.ScalarBaseMult(rkey.D.Bytes())
 		return rkey, nil
 	default:

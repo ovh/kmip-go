@@ -1,6 +1,8 @@
 package kmipclient
 
 import (
+	"math"
+
 	"github.com/ovh/kmip-go"
 	"github.com/ovh/kmip-go/payloads"
 )
@@ -23,6 +25,9 @@ type ExecCreateKeyPair struct {
 }
 
 func (ex ExecCreateKeyPair) RSA(bitlen int, privateUsage, publicUsage kmip.CryptographicUsageMask) ExecCreateKeyPairAttr {
+	if bitlen > math.MaxInt32 || bitlen < 0 {
+		panic("bitlen is out of range")
+	}
 	return ex.Common().
 		WithAttribute(kmip.AttributeNameCryptographicAlgorithm, kmip.CryptographicAlgorithmRSA).
 		WithAttribute(kmip.AttributeNameCryptographicLength, int32(bitlen)).

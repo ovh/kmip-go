@@ -90,6 +90,7 @@ func (j *jsonWriter) LongInteger(tag int, value int64) {
 	if value >= maxJsonInt || value <= minJsonInt {
 		// Any values >= 2^52 must be represented as hex strings
 		j.encodeAppend(TypeLongInteger, tag, func(b []byte) []byte {
+			//nolint:gosec // this cast is safe as we are appending hex values
 			return fmt.Appendf(b, "\"0x%016x\"", uint64(value))
 		})
 		return
@@ -330,7 +331,7 @@ func (j *jsonReader) Integer(tag int) (int32, error) {
 			return 0, err
 		}
 		// Check integer bounds
-		if n > math.MaxInt32 {
+		if n > math.MaxInt32 || n < math.MinInt32 {
 			return 0, Errorf("integer is out of bound")
 		}
 		return int32(n), j.Next()
@@ -340,7 +341,7 @@ func (j *jsonReader) Integer(tag int) (int32, error) {
 			return 0, err
 		}
 		// Check integer bounds
-		if parsed > math.MaxInt32 {
+		if parsed > math.MaxInt32 || parsed < math.MinInt32 {
 			return 0, Errorf("integer is out of bound")
 		}
 		return int32(parsed), j.Next()
@@ -413,7 +414,7 @@ func (j *jsonReader) Enum(realtag, tag int) (uint32, error) {
 			return 0, err
 		}
 		// Check integer bounds
-		if n > math.MaxUint32 {
+		if n > math.MaxUint32 || n < 0 {
 			return 0, Errorf("integer is out of bound")
 		}
 		return uint32(n), j.Next()
@@ -496,6 +497,7 @@ func (j *jsonReader) DateTime(tag int) (time.Time, error) {
 			if err != nil {
 				return time.Time{}, err
 			}
+			//nolint:gosec // this cast is safe as we are parsing an 64 bits hex value
 			epoch := int64(parsed)
 			if epoch < 0 {
 				return time.Time{}, Errorf("date-time cannot be negative")
@@ -569,7 +571,7 @@ func (j *jsonReader) Bitmask(realtag, tag int) (int32, error) {
 			return 0, err
 		}
 		// Check integer bounds
-		if n > math.MaxInt32 {
+		if n > math.MaxInt32 || n < math.MinInt32 {
 			return 0, Errorf("integer is out of bound")
 		}
 		return int32(n), j.Next()
