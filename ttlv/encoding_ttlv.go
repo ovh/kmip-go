@@ -42,6 +42,7 @@ func (enc *ttlvWriter) writeType(typ Type) {
 }
 
 func (enc *ttlvWriter) writeLength(length int) {
+	//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
 	enc.buf = binary.BigEndian.AppendUint32(enc.buf, uint32(length))
 }
 
@@ -68,6 +69,7 @@ func (enc *ttlvWriter) encodeAppendLeftPadded(tag int, typ Type, length, padLen 
 
 func (enc *ttlvWriter) Integer(tag int, value int32) {
 	enc.encodeAppend(tag, TypeInteger, 4, func(b []byte) []byte {
+		//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
 		b = binary.BigEndian.AppendUint32(b, uint32(value))
 		return append(b, 0, 0, 0, 0)
 	})
@@ -75,6 +77,7 @@ func (enc *ttlvWriter) Integer(tag int, value int32) {
 
 func (enc *ttlvWriter) LongInteger(tag int, value int64) {
 	enc.encodeAppend(tag, TypeLongInteger, 8, func(b []byte) []byte {
+		//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
 		return binary.BigEndian.AppendUint64(b, uint64(value))
 	})
 }
@@ -113,6 +116,7 @@ func (enc *ttlvWriter) Struct(tag int, f func(writer)) {
 	enc.writeLength(0)
 	f(enc)
 	length := len(enc.buf) - off - 4
+	//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
 	binary.BigEndian.AppendUint32(enc.buf[:off], uint32(length))
 }
 
@@ -130,6 +134,7 @@ func (enc *ttlvWriter) ByteString(tag int, str []byte) {
 
 func (enc *ttlvWriter) DateTime(tag int, date time.Time) {
 	enc.encodeAppend(tag, TypeDateTime, 8, func(b []byte) []byte {
+		//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
 		return binary.BigEndian.AppendUint64(b, uint64(date.Unix()))
 	})
 }
@@ -154,7 +159,10 @@ type ttlvReader struct {
 
 func newTTLVReader(buf []byte) (*ttlvReader, error) {
 	dec := &ttlvReader{buf: buf}
-	return dec, dec.validate()
+	if err := dec.validate(); err != nil {
+		return nil, err
+	}
+	return dec, nil
 }
 
 func (dec *ttlvReader) Next() error {
@@ -233,6 +241,7 @@ func (dec *ttlvReader) Integer(tag int) (int32, error) {
 	if err := dec.assertType(TypeInteger, tag); err != nil {
 		return 0, err
 	}
+	//nolint:gosec // this cast is safe as we are parsing raw bytes.
 	v := int32(binary.BigEndian.Uint32(dec.value()))
 	return v, dec.Next()
 }
@@ -241,6 +250,7 @@ func (dec *ttlvReader) LongInteger(tag int) (int64, error) {
 	if err := dec.assertType(TypeLongInteger, tag); err != nil {
 		return 0, err
 	}
+	//nolint:gosec // this cast is safe as we are parsing raw bytes.
 	v := int64(binary.BigEndian.Uint64(dec.value()))
 	return v, dec.Next()
 }
@@ -298,6 +308,7 @@ func (dec *ttlvReader) DateTime(tag int) (time.Time, error) {
 	if err := dec.assertType(TypeDateTime, tag); err != nil {
 		return time.Time{}, err
 	}
+	//nolint:gosec // this cast is safe as we are parsing raw bytes.
 	v := time.Unix(int64(binary.BigEndian.Uint64(dec.value())), 0)
 	return v, dec.Next()
 }

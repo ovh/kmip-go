@@ -72,6 +72,7 @@ func revMap[K, V comparable](m map[K]V) map[V]K {
 func parseInt(val string, bits int) (int64, error) {
 	if strings.HasPrefix(val, "0x") {
 		ui, err := strconv.ParseUint(val[2:], 16, bits)
+		//nolint:gosec // this cast is safe as we are parsing a hex value
 		return int64(ui), err
 	} else {
 		return strconv.ParseInt(val, 10, bits)

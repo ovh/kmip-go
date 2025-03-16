@@ -36,6 +36,7 @@ func TagString(tag int) string {
 	if name, ok := tagNames[tag]; ok {
 		return name
 	}
+	//nolint:gosec // this cast is safe as we are appending a hex value
 	return fmt.Sprintf("0x%06X", uint(tag))
 }
 
@@ -181,7 +182,7 @@ func appendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 	bsep := []byte(sep)
 	mapper := bitmaskNames[tag]
 	wrote := false
-	for i := 0; i < 32; i++ {
+	for i := range 32 {
 		v := int32(value & (1 << i))
 		if v == 0 {
 			continue
@@ -196,6 +197,7 @@ func appendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 		}
 		// Handle case where it's not registered
 		// by writing 0x prefixed hex value
+		//nolint:gosec // this cast is safe as we are appending a hex value
 		dst = fmt.Appendf(dst, "0x%08X", uint32(v))
 	}
 	return dst

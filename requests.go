@@ -2,6 +2,7 @@ package kmip
 
 import (
 	"encoding/binary"
+	"math"
 	"time"
 
 	"github.com/ovh/kmip-go/ttlv"
@@ -13,12 +14,16 @@ type RequestMessage struct {
 }
 
 func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) RequestMessage {
+	bc := len(payloads)
+	if bc > math.MaxInt32 {
+		panic("too many payloads")
+	}
 	timestamp := time.Now().Truncate(time.Second)
 	msg := RequestMessage{
 		Header: RequestHeader{
 			ProtocolVersion: version,
 			TimeStamp:       &timestamp,
-			BatchCount:      int32(len(payloads)),
+			BatchCount:      int32(bc),
 		},
 	}
 
@@ -28,6 +33,7 @@ func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) Re
 			RequestPayload: pl,
 		}
 		if len(payloads) > 1 {
+			//nolint:gosec // this cast is safe as we just want to append a number to a byte slice
 			item.UniqueBatchItemID = binary.BigEndian.AppendUint64(item.UniqueBatchItemID, uint64(i))
 		}
 		msg.BatchItem = append(msg.BatchItem, item)
