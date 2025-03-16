@@ -256,195 +256,249 @@ func decodeFuncFor(ty reflect.Type) func(d *Decoder, tag int, value reflect.Valu
 	return f
 }
 
-func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
-	if ty.Kind() != reflect.Interface && ty.Implements(reflect.TypeFor[TagDecodable]()) {
-		return func(d *Decoder, tag int, v reflect.Value) error {
-			if v.Kind() == reflect.Pointer {
-				if d.Tag() != tag {
-					v.SetZero()
-					return nil
-				}
-				if v.IsNil() {
-					v.Set(reflect.New(ty.Elem()))
-				}
-			}
-			return v.Interface().(TagDecodable).TagDecodeTTLV(d, tag)
-		}
-	}
-	if reflect.PointerTo(ty).Implements(reflect.TypeFor[TagDecodable]()) {
-		return func(d *Decoder, tag int, v reflect.Value) error {
-			if v.Kind() == reflect.Interface && v.IsNil() {
+func buildTagDecodableDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, v reflect.Value) error {
+		if v.Kind() == reflect.Pointer {
+			if d.Tag() != tag {
 				v.SetZero()
 				return nil
 			}
-			if !v.CanAddr() {
-				panic(ty.Name() + " Implements ttlv.Encodable but its value cannot be addressed")
+			if v.IsNil() {
+				v.Set(reflect.New(ty.Elem()))
 			}
-			return v.Addr().Interface().(TagDecodable).TagDecodeTTLV(d, tag)
 		}
+		return v.Interface().(TagDecodable).TagDecodeTTLV(d, tag)
 	}
+}
 
-	if isEnum(ty) {
+func buildPtrTagDecodableDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, v reflect.Value) error {
+		if v.Kind() == reflect.Interface && v.IsNil() {
+			v.SetZero()
+			return nil
+		}
+		if !v.CanAddr() {
+			panic(ty.Name() + " Implements ttlv.Encodable but its value cannot be addressed")
+		}
+		return v.Addr().Interface().(TagDecodable).TagDecodeTTLV(d, tag)
+	}
+}
+
+func buildEnumDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		enumtag, _ := getTagForType(ty)
+		v, err := d.Enum(enumtag, tag)
+		if err != nil {
+			return err
+		}
+		value.SetUint(uint64(v))
+		return nil
+	}
+}
+
+func buildBitmaskDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		bitmasktag, _ := getTagForType(ty)
+		v, err := d.Bitmask(bitmasktag, tag)
+		if err != nil {
+			return err
+		}
+		value.SetInt(int64(v))
+		return nil
+	}
+}
+
+func buildDurationDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.Interval(tag)
+		if err != nil {
+			return err
+		}
+		value.SetInt(int64(v))
+		return nil
+	}
+}
+
+func buildTimeDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.DateTime(tag)
+		if err != nil {
+			return err
+		}
+		value.Set(reflect.ValueOf(v))
+		return nil
+	}
+}
+
+func buildBigIntDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		bi, err := d.BigInteger(tag)
+		if err != nil {
+			return err
+		}
+		value.Set(reflect.ValueOf(*bi))
+		return nil
+	}
+}
+
+func buildPointerDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	for ty.Kind() == reflect.Pointer {
+		ty = ty.Elem()
+	}
+	f := decodeFuncFor(ty)
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		if d.Tag() != tag {
+			value.SetZero()
+			return nil
+		}
+		for value.Kind() == reflect.Pointer {
+			if value.IsNil() {
+				value.Set(reflect.New(value.Type().Elem()))
+			}
+			value = value.Elem()
+		}
+		return f(d, tag, value)
+	}
+}
+
+func buildUnsignedIntegerDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.Integer(tag)
+		if err != nil {
+			return err
+		}
+		if v < 0 {
+			return fmt.Errorf("negative value %d for uint", v)
+		}
+		value.SetUint(uint64(v))
+		return nil
+	}
+}
+
+func buildUnsignedLongIntegerDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.LongInteger(tag)
+		if err != nil {
+			return err
+		}
+		if v < 0 {
+			return fmt.Errorf("negative value %d for uint", v)
+		}
+		value.SetUint(uint64(v))
+		return nil
+	}
+}
+
+func buildSignedIntegerDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.Integer(tag)
+		if err != nil {
+			return err
+		}
+		value.SetInt(int64(v))
+		return nil
+	}
+}
+
+func buildSignedLongIntegerDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.LongInteger(tag)
+		if err != nil {
+			return err
+		}
+		value.SetInt(v)
+		return nil
+	}
+}
+
+func buildBoolDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.Bool(tag)
+		if err != nil {
+			return err
+		}
+		value.SetBool(v)
+		return nil
+	}
+}
+
+func buildStringDecodeFunc() func(*Decoder, int, reflect.Value) error {
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		v, err := d.TextString(tag)
+		if err != nil {
+			return err
+		}
+		value.SetString(v)
+		return nil
+	}
+}
+
+func buildSliceDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) error {
+	if ty.Elem().Kind() == reflect.Uint8 {
 		return func(d *Decoder, tag int, value reflect.Value) error {
-			enumtag, _ := getTagForType(ty)
-			v, err := d.Enum(enumtag, tag)
+			v, err := d.ByteString(tag)
 			if err != nil {
 				return err
 			}
-			value.SetUint(uint64(v))
+			value.SetBytes(v)
 			return nil
 		}
 	}
-
-	if isBitmask(ty) {
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			bitmasktag, _ := getTagForType(ty)
-			v, err := d.Bitmask(bitmasktag, tag)
-			if err != nil {
+	// 	fallthrough
+	// case reflect.Array:
+	elemTy := ty.Elem()
+	ff := decodeFuncFor(reflect.PointerTo(elemTy))
+	return func(d *Decoder, tag int, value reflect.Value) error {
+		for d.Tag() == tag {
+			elem := reflect.New(elemTy)
+			if err := ff(d, tag, elem); err != nil {
 				return err
 			}
-			value.SetInt(int64(v))
-			return nil
+			value.Set(reflect.Append(value, elem.Elem()))
 		}
+		return nil
+	}
+}
+
+func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
+	if ty.Kind() != reflect.Interface && ty.Implements(reflect.TypeFor[TagDecodable]()) {
+		return buildTagDecodableDecodeFunc(ty)
+	} else if reflect.PointerTo(ty).Implements(reflect.TypeFor[TagDecodable]()) {
+		return buildPtrTagDecodableDecodeFunc(ty)
+	} else if isEnum(ty) {
+		return buildEnumDecodeFunc(ty)
+	} else if isBitmask(ty) {
+		return buildBitmaskDecodeFunc(ty)
 	}
 
 	switch ty {
 	case reflect.TypeFor[time.Duration]():
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.Interval(tag)
-			if err != nil {
-				return err
-			}
-			value.SetInt(int64(v))
-			return nil
-		}
+		return buildDurationDecodeFunc()
 	case reflect.TypeFor[time.Time]():
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.DateTime(tag)
-			if err != nil {
-				return err
-			}
-			value.Set(reflect.ValueOf(v))
-			return nil
-		}
+		return buildTimeDecodeFunc()
 	case reflect.TypeFor[big.Int]():
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			bi, err := d.BigInteger(tag)
-			if err != nil {
-				return err
-			}
-			value.Set(reflect.ValueOf(*bi))
-			return nil
-		}
+		return buildBigIntDecodeFunc()
 	}
 
 	switch ty.Kind() {
 	case reflect.Pointer:
-		for ty.Kind() == reflect.Pointer {
-			ty = ty.Elem()
-		}
-		f := decodeFuncFor(ty)
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			if d.Tag() != tag {
-				value.SetZero()
-				return nil
-			}
-			for value.Kind() == reflect.Pointer {
-				if value.IsNil() {
-					value.Set(reflect.New(value.Type().Elem()))
-				}
-				value = value.Elem()
-			}
-			return f(d, tag, value)
-		}
-
+		return buildPointerDecodeFunc(ty)
 	case reflect.Uint8, reflect.Uint16:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.Integer(tag)
-			if err != nil {
-				return err
-			}
-			if v < 0 {
-				return fmt.Errorf("negative value %d for uint", v)
-			}
-			value.SetUint(uint64(v))
-			return nil
-		}
+		return buildUnsignedIntegerDecodeFunc()
 	case reflect.Uint32, reflect.Uint64:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.LongInteger(tag)
-			if err != nil {
-				return err
-			}
-			if v < 0 {
-				return fmt.Errorf("negative value %d for uint", v)
-			}
-			value.SetUint(uint64(v))
-			return nil
-		}
+		return buildUnsignedLongIntegerDecodeFunc()
 	case reflect.Int8, reflect.Int16, reflect.Int32:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.Integer(tag)
-			if err != nil {
-				return err
-			}
-			value.SetInt(int64(v))
-			return nil
-		}
+		return buildSignedIntegerDecodeFunc()
 	case reflect.Int64:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.LongInteger(tag)
-			if err != nil {
-				return err
-			}
-			value.SetInt(v)
-			return nil
-		}
+		return buildSignedLongIntegerDecodeFunc()
 	case reflect.Bool:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.Bool(tag)
-			if err != nil {
-				return err
-			}
-			value.SetBool(v)
-			return nil
-		}
+		return buildBoolDecodeFunc()
 	case reflect.String:
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			v, err := d.TextString(tag)
-			if err != nil {
-				return err
-			}
-			value.SetString(v)
-			return nil
-		}
+		return buildStringDecodeFunc()
 	case reflect.Slice:
-		if ty.Elem().Kind() == reflect.Uint8 {
-			return func(d *Decoder, tag int, value reflect.Value) error {
-				v, err := d.ByteString(tag)
-				if err != nil {
-					return err
-				}
-				value.SetBytes(v)
-				return nil
-			}
-		}
-		// 	fallthrough
-		// case reflect.Array:
-		elemTy := ty.Elem()
-		ff := decodeFuncFor(reflect.PointerTo(elemTy))
-		return func(d *Decoder, tag int, value reflect.Value) error {
-			for d.Tag() == tag {
-				elem := reflect.New(elemTy)
-				if err := ff(d, tag, elem); err != nil {
-					return err
-				}
-				value.Set(reflect.Append(value, elem.Elem()))
-			}
-			return nil
-		}
+		return buildSliceDecodeFunc(ty)
 	case reflect.Struct:
-		return structDecodeFunc(ty)
+		return buidStructDecodeFunc(ty)
 	case reflect.Interface:
 		return func(d *Decoder, tag int, value reflect.Value) error {
 			return d.decodeValue(tag, value.Elem())
@@ -454,7 +508,43 @@ func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) 
 	}
 }
 
-func structDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
+func applyOmitEmptyDecode(ffunc func(d *Decoder, i int, v reflect.Value) error) func(d *Decoder, i int, v reflect.Value) error {
+	return func(d *Decoder, i int, v reflect.Value) error {
+		if d.Tag() != i {
+			v.SetZero()
+			return nil
+		}
+		return ffunc(d, i, v)
+	}
+}
+
+func applyVersionRangeDecode(rng versionRange, ffunc func(d *Decoder, i int, v reflect.Value) error) func(d *Decoder, i int, v reflect.Value) error {
+	return func(d *Decoder, i int, v reflect.Value) error {
+		// If the field is not for current version, consider it optional
+		// (but still accept and decode it if it's present)
+		if !d.versionIn(rng) && d.Tag() != i {
+			v.SetZero()
+			return nil
+		}
+		return ffunc(d, i, v)
+	}
+}
+
+func applySetVersionDecode(fldT reflect.StructField, ffunc func(d *Decoder, i int, v reflect.Value) error) func(d *Decoder, i int, v reflect.Value) error {
+	// Check that field type implements Version interface (major / minor)
+	if !fldT.Type.Implements(reflect.TypeFor[Version]()) {
+		panic(fmt.Sprintf("Type %s does not implement ttlv.Version", fldT.Type.String()))
+	}
+	return func(d *Decoder, i int, v reflect.Value) error {
+		if err := ffunc(d, i, v); err != nil {
+			return err
+		}
+		d.setVersion(v.Interface().(Version))
+		return nil
+	}
+}
+
+func buidStructDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	fieldsDecode := []func(d *Decoder, value reflect.Value) error{}
 
 	for i := range ty.NumField() {
@@ -486,40 +576,13 @@ func structDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.V
 		}
 		ffunc := decodeFuncFor(fldT.Type)
 		if info.omitempty {
-			ff := ffunc
-			ffunc = func(d *Decoder, i int, v reflect.Value) error {
-				if d.Tag() != i {
-					v.SetZero()
-					return nil
-				}
-				return ff(d, i, v)
-			}
+			ffunc = applyOmitEmptyDecode(ffunc)
 		}
 		if info.vrange != nil {
-			ff := ffunc
-			ffunc = func(d *Decoder, i int, v reflect.Value) error {
-				// If the field is not for current version, consider it optional
-				// (but still accept and decode it if it's present)
-				if !d.versionIn(*info.vrange) && d.Tag() != i {
-					v.SetZero()
-					return nil
-				}
-				return ff(d, i, v)
-			}
+			ffunc = applyVersionRangeDecode(*info.vrange, ffunc)
 		}
 		if info.setVersion {
-			// Check that field type implements Version interface (major / minor)
-			if !fldT.Type.Implements(reflect.TypeFor[Version]()) {
-				panic(fmt.Sprintf("Type %s does not implement ttlv.Version", fldT.Type.String()))
-			}
-			ff := ffunc
-			ffunc = func(d *Decoder, i int, v reflect.Value) error {
-				if err := ff(d, i, v); err != nil {
-					return err
-				}
-				d.setVersion(v.Interface().(Version))
-				return nil
-			}
+			ffunc = applySetVersionDecode(fldT, ffunc)
 		}
 		fieldsDecode = append(fieldsDecode, func(d *Decoder, value reflect.Value) error {
 			return ffunc(d, numTag, value.Field(i))

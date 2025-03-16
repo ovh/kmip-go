@@ -206,81 +206,124 @@ func encodeFuncFor(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	return f
 }
 
+func buildTagDecodableEncodeFunc() func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		if (v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer) && v.IsNil() {
+			return
+		}
+		v.Interface().(TagEncodable).TagEncodeTTLV(e, tag)
+	}
+}
+
+func buildPtrTagDecodableEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		if v.Kind() == reflect.Interface && v.IsNil() {
+			return
+		}
+		if !v.CanAddr() {
+			panic(ty.Name() + " Implements ttlv.Encodable but its value cannot be addressed")
+		}
+		v.Addr().Interface().(TagEncodable).TagEncodeTTLV(e, tag)
+	}
+}
+
+func buildEnumEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+	enumtag, _ := getTagForType(ty)
+	return func(e *Encoder, tag int, v reflect.Value) {
+		//nolint:gosec // enums are uint32 already.
+		e.Enum(enumtag, tag, uint32(v.Uint()))
+	}
+}
+
+func buildBitmaskEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+	bitmasktag, _ := getTagForType(ty)
+	return func(e *Encoder, tag int, v reflect.Value) {
+		//nolint:gosec // bitmasks are int32 already.
+		e.Bitmask(bitmasktag, tag, int32(v.Int()))
+	}
+}
+
+func buildDurationEncodeFunc() func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		e.Interval(tag, time.Duration(v.Int()))
+	}
+}
+
+func buildTimeEncodeFunc() func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		// if v.CanAddr() {
+		// 	e.DateTime(tag, *v.Addr().Interface().(*time.Time))
+		// 	return
+		// }
+		e.DateTime(tag, v.Interface().(time.Time))
+	}
+}
+
+func buildBigIntEncodeFunc() func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		// if v.CanAddr() {
+		// 	e.BigInteger(tag, v.Addr().Interface().(*big.Int))
+		// 	return
+		// }
+		n := v.Interface().(big.Int)
+		e.BigInteger(tag, &n)
+	}
+}
+
+func buildPointerEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+	for ty.Kind() == reflect.Pointer {
+		ty = ty.Elem()
+	}
+	f := encodeFuncFor(ty)
+	return func(e *Encoder, tag int, v reflect.Value) {
+		for v.Kind() == reflect.Pointer {
+			if v.IsNil() {
+				return
+			}
+			v = v.Elem()
+		}
+		f(e, tag, v)
+	}
+}
+
+func buildSliceEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+	if ty.Elem().Kind() == reflect.Uint8 {
+		return func(e *Encoder, tag int, v reflect.Value) {
+			e.ByteString(tag, v.Bytes())
+		}
+	}
+	// 	fallthrough
+	// case reflect.Array:
+	ff := encodeFuncFor(ty.Elem())
+	return func(e *Encoder, tag int, v reflect.Value) {
+		for i := range v.Len() {
+			ff(e, tag, v.Index(i))
+		}
+	}
+}
+
 func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	if ty.Implements(reflect.TypeFor[TagEncodable]()) {
-		return func(e *Encoder, tag int, v reflect.Value) {
-			if (v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer) && v.IsNil() {
-				return
-			}
-			v.Interface().(TagEncodable).TagEncodeTTLV(e, tag)
-		}
-	}
-	if reflect.PointerTo(ty).Implements(reflect.TypeFor[TagEncodable]()) {
-		return func(e *Encoder, tag int, v reflect.Value) {
-			if v.Kind() == reflect.Interface && v.IsNil() {
-				return
-			}
-			if !v.CanAddr() {
-				panic(ty.Name() + " Implements ttlv.Encodable but its value cannot be addressed")
-			}
-			v.Addr().Interface().(TagEncodable).TagEncodeTTLV(e, tag)
-		}
-	}
-
-	if isEnum(ty) {
-		enumtag, _ := getTagForType(ty)
-		return func(e *Encoder, tag int, v reflect.Value) {
-			//nolint:gosec // enums are uint32 already.
-			e.Enum(enumtag, tag, uint32(v.Uint()))
-		}
-	}
-	if isBitmask(ty) {
-		bitmasktag, _ := getTagForType(ty)
-		return func(e *Encoder, tag int, v reflect.Value) {
-			//nolint:gosec // bitmasks are int32 already.
-			e.Bitmask(bitmasktag, tag, int32(v.Int()))
-		}
+		return buildTagDecodableEncodeFunc()
+	} else if reflect.PointerTo(ty).Implements(reflect.TypeFor[TagEncodable]()) {
+		return buildPtrTagDecodableEncodeFunc(ty)
+	} else if isEnum(ty) {
+		return buildEnumEncodeFunc(ty)
+	} else if isBitmask(ty) {
+		return buildBitmaskEncodeFunc(ty)
 	}
 
 	switch ty {
 	case reflect.TypeFor[time.Duration]():
-		return func(e *Encoder, tag int, v reflect.Value) {
-			e.Interval(tag, time.Duration(v.Int()))
-		}
+		return buildDurationEncodeFunc()
 	case reflect.TypeFor[time.Time]():
-		return func(e *Encoder, tag int, v reflect.Value) {
-			if v.CanAddr() {
-				e.DateTime(tag, *v.Addr().Interface().(*time.Time))
-				return
-			}
-			e.DateTime(tag, v.Interface().(time.Time))
-		}
+		return buildTimeEncodeFunc()
 	case reflect.TypeFor[big.Int]():
-		return func(e *Encoder, tag int, v reflect.Value) {
-			if v.CanAddr() {
-				e.BigInteger(tag, v.Addr().Interface().(*big.Int))
-				return
-			}
-			n := v.Interface().(big.Int)
-			e.BigInteger(tag, &n)
-		}
+		return buildBigIntEncodeFunc()
 	}
 	switch ty.Kind() {
 	case reflect.Pointer:
-		for ty.Kind() == reflect.Pointer {
-			ty = ty.Elem()
-		}
-		f := encodeFuncFor(ty)
-		return func(e *Encoder, tag int, v reflect.Value) {
-			for v.Kind() == reflect.Pointer {
-				if v.IsNil() {
-					return
-				}
-				v = v.Elem()
-			}
-			f(e, tag, v)
-		}
-
+		return buildPointerEncodeFunc(ty)
 	case reflect.Uint8, reflect.Uint16:
 		return func(e *Encoder, tag int, v reflect.Value) {
 			//nolint:gosec // cast is safe as we already checked the type.
@@ -309,21 +352,9 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 			e.TextString(tag, v.String())
 		}
 	case reflect.Slice:
-		if ty.Elem().Kind() == reflect.Uint8 {
-			return func(e *Encoder, tag int, v reflect.Value) {
-				e.ByteString(tag, v.Bytes())
-			}
-		}
-		// 	fallthrough
-		// case reflect.Array:
-		ff := encodeFuncFor(ty.Elem())
-		return func(e *Encoder, tag int, v reflect.Value) {
-			for i := range v.Len() {
-				ff(e, tag, v.Index(i))
-			}
-		}
+		return buildSliceEncodeFunc(ty)
 	case reflect.Struct:
-		return structFunc(ty)
+		return buildStructEncodeFunc(ty)
 	case reflect.Interface:
 		return func(e *Encoder, tag int, v reflect.Value) {
 			if v.IsNil() {
@@ -336,7 +367,36 @@ func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	}
 }
 
-func structFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
+func applyOmitEmptyEncode(ffunc func(*Encoder, int, reflect.Value)) func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, i int, v reflect.Value) {
+		if v.IsZero() {
+			return
+		}
+		ffunc(e, i, v)
+	}
+}
+
+func applyVersionRangeEncode(vrange versionRange, ffunc func(*Encoder, int, reflect.Value)) func(*Encoder, int, reflect.Value) {
+	return func(e *Encoder, tag int, v reflect.Value) {
+		if !e.versionIn(vrange) {
+			return
+		}
+		ffunc(e, tag, v)
+	}
+}
+
+func applySetVersionEncode(fldT reflect.StructField, ffunc func(*Encoder, int, reflect.Value)) func(*Encoder, int, reflect.Value) {
+	// Check that field type implements Version interface (major / minor)
+	if !fldT.Type.Implements(reflect.TypeFor[Version]()) {
+		panic(fmt.Sprintf("Type %s does not implement ttlv.Version", fldT.Type.String()))
+	}
+	return func(e *Encoder, i int, v reflect.Value) {
+		e.setVersion(v.Interface().(Version))
+		ffunc(e, i, v)
+	}
+}
+
+func buildStructEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	fieldsEncode := []func(e *Encoder, v reflect.Value){}
 
 	for i := range ty.NumField() {
@@ -371,33 +431,13 @@ func structFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 
 		ffunc := encodeFuncFor(fldT.Type)
 		if info.omitempty {
-			ff := ffunc
-			ffunc = func(e *Encoder, i int, v reflect.Value) {
-				if v.IsZero() {
-					return
-				}
-				ff(e, i, v)
-			}
+			ffunc = applyOmitEmptyEncode(ffunc)
 		}
 		if info.vrange != nil {
-			ff := ffunc
-			ffunc = func(e *Encoder, _ int, v reflect.Value) {
-				if !e.versionIn(*info.vrange) {
-					return
-				}
-				ff(e, numTag, v)
-			}
+			ffunc = applyVersionRangeEncode(*info.vrange, ffunc)
 		}
 		if info.setVersion {
-			// Check that field type implements Version interface (major / minor)
-			if !fldT.Type.Implements(reflect.TypeFor[Version]()) {
-				panic(fmt.Sprintf("Type %s does not implement ttlv.Version", fldT.Type.String()))
-			}
-			ff := ffunc
-			ffunc = func(e *Encoder, i int, v reflect.Value) {
-				e.setVersion(v.Interface().(Version))
-				ff(e, i, v)
-			}
+			ffunc = applySetVersionEncode(fldT, ffunc)
 		}
 		fieldsEncode = append(fieldsEncode, func(e *Encoder, v reflect.Value) {
 			ffunc(e, numTag, v.Field(i))
