@@ -1,0 +1,159 @@
+run:
+  timeout: 10m
+  issues-exit-code: 1
+  tests: false
+
+linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
+  disable-all: true
+  enable:
+    - bodyclose
+    # - depguard # We don't want to use this anymore
+    - dogsled
+    # - dupl # Reactivate when we want to ensure there is no code duplication
+    - errcheck
+    - funlen
+    - gocyclo
+    - gocritic
+    - gofmt
+    - goimports
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    # - rowserrcheck # Does not support generics yet (see https://github.com/golangci/golangci-lint/issues/2649)
+    # - copyloopvar
+    - staticcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - gocognit
+    - nolintlint
+    # - revive # Reactivate when we want everything to be documented
+    - godot
+    - promlinter
+    - whitespace
+    - dupword
+    - predeclared
+
+    # - gochecknoglobals
+    # - gochecknoinits
+
+    # - fieldalignment # Not packaged yet ?
+
+    # - maligned # Deprecated
+    # - interfacer
+    # - goerr113
+    # - errorlint
+    # - contextcheck
+    # - wrapcheck
+    # - varnamelen
+
+    # - durationcheck
+    # - errname
+    # - exhaustive
+    # - makezero
+    # - nilerr
+    # - noctx
+    # - paralleltest
+
+    # - wsl
+    # - nlreturn
+    # - ireturn
+    # - gomnd
+    # - forcetypeassert
+    # - exhaustivestruct
+    # - cyclop
+    # - nestif
+    # - lll
+    # - godox
+    # - gofumpt
+
+output:
+  formats:
+    - format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    # report about not checking of errors in type assetions: `a := b.(MyStruct)`;
+    # default is false: such cases aren't reported by default.
+    check-type-assertions: false
+
+    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
+    # default is false: such cases aren't reported by default.
+    check-blank: false
+  # govet:
+  # report about shadowed variables
+  #TODO# check-shadowing: true
+  gocognit:
+    min-complexity: 30
+  funlen:
+    lines: 110
+    statements: 60
+  gofmt:
+    simplify: true
+  gocyclo:
+    min-complexity: 20
+  # maligned: # Deprecated
+  #   suggest-new: true
+  dupl:
+    threshold: 150
+  misspell:
+    locale: US
+  lll:
+    line-length: 140
+    tab-width: 1
+  # unused:
+  unparam:
+    # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
+    # XXX: if you enable this setting, unparam will report a lot of false-positives in text editors:
+    # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
+    # with golangci-lint call it on a directory with the changed file.
+    check-exported: false
+  nakedret:
+    # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
+    max-func-lines: 30
+  prealloc:
+    # Report preallocation suggestions only on simple loops that have no returns/breaks/continues/gotos in them.
+    # True by default.
+    simple: true
+    range-loops: true # Report preallocation suggestions on range loops, true by default
+    for-loops: true # Report preallocation suggestions on for loops, false by default
+  gocritic:
+    enabled-tags:
+      - performance
+      - diagnostic
+      - style
+    disabled-checks:
+      - hugeParam
+      - importShadow
+      - ifElseChain
+      - commentedOutCode
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+    - ".*_gen\\.go$"
+  new: false
+  # Default set of ignore rules is quite usefull to avoid false positives
+  # and annoying warnings no one cares about
+  exclude-use-default: true
+  include:
+    # Re-enable revive's doc comment linters:
+    - EXC0012
+    - EXC0013
+    - EXC0014
+    - EXC0015
