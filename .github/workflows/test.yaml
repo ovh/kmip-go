@@ -28,5 +28,3 @@ jobs:
       - uses: ./.github/actions/setup-build-env
       - name: Lint library
         uses: golangci/golangci-lint-action@v7
-        with:
-          version: v1.64
