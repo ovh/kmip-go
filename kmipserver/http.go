@@ -11,6 +11,8 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
+const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
+
 func NewHTTPHandler(hdl RequestHandler) http.Handler {
 	return httpHandler{inner: hdl}
 }
@@ -52,6 +54,11 @@ func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	contentLen, err := strconv.Atoi(req.Header.Get("Content-Length"))
 	if err != nil || contentLen <= 0 {
 		rw.WriteHeader(http.StatusLengthRequired)
+		return
+	}
+	if contentLen > DEFAULT_MAX_BODY_SIZE {
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(rw, "The request is too large")
 		return
 	}
 
