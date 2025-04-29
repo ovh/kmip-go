@@ -71,9 +71,15 @@ func getFieldTag(fldT reflect.StructField, tagVal string) int {
 	}
 
 	if strings.HasPrefix(tagVal, "0x") {
-		n, err := strconv.ParseInt(tagVal[2:], 16, 64)
+		n, err := strconv.ParseInt(tagVal[2:], 16, 0)
 		if err != nil {
 			panic(err)
+		}
+		if n <= 0 {
+			panic("the tag must be strictly positive")
+		}
+		if n > 0xFFFFFF {
+			panic("the tag cannot be bigger than 3 bytes")
 		}
 		return int(n)
 	}
