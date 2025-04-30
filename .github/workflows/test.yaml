@@ -8,6 +8,8 @@ on:
     branches: ["main"]
   workflow_call: {}
 
+permissions: {}
+
 jobs:
   test:
     runs-on: ubuntu-latest
