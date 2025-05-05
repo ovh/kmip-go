@@ -263,7 +263,7 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 
 	// Negotiate protocol version
 	if err := c.negotiateVersion(ctx); err != nil {
-		c.Close()
+		_ = c.Close()
 		return nil, err
 	}
 
@@ -313,7 +313,7 @@ func (c *Client) Close() error {
 func (c *Client) reconnect(ctx context.Context) error {
 	// fmt.Println("Reconnecting")
 	if c.conn != nil {
-		c.conn.Close()
+		_ = c.conn.Close()
 		c.conn = nil
 	}
 	stream, err := c.dialer(ctx)

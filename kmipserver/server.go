@@ -90,7 +90,7 @@ func (srv *Server) handleConn(conn net.Conn) {
 	var tlsState *tls.ConnectionState
 	if tcon, ok := conn.(*tls.Conn); ok {
 		if err := tcon.Handshake(); err != nil {
-			tcon.Close()
+			_ = tcon.Close()
 			logger.Warn("TLS handshake failure. Closing client connection", "err", err)
 			return
 		}

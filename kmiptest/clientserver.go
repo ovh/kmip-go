@@ -75,7 +75,7 @@ func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.C
 	require.NoError(t, err)
 	require.NotNil(t, client)
 	t.Cleanup(func() {
-		client.Close()
+		_ = client.Close()
 	})
 	return client
 }
