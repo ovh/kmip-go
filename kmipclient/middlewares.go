@@ -52,6 +52,16 @@ func DebugMiddleware(out io.Writer, marshal func(data any) []byte) Middleware {
 // The provided fn function is used to generate the correlation value. If fn is nil,
 // the middleware will panic. This is useful for ensuring that requests have a unique
 // correlation value for tracking and debugging purposes in compliant KMIP versions.
+//
+// Parameters:
+//   - fn: A function that generates a string to be used as the correlation value.
+//
+// Returns:
+//   - Middleware: A middleware function that sets the correlation value in the request header.
+//
+// Errors:
+//   - Panics if fn is nil.
+//   - No error is returned by this middleware directly. If the protocol version is below 1.4 or the value is already set, it does nothing.
 func CorrelationValueMiddleware(fn func() string) Middleware {
 	if fn == nil {
 		panic("correlation value generator function cannot be null")
@@ -74,6 +84,9 @@ func CorrelationValueMiddleware(fn func() string) Middleware {
 //
 // Returns:
 //   - Middleware: A middleware function that enforces the specified timeout on the request context.
+//
+// Errors:
+//   - No error is returned by this middleware directly. If the timeout is reached, the request will be canceled and an error will be returned by the handler.
 func TimeoutMiddleware(timeout time.Duration) Middleware {
 	if timeout == 0 {
 		return func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
