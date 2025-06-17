@@ -10,9 +10,22 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
+// Next defines a middleware function signature that takes a context and a KMIP request message,
+// and returns a KMIP response message or an error. It is used to chain middleware handlers
+// in the KMIP server processing pipeline.
 type Next func(context.Context, *kmip.RequestMessage) (*kmip.ResponseMessage, error)
+
+// Middleware defines a function type that wraps the processing of a KMIP request message.
+// It takes the next handler in the chain, a context, and the incoming KMIP request message,
+// and returns a KMIP response message or an error. Middlewares can be used to implement
+// cross-cutting concerns such as logging, authentication, or request validation.
 type Middleware func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error)
 
+// DebugMiddleware returns a Middleware that logs the incoming KMIP request and the corresponding response
+// to the provided io.Writer. It uses the given marshal function to serialize the request and response data,
+// defaulting to ttlv.MarshalXML if marshal is nil. The middleware also logs the time taken to process the request.
+// If the writer supports flushing, it will be flushed after logging. Any errors encountered during processing
+// are also logged to the writer.
 func DebugMiddleware(out io.Writer, marshal func(data any) []byte) Middleware {
 	if marshal == nil {
 		marshal = ttlv.MarshalXML

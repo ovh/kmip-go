@@ -10,6 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestingMiddleware returns a kmipclient.Middleware that verifies the correctness of
+// marshaling and unmarshaling KMIP request and response messages to and from XML and JSON formats.
+// It ensures that marshaling a message to XML/JSON and then unmarshaling it back produces an
+// equivalent message (as measured by TTLV encoding). The middleware uses the provided TestingT
+// interface for assertions and error reporting during tests. This is intended for use in test
+// environments to validate serialization logic.
 func TestingMiddleware(t TestingT) kmipclient.Middleware {
 	return func(next kmipclient.Next, ctx context.Context, rm *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 		resp, err := next(ctx, rm)

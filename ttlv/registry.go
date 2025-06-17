@@ -32,6 +32,9 @@ func getTagName(tag int) string {
 	return n
 }
 
+// TagString returns the string representation of a given tag.
+// If the tag exists in the tagNames map, its corresponding name is returned.
+// Otherwise, the tag is formatted as a zero-padded 6-digit hexadecimal string prefixed with "0x".
 func TagString(tag int) string {
 	if name, ok := tagNames[tag]; ok {
 		return name
@@ -56,6 +59,10 @@ func getTagForType(ty reflect.Type) (int, error) {
 	return 0, fmt.Errorf("No default tag found for type %q", ty.Name())
 }
 
+// getTagForValue attempts to retrieve a tag integer associated with the type of the provided reflect.Value.
+// It first tries to get the tag for the value's type directly. If that fails and the value is a pointer,
+// it dereferences the pointer(s) until it reaches a non-pointer type. If the resulting value is an interface,
+// it attempts to get the tag for the underlying concrete type. Returns the tag and any error encountered.
 func getTagForValue(val reflect.Value) (int, error) {
 	tag, err := getTagForType(val.Type())
 	if err != nil {
@@ -171,10 +178,32 @@ func BitmaskStr[T ~int32](value T, sep string) string {
 	return bitmaskString(bitmasks[reflect.TypeFor[T]()], value, sep)
 }
 
+// bitmaskString returns a string representation of a bitmask value of type T,
+// formatted with the specified separator. The tag parameter is used to identify
+// the bitmask, and value is the bitmask value to be converted. The sep parameter
+// specifies the separator to use between bitmask components in the resulting string.
+// T must be a type whose underlying type is int32.
 func bitmaskString[T ~int32](tag int, value T, sep string) string {
 	return string(appendBitmaskString([]byte{}, tag, value, sep))
 }
 
+// appendBitmaskString appends a string representation of a bitmask value to the given byte slice.
+// For each set bit in the value, it looks up a human-readable name from the bitmaskNames map using the provided tag.
+// If a name is not found for a set bit, it appends the bit's value as a hexadecimal string prefixed with "0x".
+// Multiple set bits are separated by the specified separator string.
+// The function returns the resulting byte slice with the appended string representation.
+//
+// Type Parameters:
+//   - T: an integer type based on int32.
+//
+// Parameters:
+//   - dst: the destination byte slice to append to.
+//   - tag: an integer key used to look up bit names in the bitmaskNames map.
+//   - value: the bitmask value to convert to a string representation.
+//   - sep: the separator string to use between multiple set bits.
+//
+// Returns:
+//   - []byte: the resulting byte slice with the appended string representation.
 func appendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []byte {
 	if value == 0 {
 		return dst

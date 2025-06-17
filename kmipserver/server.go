@@ -16,10 +16,18 @@ import (
 
 var ErrShutdown = errors.New("Server is shutting down")
 
+// RequestHandler defines an interface for handling KMIP request messages.
+// Implementations of this interface should process the provided RequestMessage
+// and return an appropriate ResponseMessage. The context.Context parameter
+// allows for request-scoped values, cancellation, and timeouts.
 type RequestHandler interface {
 	HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage
 }
 
+// Server represents a KMIP server instance that manages incoming network connections,
+// handles KMIP requests, and coordinates server lifecycle operations. It encapsulates
+// the network listener, request handler, logging, context management for graceful
+// shutdown, and a wait group for synchronizing goroutines.
 type Server struct {
 	listener   net.Listener
 	handler    RequestHandler
@@ -31,6 +39,16 @@ type Server struct {
 	wg         *sync.WaitGroup
 }
 
+// NewServer creates and returns a new Server instance using the provided net.Listener and RequestHandler.
+// It panics if the handler is nil. The function initializes internal contexts for server control and
+// request reception, as well as a WaitGroup for managing goroutines.
+//
+// Parameters:
+//   - listener: The net.Listener to accept incoming connections.
+//   - handler:  The RequestHandler to process KMIP requests.
+//
+// Returns:
+//   - A pointer to the initialized Server.
 func NewServer(listener net.Listener, handler RequestHandler) *Server {
 	if handler == nil {
 		panic("KMIP request handler cannot be null")
@@ -49,6 +67,10 @@ func NewServer(listener net.Listener, handler RequestHandler) *Server {
 	}
 }
 
+// Serve starts the KMIP server and listens for incoming client connections.
+// It accepts connections in a loop, spawning a new goroutine to handle each connection.
+// If the listener is closed, it returns ErrShutdown. Any other error encountered
+// during Accept is returned immediately. The method blocks until the server is shut down.
 func (srv *Server) Serve() error {
 	srv.logger.Info("Running KMIP server", "bind", srv.listener.Addr())
 	for {
@@ -65,13 +87,21 @@ func (srv *Server) Serve() error {
 	}
 }
 
+// Shutdown gracefully shuts down the server by performing the following steps:
+// 1. Logs a warning message indicating shutdown initiation.
+// 2. Closes the listener to prevent new incoming connections.
+// 3. Cancels the receive context to stop processing new requests.
+// 4. Sets a timeout to force server context cancellation after 3 seconds.
+// 5. Waits for all running requests to complete.
+// 6. Cancels the server's root context.
+// Returns any error encountered while closing the listener.
 func (srv *Server) Shutdown() error {
 	srv.logger.Warn("Shutting down")
 	// 1. Close listener to prevent new incoming conections
 	err := srv.listener.Close()
 	// 2. Cancel recvCtx to stop receiving new requests
 	srv.recvCancel()
-	// 3.
+	// 3. Set a timeout to force server context cancellation after 3 seconds.
 	tm := time.AfterFunc(3*time.Second, func() {
 		srv.cancel()
 	})

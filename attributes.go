@@ -10,6 +10,8 @@ import (
 
 type AttributeName string
 
+// IsCustom determines whether the AttributeName is considered custom.
+// It returns true if the attribute name starts with "x-" or "y-", indicating a custom attribute.
 func (atn AttributeName) IsCustom() bool {
 	n := string(atn)
 	return strings.HasPrefix(n, "x-") || strings.HasPrefix(n, "y-")

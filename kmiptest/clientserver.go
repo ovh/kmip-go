@@ -1,3 +1,13 @@
+// Package kmiptest provides utilities for testing KMIP (Key Management Interoperability Protocol) servers and clients.
+// It includes helper functions to create in-memory KMIP servers and clients for use in unit tests.
+//
+// The package defines the TestingT interface, which abstracts the testing.T type, allowing for error reporting and cleanup registration.
+//
+// Functions:
+//   - NewServer: Starts a new in-memory KMIP server with a self-signed certificate and the provided request handler.
+//     Returns the server address and the PEM-encoded CA certificate.
+//   - NewClientAndServer: Starts a new KMIP server and returns a connected client configured with the server's CA certificate.
+//     Registers cleanup functions to shut down the server and client after the test.
 package kmiptest
 
 import (
@@ -28,6 +38,19 @@ type TestingT interface {
 	Cleanup(func())
 }
 
+// NewServer starts a new in-memory TLS server for testing purposes using the provided
+// kmipserver.RequestHandler. It generates a self-signed ECDSA certificate for the server,
+// listens on a random local port, and starts serving requests in a separate goroutine.
+// The server is automatically shut down when the test completes. The function returns
+// the server's address and the PEM-encoded CA certificate as strings.
+//
+// Parameters:
+//   - t: A TestingT instance (typically *testing.T or *testing.B) used for test assertions and cleanup.
+//   - hdl: The kmipserver.RequestHandler to handle incoming requests.
+//
+// Returns:
+//   - addr: The address the server is listening on (e.g., "127.0.0.1:port").
+//   - ca: The PEM-encoded CA certificate used by the server.
 func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 	caTpl := x509.Certificate{
 		KeyUsage:     x509.KeyUsageDigitalSignature,
@@ -65,6 +88,22 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 	return list.Addr().String(), string(pemCA)
 }
 
+// NewClientAndServer creates and returns a new KMIP client connected to a test server.
+//
+// It starts a new KMIP server using the provided request handler `hdl` and establishes a client
+// connection to it. The client is configured with the server's CA certificate, a correlation value
+// middleware, a testing middleware, and a debug middleware that outputs to stderr in XML format.
+//
+// The function registers a cleanup function to close the client connection when the test completes.
+//
+// Parameters:
+//   - t: A testing interface used for assertions and cleanup registration.
+//   - hdl: The KMIP server request handler.
+//
+// Returns:
+//   - A pointer to the initialized KMIP client.
+//
+// The function will fail the test if the client cannot be created.
 func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.Client {
 	addr, ca := NewServer(t, hdl)
 	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(

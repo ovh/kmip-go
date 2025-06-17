@@ -5,6 +5,9 @@ import (
 	"slices"
 )
 
+// computeNeededBytes calculates the number of bytes needed to process a TTLV-encoded buffer.
+// If the buffer length is less than 8 bytes, it returns 8 as the minimum required size.
+// Otherwise, it returns 8 plus the padded length of the TTLV value as determined by ttlvReader.
 func computeNeededBytes(buf []byte) int {
 	if len(buf) < 8 {
 		return 8

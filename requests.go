@@ -13,6 +13,11 @@ type RequestMessage struct {
 	BatchItem []RequestBatchItem
 }
 
+// NewRequestMessage creates a new RequestMessage with the specified protocol version and one or more operation payloads.
+// It sets the current timestamp (truncated to the nearest second) in the request header and assigns a batch count
+// equal to the number of payloads provided. For each payload, a RequestBatchItem is created and added to the message.
+// If multiple payloads are provided, each batch item is assigned a unique batch item ID based on its index.
+// Panics if the number of payloads exceeds the maximum value for an int32.
 func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) RequestMessage {
 	bc := len(payloads)
 	if bc > math.MaxInt32 {

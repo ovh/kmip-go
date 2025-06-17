@@ -6,17 +6,6 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
-var (
-	V1_0 = ProtocolVersion{ProtocolVersionMajor: 1, ProtocolVersionMinor: 0}
-	V1_1 = ProtocolVersion{ProtocolVersionMajor: 1, ProtocolVersionMinor: 1}
-	V1_2 = ProtocolVersion{ProtocolVersionMajor: 1, ProtocolVersionMinor: 2}
-	V1_3 = ProtocolVersion{ProtocolVersionMajor: 1, ProtocolVersionMinor: 3}
-	V1_4 = ProtocolVersion{ProtocolVersionMajor: 1, ProtocolVersionMinor: 4}
-	V2_0 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 0}
-	V2_1 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 1}
-	V2_2 = ProtocolVersion{ProtocolVersionMajor: 2, ProtocolVersionMinor: 2}
-)
-
 type ProtocolVersion struct {
 	ProtocolVersionMajor int32
 	ProtocolVersionMinor int32

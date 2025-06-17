@@ -32,6 +32,9 @@ func init() {
 	)
 }
 
+// CryptographicUsageMask represents a set of bitmask flags indicating the permitted cryptographic operations
+// that can be performed with a cryptographic object, such as encrypt, decrypt, sign, or verify.
+// Each bit in the mask corresponds to a specific usage permission as defined by the KMIP specification.
 type CryptographicUsageMask int32
 
 const (
@@ -60,6 +63,8 @@ func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
 	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
 }
 
+// StorageStatusMask represents a bitmask for storage status flags.
+// It is used to indicate various storage states using bitwise operations.
 type StorageStatusMask int32
 
 const (

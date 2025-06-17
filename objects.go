@@ -49,6 +49,8 @@ func (sd *SecretData) ObjectType() ObjectType {
 	return ObjectTypeSecretData
 }
 
+// Data returns the raw bytes of the secret data if the KeyFormatType is either Raw or Opaque.
+// For unsupported key format types, it returns an error indicating the unsupported type.
 func (sd *SecretData) Data() ([]byte, error) {
 	switch sd.KeyBlock.KeyFormatType {
 	case KeyFormatTypeRaw, KeyFormatTypeOpaque:
@@ -67,6 +69,10 @@ func (sd *Certificate) ObjectType() ObjectType {
 	return ObjectTypeCertificate
 }
 
+// X509Certificate parses the CertificateValue field as an x509.Certificate if the
+// CertificateType is CertificateTypeX_509. It returns a pointer to the parsed
+// x509.Certificate and any error encountered during parsing. If the certificate
+// type is not X.509, an error is returned indicating the unsupported type.
 func (sd *Certificate) X509Certificate() (*x509.Certificate, error) {
 	if sd.CertificateType != CertificateTypeX_509 {
 		return nil, fmt.Errorf("Unsupported certificate type. Got %s but want %s", ttlv.EnumStr(sd.CertificateType), ttlv.EnumStr(CertificateTypeX_509))
@@ -96,6 +102,9 @@ func (sd *SymmetricKey) ObjectType() ObjectType {
 	return ObjectTypeSymmetricKey
 }
 
+// KeyMaterial returns the raw key material as a byte slice for the SymmetricKey.
+// It handles different key format types, including raw and transparent symmetric keys.
+// If the key format is unsupported or the key material is empty, an error is returned.
 func (sd *SymmetricKey) KeyMaterial() ([]byte, error) {
 	switch sd.KeyBlock.KeyFormatType {
 	case KeyFormatTypeRaw:
@@ -122,6 +131,11 @@ func (sd *PublicKey) ObjectType() ObjectType {
 	return ObjectTypePublicKey
 }
 
+// RSA returns the rsa.PublicKey representation of the PublicKey object.
+// It supports multiple key format types, including PKCS#1, X.509 SubjectPublicKeyInfo (SPKI),
+// and Transparent RSAPublicKey. The method parses the underlying key material according to the
+// format type and returns the corresponding *rsa.PublicKey. If the key format is unsupported
+// or the key material is invalid, an error is returned.
 func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypePKCS_1:
@@ -171,6 +185,13 @@ func (key *PublicKey) RSA() (*rsa.PublicKey, error) {
 	}
 }
 
+// ECDSA returns the ECDSA public key represented by the PublicKey object.
+// It supports multiple key format types, including X.509 SubjectPublicKeyInfo (SPKI)
+// and transparent ECDSA/EC public key formats as defined by KMIP.
+// For X.509 keys, it parses the DER-encoded public key. For transparent keys,
+// it reconstructs the ECDSA public key from the curve parameters and public key material.
+// Returns an error if the key format is unsupported, the key material is invalid,
+// or the key is not an ECDSA public key.
 func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeX_509:
@@ -284,6 +305,10 @@ func (sd *PrivateKey) ObjectType() ObjectType {
 	return ObjectTypePrivateKey
 }
 
+// RSA returns the RSA private key represented by the PrivateKey object.
+// It supports multiple key format types, including PKCS#1, PKCS#8, and Transparent RSA Private Key.
+// The method parses the key material according to the format and returns a *rsa.PrivateKey.
+// If the key format is unsupported or the key material is invalid, an error is returned.
 func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypePKCS_1:
@@ -350,6 +375,11 @@ func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 	}
 }
 
+// ECDSA returns the ECDSA private key represented by the PrivateKey object.
+// It supports multiple key format types, including ECPrivateKey, PKCS#8, and
+// transparent ECDSA/EC private key formats. The method parses the underlying
+// key material and constructs an *ecdsa.PrivateKey. If the key format or
+// curve is unsupported, or if the key material is invalid, an error is returned.
 func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 	switch key.KeyBlock.KeyFormatType {
 	case KeyFormatTypeECPrivateKey:

@@ -33,10 +33,13 @@ type ResponseBatchItem struct {
 	MessageExtension             *MessageExtension
 }
 
+// Err returns an error if the ResponseBatchItem indicates a failure.
+// If the ResultStatus is not ResultStatusSuccess, it constructs and returns
+// an error describing the operation, status, reason, and message.
+// Otherwise, it returns nil.
 func (bi *ResponseBatchItem) Err() error {
 	if bi.ResultStatus != ResultStatusSuccess {
-		msg := bi.ResultMessage
-		return fmt.Errorf("Operation failed (status=%q, reason=%q) %s", ttlv.EnumStr(bi.ResultStatus), ttlv.EnumStr(bi.ResultReason), msg)
+		return fmt.Errorf("Operation %q failed (status=%q, reason=%q) %s", ttlv.EnumStr(bi.Operation), ttlv.EnumStr(bi.ResultStatus), ttlv.EnumStr(bi.ResultReason), bi.ResultMessage)
 	}
 	return nil
 }

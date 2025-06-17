@@ -119,11 +119,18 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 	}
 }
 
-// Signer returns a crypto.Signer implementation using the remote private key for signing.
-// The public key must be non sensitive and extractable. The private key must be linked to its publickey.
+// Signer creates a crypto.Signer using the provided private and public key IDs.
+// It verifies the attributes of the keys to ensure they are suitable for signing and verifying operations.
+// If only one key ID is provided, it attempts to find the corresponding linked key ID.
 //
-// At least one of privateKeyId or publicKeyId must be given. If only one of them is given, the other will be retrieved
-// from the appropriate Link attribute.
+// Parameters:
+//   - ctx: The context for the operation.
+//   - privateKeyId: The ID of the private key. Can be empty if publicKeyId is provided.
+//   - publicKeyId: The ID of the public key. Can be empty if privateKeyId is provided.
+//
+// Returns:
+//   - crypto.Signer: The signer object that can be used for signing operations.
+//   - error: An error if the key attributes are invalid or if required keys are missing.
 func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
 	if privateKeyId == "" && publicKeyId == "" {
 		return nil, errors.New("at least one of public key or private key ID must be given")
@@ -150,6 +157,7 @@ func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (
 	}
 	// At this point, publicKeyId must not be empty, otherwise it's a failure.
 	if publicKeyId == "" {
+		//TODO: If private key is extractable and non-sensitive, then we can extract the public key from the private key.
 		return nil, fmt.Errorf("link to public key is missing")
 	}
 	// Check public key attributes:
@@ -334,7 +342,7 @@ func (c *cryptoSigner) verifySignerKeyAttributes(ctx context.Context, id string,
 
 // convertRawECDSAToASN1DER converts a raw ECDSA signature (r || s) into ASN.1 DER format.
 func convertRawECDSAToASN1DER(rawSig []byte, curve elliptic.Curve) ([]byte, error) {
-	//TODO: Change maybe to use x/crypto's cryptobyte package which would be more permfromant.
+	//TODO: Change maybe to use x/crypto's cryptobyte package which would be more performant, but would add a new dependency.
 
 	// ECDSASignature represents the ASN.1 structure of an ECDSA signature
 	type ECDSASignature struct {

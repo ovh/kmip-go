@@ -693,6 +693,9 @@ func init() {
 	})
 }
 
+// ResultStatus represents the status of a KMIP operation result as defined by the KMIP specification.
+// It is typically used to indicate whether an operation was successful, failed, or resulted in a partial success.
+// The underlying type is uint32, and specific status values are usually defined as constants.
 type ResultStatus uint32
 
 const (
@@ -702,6 +705,9 @@ const (
 	ResultStatusOperationUndone  ResultStatus = 0x00000003
 )
 
+// ResultReason represents the reason for a result in KMIP operations.
+// It is used to provide additional context or explanation for the outcome
+// of a KMIP request, typically indicating why a particular result occurred.
 type ResultReason uint32
 
 // See https://docs.oasis-open.org/kmip/spec/v1.4/errata01/os/kmip-spec-v1.4-errata01-os-redlined.html#_Toc490660949
@@ -793,6 +799,8 @@ const (
 
 type OpaqueDataType uint32
 
+// State represents the various states that an object can be in within the KMIP (Key Management Interoperability Protocol) context.
+// It is defined as a uint32 type and is typically used to indicate the lifecycle or status of a managed object.
 type State uint32
 
 const (
