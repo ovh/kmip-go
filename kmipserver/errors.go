@@ -10,6 +10,8 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
+// Error represents a KMIP error with a specific reason and an optional message.
+// It encapsulates the KMIP ResultReason and a human-readable error message.
 type Error struct {
 	Reason  kmip.ResultReason
 	Message string
@@ -22,6 +24,16 @@ func (e Error) Error() string {
 	return e.Message
 }
 
+// Errorf creates a new Error with the specified kmip.ResultReason and a formatted message.
+// The message is formatted according to the given format specifier and arguments, similar to fmt.Sprintf.
+//
+// Parameters:
+//   - reason: The kmip.ResultReason indicating the reason for the error.
+//   - format: A format string compatible with fmt.Sprintf.
+//   - args:   Variadic arguments to be formatted into the message.
+//
+// Returns:
+//   - error: An Error instance containing the reason and formatted message.
 func Errorf(reason kmip.ResultReason, format string, args ...any) error {
 	return Error{
 		Reason:  reason,

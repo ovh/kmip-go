@@ -58,14 +58,20 @@ func (v version) String() string {
 	return fmt.Sprintf("%d.%d", v.major, v.minor)
 }
 
+// Major returns the major version number of the version.
 func (v version) Major() int {
 	return v.major
 }
 
+// Minor returns the minor version number of the version.
 func (v version) Minor() int {
 	return v.minor
 }
 
+// parseVersion parses a version string in the format "v<major>.<minor>" or "<major>.<minor>"
+// and returns a version struct with the extracted major and minor version numbers.
+// It returns an error if the input string does not conform to the expected format
+// or if the major or minor parts are not valid integers.
 func parseVersion(s string) (version, error) {
 	var v version
 	var err error
@@ -98,6 +104,11 @@ type versionRange struct {
 	end   *version
 }
 
+// parseVersionRange parses a version range string and returns a versionRange object.
+// The input string can be a single version (e.g., "1.0") or a range in the form "start..end" (e.g., "1.0..2.0").
+// If only one version is provided, both the start and end of the range are set to that version.
+// If the range is specified, the start or end can be omitted to indicate an open range (e.g., "..2.0" or "1.0..").
+// Returns an error if the version(s) cannot be parsed or if the start version is greater than the end version.
 func parseVersionRange(s string) (versionRange, error) {
 	start, end, found := strings.Cut(s, "..")
 	if !found {

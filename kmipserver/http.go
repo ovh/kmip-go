@@ -13,6 +13,17 @@ import (
 
 const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
 
+// NewHTTPHandler creates a new HTTP handler that wraps the provided RequestHandler.
+// It returns an http.Handler that can be used to serve HTTP requests using the given handler logic.
+//
+// The method ServeHTTP handles incoming HTTP requests for the KMIP server. It supports POST requests with
+// Content-Type headers of "text/xml", "application/json", or "application/octet-stream", and
+// unmarshals the request body accordingly. The function enforces a maximum body size and validates
+// the Content-Length header. It processes the KMIP request message and marshals the response using
+// the appropriate format. If an error occurs during unmarshalling, a KMIP error response is sent
+// back. Only POST requests are allowed; other methods receive a 405 Method Not Allowed response.
+// Unsupported Content-Type headers result in a 406 Not Acceptable response, and requests with
+// invalid or missing Content-Length headers receive a 411 Length Required response.
 func NewHTTPHandler(hdl RequestHandler) http.Handler {
 	return httpHandler{inner: hdl}
 }
@@ -21,6 +32,14 @@ type httpHandler struct {
 	inner RequestHandler
 }
 
+// ServeHTTP handles incoming HTTP requests for the KMIP server. It supports POST requests with
+// Content-Type headers of "text/xml", "application/json", or "application/octet-stream", and
+// unmarshals the request body accordingly. The function enforces a maximum body size and validates
+// the Content-Length header. It processes the KMIP request message and marshals the response using
+// the appropriate format. If an error occurs during unmarshalling, a KMIP error response is sent
+// back. Only POST requests are allowed; other methods receive a 405 Method Not Allowed response.
+// Unsupported Content-Type headers result in a 406 Not Acceptable response, and requests with
+// invalid or missing Content-Length headers receive a 411 Length Required response.
 func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if body := req.Body; body != nil {
 		defer body.Close()

@@ -1,15 +1,20 @@
-// Package ttlv implements the TTLV serialization and deserialization as defined in the Oasis [KMIP 1.4 specification, section 9.1].
-// It also supports other encoding format like
-//   - XML as defined in [KMIP 1.4 Profiles, section 5.4]
-//   - JSON as defined in [KMIP 1.4 Profiles, section 5.5]
-//   - Non standard "human friendly" textual format
+// Package ttlv provides low-level serialization and deserialization for the KMIP protocol
+// as defined in the Oasis KMIP 1.4 specification, section 9.1. It supports multiple encoding
+// formats including:
+//   - Binary TTLV (Tag-Type-Length-Value) as per the KMIP specification
+//   - XML encoding as defined in KMIP 1.4 Profiles, section 5.4
+//   - JSON encoding as defined in KMIP 1.4 Profiles, section 5.5
+//   - A non-standard, human-friendly textual format for debugging purposes
 //
-// This package is the low level part of KMIP protocol serialization and should mostly never be used directly except to extend the kmip protocol implementation
-// or to perform testing or optimizing stuff.
+// This package is intended for advanced use cases such as extending the KMIP protocol
+// implementation, testing, or performance optimization. Most users should interact with
+// higher-level KMIP protocol abstractions.
 //
-// [KMIP 1.4 Profiles, section 5.4]: http://docs.oasis-open.org/kmip/profiles/v1.4/os/kmip-profiles-v1.4-os.html#_Toc491431437
-// [KMIP 1.4 specification, section 9.1]: http://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.html#_Toc490660911
-// [KMIP 1.4 Profiles, section 5.5]: http://docs.oasis-open.org/kmip/profiles/v1.4/os/kmip-profiles-v1.4-os.html#_Toc491431461
+// References:
+//
+//	[KMIP 1.4 specification, section 9.1]: http://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.html#_Toc490660911
+//	[KMIP 1.4 Profiles, section 5.4]: http://docs.oasis-open.org/kmip/profiles/v1.4/os/kmip-profiles-v1.4-os.html#_Toc491431437
+//	[KMIP 1.4 Profiles, section 5.5]: http://docs.oasis-open.org/kmip/profiles/v1.4/os/kmip-profiles-v1.4-os.html#_Toc491431461
 package ttlv
 
 import (

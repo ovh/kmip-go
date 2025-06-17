@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// fieldInfo holds metadata about a struct field for TTLV (Tag-Type-Length-Value) processing,
+// including the tag name, omitempty flag, applicable version range, and whether the version is set.
 type fieldInfo struct {
 	tag        string
 	omitempty  bool
@@ -13,11 +15,20 @@ type fieldInfo struct {
 	setVersion bool
 }
 
+// getFieldInfo extracts the "ttlv" struct tag value from the provided StructField
+// and parses it into a fieldInfo struct. It returns the parsed fieldInfo.
+// If the "ttlv" tag is not present, an empty string is passed to parseFieldInfo.
 func getFieldInfo(fldT reflect.StructField) fieldInfo {
 	tagVal, _ := fldT.Tag.Lookup("ttlv")
 	return parseFieldInfo(tagVal)
 }
 
+// parseFieldInfo parses a struct field tag string and returns a fieldInfo struct
+// containing the parsed tag information. The tag string is expected to be a
+// comma-separated list, where the first part is the main tag, and subsequent
+// parts are options or key-value pairs (e.g., "omitempty", "set-version",
+// "version=1-3"). Recognized options are "omitempty", "set-version", and
+// "version=<range>". If an invalid sub-tag is encountered, the function panics.
 func parseFieldInfo(s string) fieldInfo {
 	parts := strings.Split(s, ",")
 	ann := fieldInfo{tag: parts[0]}
@@ -49,6 +60,11 @@ func parseFieldInfo(s string) fieldInfo {
 	return ann
 }
 
+// getFieldTag returns the integer tag value associated with a struct field based on the provided tagVal string.
+// If tagVal is empty, it attempts to resolve the tag by the field's name or type using getTagByName and getTagForType.
+// If tagVal starts with "0x", it parses the hexadecimal value as the tag, ensuring it is strictly positive and fits in 3 bytes.
+// Otherwise, it treats tagVal as a tag name and resolves it using getTagByName.
+// Panics if tagVal is invalid or cannot be resolved.
 func getFieldTag(fldT reflect.StructField, tagVal string) int {
 	if tagVal == "" {
 		// if fldT.Type.Implements(reflect.TypeFor[Encodable]()) {

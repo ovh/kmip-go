@@ -173,6 +173,16 @@ type UnknownPayload struct {
 	Fields ttlv.Struct
 }
 
+// NewUnknownPayload creates a new UnknownPayload instance for the specified operation type,
+// initializing it with the provided TTLV values as fields. This is useful for handling
+// KMIP operations that are not explicitly supported or recognized by the implementation.
+//
+// Parameters:
+//   - op: The operation type for which the payload is being created.
+//   - fields: A variadic list of ttlv.Value representing the fields to include in the payload.
+//
+// Returns:
+//   - A pointer to the constructed UnknownPayload.
 func NewUnknownPayload(op Operation, fields ...ttlv.Value) *UnknownPayload {
 	return &UnknownPayload{
 		opType: op,
