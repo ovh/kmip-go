@@ -6,8 +6,6 @@ See [KMIP v1.4 protocole specification](https://docs.oasis-open.org/kmip/spec/v1
 
 This library is developped for and tested against [OVHcloud KMS](https://help.ovhcloud.com/csm/en-ie-kms-quick-start?id=kb_article_view&sysparm_article=KB0063362).
 
-> **NOTE:** THIS PROJECT IS CURRENTLY UNDER DEVELOPMENT AND SUBJECT TO BREAKING CHANGES.
-
 ## Usage
 
 Add it to your project by running
@@ -126,7 +124,7 @@ See [examples](./examples) for more possibilities.
 > **Legend:**
 > * N/A : Not Applicable 
 > * ✅ : Fully compatible
-> * ❌ : Not implemented or reviewed
+> * ❌ : Not implemented
 > * 🚧 : Work in progress / Partially compatible
 > * 💀 : Deprecated
 
