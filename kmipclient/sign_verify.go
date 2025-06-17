@@ -18,10 +18,34 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
+// ExecSign is a specialized executor for handling Sign operations.
+// It embeds the generic Executor with request and response payload types specific to
+// the Sign KMIP operation, facilitating the execution and management of sign requests and their responses.
+//
+// Usage:
+//
+//	exec := client.Sign("key-id").WithCryptographicParameters(...).Data(...)
+//	resp, err := exec.ExecContext(ctx)
+//
+// Errors:
+//   - Errors may be returned when executing the sign operation if the key is invalid,
+//     the server rejects the operation, or the cryptographic parameters are not supported.
 type ExecSign struct {
 	Executor[*payloads.SignRequestPayload, *payloads.SignResponsePayload]
 }
 
+// ExecSignatureVerify is a specialized executor for handling SignatureVerify operations.
+// It embeds the generic Executor with request and response payload types specific to
+// the SignatureVerify KMIP operation, facilitating the execution and management of signature verification requests and their responses.
+//
+// Usage:
+//
+//	exec := client.SignatureVerify("key-id").WithCryptographicParameters(...).Data(...).Signature(...)
+//	resp, err := exec.ExecContext(ctx)
+//
+// Errors:
+//   - Errors may be returned when executing the signature verify operation if the key is invalid,
+//     the server rejects the operation, or the cryptographic parameters are not supported.
 type ExecSignatureVerify struct {
 	Executor[*payloads.SignatureVerifyRequestPayload, *payloads.SignatureVerifyResponsePayload]
 }
@@ -41,6 +65,9 @@ type ExecSignatureVerifyWantsSignature struct {
 	client *Client
 }
 
+// Sign initializes a signing operation for the object identified by the given unique identifier.
+// It returns an ExecSignWantsData struct, which allows the caller to provide the data to be signed.
+// The signing operation is not executed until the data is supplied.
 func (c *Client) Sign(id string) ExecSignWantsData {
 	return ExecSignWantsData{
 		client: c,
@@ -50,11 +77,15 @@ func (c *Client) Sign(id string) ExecSignWantsData {
 	}
 }
 
+// WithCryptographicParameters sets the CryptographicParameters field of the request to the provided params.
+// It returns the updated ExecSignWantsData to allow for method chaining.
 func (ex ExecSignWantsData) WithCryptographicParameters(params kmip.CryptographicParameters) ExecSignWantsData {
 	ex.req.CryptographicParameters = &params
 	return ex
 }
 
+// Data sets the data to be signed in the request and returns an ExecSign instance
+// for executing the sign operation with the provided data.
 func (ex ExecSignWantsData) Data(data []byte) ExecSign {
 	ex.req.Data = data
 	return ExecSign{
@@ -65,6 +96,9 @@ func (ex ExecSignWantsData) Data(data []byte) ExecSign {
 	}
 }
 
+// DigestedData sets the digested (hashed) data to be signed in the request payload.
+// It accepts a byte slice containing the digested data and returns an ExecSign instance
+// for further configuration or execution of the signing operation.
 func (ex ExecSignWantsData) DigestedData(data []byte) ExecSign {
 	ex.req.DigestedData = data
 	return ExecSign{
@@ -75,6 +109,19 @@ func (ex ExecSignWantsData) DigestedData(data []byte) ExecSign {
 	}
 }
 
+// SignatureVerify initializes a signature verification operation for the object identified by the given unique identifier.
+// It returns an ExecSignatureVerifyWantsData struct, which allows the caller to provide the data and signature to be verified.
+// The verification process is performed using the cryptographic object referenced by the unique identifier.
+//
+// Parameters:
+//   - id: The unique identifier of the cryptographic object to be used for signature verification.
+//
+// Returns:
+//   - ExecSignatureVerifyWantsData: A struct for chaining the next steps of the signature verification process.
+//
+// Errors:
+//   - This function does not return errors directly. Errors may be returned when executing the ExecSignatureVerifyWantsData or ExecSignatureVerify.
+//   - If the object does not exist or the server rejects the operation, an error will be returned during execution.
 func (c *Client) SignatureVerify(id string) ExecSignatureVerifyWantsData {
 	return ExecSignatureVerifyWantsData{
 		client: c,
@@ -89,16 +136,28 @@ func (ex ExecSignatureVerifyWantsData) WithCryptographicParameters(params kmip.C
 	return ex
 }
 
+// Data sets the data to be verified in the request and returns an ExecSignatureVerifyWantsSignature instance
+// for providing the signature and executing the verification operation.
 func (ex ExecSignatureVerifyWantsData) Data(data []byte) ExecSignatureVerifyWantsSignature {
 	ex.req.Data = data
 	return ExecSignatureVerifyWantsSignature(ex)
 }
 
+// DigestedData sets the digested (hashed) data to be verified in the request payload.
+// Returns an ExecSignatureVerifyWantsSignature instance for providing the signature and executing the verification operation.
 func (ex ExecSignatureVerifyWantsData) DigestedData(data []byte) ExecSignatureVerifyWantsSignature {
 	ex.req.DigestedData = data
 	return ExecSignatureVerifyWantsSignature(ex)
 }
 
+// Signature sets the signature data to be verified in the request and returns an ExecSignatureVerify
+// instance for executing the signature verification operation.
+//
+// Parameters:
+//   - sig ([]byte): The signature data to be verified.
+//
+// Returns:
+//   - ExecSignatureVerify: An executor configured with the provided signature data.
 func (ex ExecSignatureVerifyWantsData) Signature(sig []byte) ExecSignatureVerify {
 	ex.req.SignatureData = sig
 	return ExecSignatureVerify{
@@ -109,6 +168,16 @@ func (ex ExecSignatureVerifyWantsData) Signature(sig []byte) ExecSignatureVerify
 	}
 }
 
+// Signature sets the signature data to be verified in the request payload and returns
+// an ExecSignatureVerify instance for further execution. The provided sig parameter
+// should contain the signature bytes to be verified.
+//
+// Parameters:
+//   - sig: The signature data as a byte slice.
+//
+// Returns:
+//   - ExecSignatureVerify: An executor configured with the signature data.
+//   - error: An error if the key attributes are invalid or if required keys are missing.
 func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureVerify {
 	ex.req.SignatureData = sig
 	return ExecSignatureVerify{

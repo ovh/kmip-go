@@ -545,6 +545,9 @@ func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip
 // the DiscoverVersions operation, it falls back to KMIP v1.0, provided it is in the client's list of
 // supported versions. If no common version is found between the client and server, or if any errors
 // occur during negotiation, an error is returned. On success, the negotiated version is set in the client.
+//
+// Returns:
+//   - error: If negotiation fails, no common version is found, or the server returns an error.
 func (c *Client) negotiateVersion(ctx context.Context) error {
 	if c.version != nil {
 		return nil
