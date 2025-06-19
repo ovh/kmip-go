@@ -32,14 +32,18 @@ const (
 
 var RESOURCE = "cb0ea267-d912-4bd4-9be2-2093e1ed02a4"
 
+//nolint:funlen // list all examples
 func main() {
 	client := newClient()
 	defer client.Close()
 
-	unsupported_operation(client)
+	test_batch_helper(client)
+	test_encrypt_by_name(client)
 
 	activateAll(client)
 	cleanupDomain(client)
+
+	unsupported_operation(client)
 
 	time_consuming_batch(client)
 

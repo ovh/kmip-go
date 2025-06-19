@@ -210,8 +210,10 @@ func (dec *Decoder) TagAny(tag int, value any) (err error) {
 }
 
 // Any decodes `value` by deserializing it from the buffer using value's type default tag.
-// It panics if no tag can be found for `value` or if value does not implement [Encodable].
-// `value` must be a pointer.
+// If the value implements the Decodable interface, its DecodeTTLV method is called directly.
+// Otherwise, the decoder attempts to determine the appropriate tag for the value's type using reflection
+// and calls TagAny with that tag. If no tag can be found for the value, or if the value does not implement Decodable,
+// the function panics. The value must be a pointer, as decoding requires writing to the provided variable.
 func (dec *Decoder) Any(value any) error {
 	switch v := value.(type) {
 	case Decodable:
@@ -247,6 +249,12 @@ func (d *Decoder) decodeValue(tag int, value reflect.Value) error {
 
 var decodeFuncsCache = new(sync.Map)
 
+// decodeFuncFor returns a decoding function for the specified reflect.Type.
+// It first checks if a decoding function for the given type is present in the decodeFuncsCache.
+// If found, it returns the cached function. Otherwise, it generates a new decoding function
+// using decodeFunc, stores it in the cache, and returns it.
+// The returned function takes a Decoder pointer, a tag (int), and a reflect.Value to decode into,
+// and returns an error if decoding fails.
 func decodeFuncFor(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	if f, ok := decodeFuncsCache.Load(ty); ok {
 		return f.(func(d *Decoder, tag int, value reflect.Value) error)
@@ -460,6 +468,13 @@ func buildSliceDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) er
 	}
 }
 
+// decodeFunc returns a decoding function for the provided reflect.Type.
+// The returned function takes a Decoder, a tag, and a reflect.Value, and decodes
+// the value according to the type's decoding rules. The function supports various
+// custom interfaces (such as TagDecodable), pointer types, enums, bitmasks, and
+// common Go types (e.g., time.Duration, time.Time, big.Int, primitive integer and
+// string types, slices, structs, and interfaces). If the type is not supported,
+// the function panics with an error message indicating the unsupported type.
 func decodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	if ty.Kind() != reflect.Interface && ty.Implements(reflect.TypeFor[TagDecodable]()) {
 		return buildTagDecodableDecodeFunc(ty)
@@ -544,6 +559,20 @@ func applySetVersionDecode(fldT reflect.StructField, ffunc func(d *Decoder, i in
 	}
 }
 
+// buidStructDecodeFunc generates a decoding function for a given struct type using reflection.
+// The returned function decodes a struct from the Decoder, mapping each exported field to its
+// corresponding tag and decoding logic. It supports field options such as omitempty, version
+// ranges, and setting version fields. Fields with a tag of "-" or unexported fields are skipped.
+// If a field is an interface and has no tag, it attempts to determine the tag dynamically based
+// on the concrete type at decode time. Panics if a required tag is missing for a non-interface field.
+//
+// Parameters:
+//
+//   - ty - The reflect.Type of the struct to generate the decode function for.
+//
+// Returns:
+//
+//   - A function that takes a Decoder, a tag, and a reflect.Value, and decodes the struct fields accordingly.
 func buidStructDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	fieldsDecode := []func(d *Decoder, value reflect.Value) error{}
 
