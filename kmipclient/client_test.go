@@ -278,3 +278,102 @@ func TestVersionNegociation_v1_0_Fallback_unsupported(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, client)
 }
+func TestBatchExec_ThenAndExec(t *testing.T) {
+	mux := kmipserver.NewBatchExecutor()
+	client := kmiptest.NewClientAndServer(t, mux)
+
+	// Route for Create
+	mux.Route(kmip.OperationCreate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.CreateRequestPayload) (*payloads.CreateResponsePayload, error) {
+		kmipserver.SetIdPlaceholder(ctx, "id1")
+		return &payloads.CreateResponsePayload{UniqueIdentifier: "id1"}, nil
+	}))
+	// Route for Activate
+	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
+		id, err := kmipserver.GetIdOrPlaceholder(ctx, pl.UniqueIdentifier)
+		if err != nil {
+			return nil, err
+		}
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: id}, nil
+	}))
+	mux.Route(kmip.OperationRevoke, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.RevokeRequestPayload) (*payloads.RevokeResponsePayload, error) {
+		id, err := kmipserver.GetIdOrPlaceholder(ctx, pl.UniqueIdentifier)
+		if err != nil {
+			return nil, err
+		}
+		return &payloads.RevokeResponsePayload{UniqueIdentifier: id}, nil
+	}))
+
+	// Build a batch with two operations
+	batch := client.Create().
+		AES(256, kmip.CryptographicUsageEncrypt).
+		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+			return c.Activate("")
+		}).
+		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+			return c.Revoke("")
+		})
+
+	result, err := batch.Exec()
+	require.NoError(t, err)
+	pl, err := result.Unwrap()
+	require.NoError(t, err)
+	require.Len(t, pl, 3)
+	require.IsType(t, &payloads.CreateResponsePayload{}, pl[0])
+	require.IsType(t, &payloads.ActivateResponsePayload{}, pl[1])
+	require.IsType(t, &payloads.RevokeResponsePayload{}, pl[2])
+}
+
+func TestBatchExec_Exec_ErrorPropagation(t *testing.T) {
+	mux := kmipserver.NewBatchExecutor()
+	client := kmiptest.NewClientAndServer(t, mux)
+	client.Close()
+
+	// Route for Create returns error
+	// mux.Route(kmip.OperationCreate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.CreateRequestPayload) (*payloads.CreateResponsePayload, error) {
+	// 	return nil, kmipserver.ErrOperationNotSupported
+	// }))
+
+	batch := client.Create().AES(256, kmip.CryptographicUsageEncrypt).
+		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+			return c.Activate("id1")
+		})
+
+	result, err := batch.Exec()
+	require.Error(t, err)
+	require.Nil(t, result)
+
+	require.Panics(t, func() {
+		batch.MustExec()
+	})
+}
+
+func TestBatchResult_Unwrap_Error(t *testing.T) {
+	// Simulate a BatchResult with one error item
+	result := kmipclient.BatchResult{
+		{
+			ResultStatus:    kmip.ResultStatusSuccess,
+			ResponsePayload: &payloads.CreateResponsePayload{UniqueIdentifier: "id1"},
+		},
+		{
+			ResultStatus:  kmip.ResultStatusOperationFailed,
+			ResultMessage: "failed",
+		},
+	}
+	pl, err := result.Unwrap()
+	require.Error(t, err)
+	require.Len(t, pl, 2)
+	require.IsType(t, &payloads.CreateResponsePayload{}, pl[0])
+	require.Nil(t, pl[1])
+}
+
+func TestBatchResult_MustUnwrap_PanicsOnError(t *testing.T) {
+	result := kmipclient.BatchResult{
+		{
+			ResultStatus:  kmip.ResultStatusOperationFailed,
+			ResultMessage: "fail",
+		},
+	}
+	require.Panics(t, func() {
+		_ = result.MustUnwrap()
+	})
+}

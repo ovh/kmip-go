@@ -136,8 +136,15 @@ func (enc *Encoder) Bitmask(realtag, tag int, value int32) {
 	enc.w.Bitmask(realtag, tag, value)
 }
 
-// TagAny encodes `value` and writes it to the internal buffer with the given tag instead of value's type default one.
-// It panics if value's type cannot be encoded.
+// TagAny encodes a value of any supported type with the specified tag.
+// It determines the type of the provided value and delegates encoding to the appropriate method.
+// Supported types include byte, int8, int16, int32, int64, bool, string, []byte, time.Duration,
+// time.Time, *big.Int, and types implementing the TagEncodable interface. If the value is nil,
+// the method returns without encoding. For unsupported types, it falls back to reflection-based encoding.
+//
+// Parameters:
+//   - tag: The tag to associate with the encoded value.
+//   - value: The value to encode, which can be of any supported type.
 func (enc *Encoder) TagAny(tag int, value any) {
 	if value == nil {
 		return
@@ -173,7 +180,10 @@ func (enc *Encoder) TagAny(tag int, value any) {
 }
 
 // Any encodes `value` and writes it to the internal buffer using value's type default tag.
-// It panics if no tag can be found for `value` or if value does not implement [Encodable].
+// If the value implements the Encodable interface, its EncodeTTLV method is called directly.
+// Otherwise, the encoder attempts to determine the appropriate tag for the value's type using reflection.
+// If no tag can be found for the value, or if the value does not implement Encodable, the function panics.
+// This method is the main entry point for encoding arbitrary Go values into TTLV format.
 func (enc *Encoder) Any(value any) {
 	if value == nil {
 		return
@@ -302,6 +312,14 @@ func buildSliceEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	}
 }
 
+// encodeFunc returns an encoding function for the provided reflect.Type.
+// The returned function takes an Encoder, a tag (int), and a reflect.Value, and encodes
+// the value according to its type. The encoding logic is determined by the type's
+// implementation of TagEncodable, pointer status, enum/bitmask status, or by its
+// concrete kind (e.g., integer, string, struct, etc.).
+// If the type is not supported, the function panics.
+// This function is used internally to dynamically select the appropriate encoding
+// strategy for different Go types when serializing to TTLV format.
 func encodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	if ty.Implements(reflect.TypeFor[TagEncodable]()) {
 		return buildTagDecodableEncodeFunc()
@@ -385,6 +403,17 @@ func applyVersionRangeEncode(vrange versionRange, ffunc func(*Encoder, int, refl
 	}
 }
 
+// applySetVersionEncode returns a wrapper function that first sets the version on the Encoder
+// using the provided struct field's value, and then calls the given encoding function.
+// It panics if the struct field's type does not implement the Version interface.
+//
+// Parameters:
+//   - fldT: The struct field to check for Version interface implementation.
+//   - ffunc: The encoding function to wrap.
+//
+// Returns:
+//   - A function that takes an Encoder, an index, and a reflect.Value, sets the version on the Encoder,
+//     and then calls the provided encoding function.
 func applySetVersionEncode(fldT reflect.StructField, ffunc func(*Encoder, int, reflect.Value)) func(*Encoder, int, reflect.Value) {
 	// Check that field type implements Version interface (major / minor)
 	if !fldT.Type.Implements(reflect.TypeFor[Version]()) {
@@ -396,6 +425,13 @@ func applySetVersionEncode(fldT reflect.StructField, ffunc func(*Encoder, int, r
 	}
 }
 
+// buildStructEncodeFunc generates an encoding function for a given struct type.
+// The returned function encodes the struct's exported fields using the provided Encoder,
+// applying field tags, omitempty, version range, and set version logic as specified by field metadata.
+// Fields with a tag of "-" or that are unexported are skipped. If a field is an interface and has no tag,
+// it attempts to determine the tag dynamically based on the concrete type at runtime.
+// Panics if a required tag is missing for a non-interface field.
+// The generated function encodes the struct as a tagged structure using the Encoder.
 func buildStructEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 	fieldsEncode := []func(e *Encoder, v reflect.Value){}
 

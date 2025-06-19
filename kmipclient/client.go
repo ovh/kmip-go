@@ -607,8 +607,41 @@ func (c *Client) Request(ctx context.Context, payload kmip.OperationPayload) (km
 	return bi.ResponsePayload, nil
 }
 
-func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) ([]kmip.ResponseBatchItem, error) {
+// Batch sends one or more KMIP operation payloads to the server as a batch request.
+// It returns a BatchResult containing the results of each operation, or an error if the request fails.
+// This method is a convenience wrapper around BatchOpt.
+//
+// Parameters:
+//
+//	ctx      - The context for controlling cancellation and deadlines.
+//	payloads - One or more KMIP operation payloads to be executed in the batch.
+//
+// Returns:
+//
+//	BatchResult - The results of the batch operations.
+//	error       - An error if the batch request fails.
+func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (BatchResult, error) {
+	return c.BatchOpt(ctx, payloads)
+}
+
+// BatchOpt sends a batch of KMIP operation payloads to the server and applies optional batch options.
+// It constructs a KMIP request message with the provided payloads and applies any BatchOption functions.
+// The request is sent using the client's Roundtrip method. If the response's batch count does not match
+// the number of payloads, an error is returned. On success, it returns the batch result items.
+//
+// Parameters:
+//   - ctx: Context for request cancellation and timeout.
+//   - payloads: Slice of KMIP operation payloads to be sent in the batch.
+//   - opts: Optional BatchOption functions to modify the request message.
+//
+// Returns:
+//   - BatchResult: The result items from the batch response.
+//   - error: An error if the request fails or the batch count does not match.
+func (c *Client) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload, opts ...BatchOption) (BatchResult, error) {
 	msg := kmip.NewRequestMessage(*c.version, payloads...)
+	for _, opt := range opts {
+		opt(&msg)
+	}
 	resp, err := c.Roundtrip(ctx, &msg)
 	if err != nil {
 		return nil, err
@@ -620,13 +653,27 @@ func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (
 	return resp.BatchItem, nil
 }
 
-type Executor[Req, Resp kmip.OperationPayload] struct {
-	client interface {
-		Request(context.Context, kmip.OperationPayload) (kmip.OperationPayload, error)
-		Version() kmip.ProtocolVersion
+// BatchOption defines a function type that modifies a kmip.RequestMessage,
+// allowing customization of batch operations in KMIP client requests.
+type BatchOption func(*kmip.RequestMessage)
+
+// OnBatchErr returns a BatchOption that sets the BatchErrorContinuationOption in the request message header.
+// This option determines how the server should handle errors encountered during batch processing.
+// The provided 'opt' parameter specifies the desired error continuation behavior.
+func OnBatchErr(opt kmip.BatchErrorContinuationOption) BatchOption {
+	return func(rm *kmip.RequestMessage) {
+		rm.Header.BatchErrorContinuationOption = opt
 	}
-	req Req
-	err error
+}
+
+// Executor is a generic type that facilitates the construction and execution of KMIP operations.
+// It holds a reference to a Client, a request payload of type Req, and an error state.
+// Req and Resp are type parameters constrained to kmip.OperationPayload, allowing
+// Executor to be used with various KMIP operation request and response types.
+type Executor[Req, Resp kmip.OperationPayload] struct {
+	client *Client
+	req    Req
+	err    error
 }
 
 // Exec sends the request to the remote KMIP server, and returns the parsed response.
@@ -642,11 +689,12 @@ func (ex Executor[Req, Resp]) Exec() (Resp, error) {
 // It returns an error if the request could not be sent, or if the server replies with
 // KMIP error.
 func (ex Executor[Req, Resp]) ExecContext(ctx context.Context) (Resp, error) {
-	if ex.err != nil {
+	req, err := ex.Build()
+	if err != nil {
 		var zero Resp
-		return zero, fmt.Errorf("Request initialization failed: %w", ex.err)
+		return zero, err
 	}
-	resp, err := ex.client.Request(ctx, ex.req)
+	resp, err := ex.client.Request(ctx, req)
 	if err != nil {
 		var zero Resp
 		return zero, err
@@ -673,6 +721,31 @@ func (ex Executor[Req, Resp]) RequestPayload() Req {
 	return ex.req
 }
 
+// Build constructs and returns the KMIP operation payload from the Executor.
+// If there was an error during request initialization, it returns a zero-value
+// request and wraps the original error with additional context.
+func (ex Executor[Req, Resp]) Build() (kmip.OperationPayload, error) {
+	if ex.err != nil {
+		var zero Req
+		return zero, fmt.Errorf("Request initialization failed: %w", ex.err)
+	}
+	return ex.req, nil
+}
+
+// AttributeExecutor is a generic struct that extends Executor to provide additional
+// functionality for handling KMIP operation payloads with attribute manipulation.
+//
+// Type Parameters:
+//   - Req:  The request payload type, which must implement kmip.OperationPayload.
+//   - Resp: The response payload type, which must implement kmip.OperationPayload.
+//   - Wrap: An arbitrary type used for wrapping or extending the executor.
+//
+// Fields:
+//   - Executor: Embeds the base Executor for handling request and response payloads.
+//   - attrFunc: A function that takes a pointer to the request payload and returns a pointer
+//     to a slice of kmip.Attribute, allowing for attribute extraction or modification.
+//   - wrap:     A function that takes an AttributeExecutor and returns a value of type Wrap,
+//     enabling custom wrapping or extension of the executor's behavior.
 type AttributeExecutor[Req, Resp kmip.OperationPayload, Wrap any] struct {
 	Executor[Req, Resp]
 	attrFunc func(*Req) *[]kmip.Attribute
@@ -757,4 +830,168 @@ func (ex AttributeExecutor[Req, Resp, Wrap]) WithUsageLimit(total int64, unit km
 		UsageLimitsCount: &total,
 		UsageLimitsUnit:  unit,
 	})
+}
+
+// PayloadBuilder defines an interface for building KMIP operation payloads.
+// Implementations of this interface should provide the Build method, which
+// constructs and returns a kmip.OperationPayload along with any error encountered
+// during the building process.
+type PayloadBuilder interface {
+	Build() (kmip.OperationPayload, error)
+}
+
+// BatchExec manages the building and the execution of a batch of KMIP operations using a client.
+// It holds a reference to the client, any error encountered during batch construction,
+// and the list of operation payloads to be executed as a batch.
+type BatchExec struct {
+	client *Client
+	err    error
+	batch  []kmip.OperationPayload
+}
+
+// Then appends a new operation to the current batch by applying the provided
+// PayloadBuilder function to the client. If an error has already occurred in the
+// Executor, it propagates the error to the BatchExec. Otherwise, it builds the
+// new request and adds it to the batch. Returns a BatchExec containing the
+// updated batch and any error encountered during the build process.
+func (ex Executor[Req, Resp]) Then(f func(client *Client) PayloadBuilder) BatchExec {
+	batch := BatchExec{
+		client: ex.client,
+		batch:  []kmip.OperationPayload{ex.req},
+	}
+	if ex.err != nil {
+		batch.err = ex.err
+		return batch
+	}
+	req, err := f(ex.client).Build()
+	if err != nil {
+		batch.err = err
+		return batch
+	}
+	return BatchExec{
+		client: ex.client,
+		batch:  []kmip.OperationPayload{ex.req, req},
+	}
+}
+
+// Then adds a new payload to the batch by invoking the provided function f with the current client.
+// If an error has already occurred in the batch execution, it returns the existing BatchExec without modification.
+// Otherwise, it builds the payload using the PayloadBuilder returned by f, appends it to the batch, and returns the updated BatchExec.
+// If building the payload results in an error, the error is stored in the BatchExec and returned.
+func (ex BatchExec) Then(f func(client *Client) PayloadBuilder) BatchExec {
+	if ex.err != nil {
+		return ex
+	}
+	req, err := f(ex.client).Build()
+	if err != nil {
+		ex.err = err
+		return ex
+	}
+	ex.batch = append(ex.batch, req)
+	return ex
+}
+
+// Exec sends the batch to the remote KMIP server, and returns the parsed responses.
+//
+// Parameters:
+//   - opts: Optional BatchOption functions to modify the request message.
+//
+// Returns:
+//   - BatchResult: The results of the batch operations.
+//   - error: An error if the batch request fails.
+func (ex BatchExec) Exec(opts ...BatchOption) (BatchResult, error) {
+	return ex.ExecContext(context.Background(), opts...)
+}
+
+// ExecContext sends the batch to the remote KMIP server, and returns the parsed responses.
+//
+// Parameters:
+//   - ctx: Context for request cancellation and timeout.
+//   - opts: Optional BatchOption functions to modify the request message.
+//
+// Returns:
+//   - BatchResult: The results of the batch operations.
+//   - error: An error if the batch request fails.
+func (ex BatchExec) ExecContext(ctx context.Context, opts ...BatchOption) (BatchResult, error) {
+	if ex.err != nil {
+		return nil, fmt.Errorf("Request initialization failed: %w", ex.err)
+	}
+	resp, err := ex.client.BatchOpt(ctx, ex.batch, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// MustExec is like Exec except it panics if the request fails.
+//
+// Parameters:
+//   - opts: Optional BatchOption functions to modify the request message.
+//
+// Returns:
+//   - BatchResult: The results of the batch operations.
+//
+// Panics:
+//   - If the request fails, this function panics with the error.
+func (ex BatchExec) MustExec(opts ...BatchOption) BatchResult {
+	return ex.MustExecContext(context.Background(), opts...)
+}
+
+// MustExecContext is like Exec except it panics if the request fails.
+//
+// Parameters:
+//   - ctx: Context for request cancellation and timeout.
+//   - opts: Optional BatchOption functions to modify the request message.
+//
+// Returns:
+//   - BatchResult: The results of the batch operations.
+//
+// Panics:
+//   - If the request fails, this function panics with the error.
+func (ex BatchExec) MustExecContext(ctx context.Context, opts ...BatchOption) BatchResult {
+	resp, err := ex.ExecContext(ctx, opts...)
+	if err != nil {
+		//TODO: Add operation ID string
+		panic(fmt.Errorf("Request failed: %w", err))
+	}
+	return resp
+}
+
+// BatchResult represents a collection of KMIP response batch items returned from a KMIP operation.
+type BatchResult []kmip.ResponseBatchItem
+
+// Unwrap checks for eventual errors in all the batch items, and returns an array
+// of item's payloads, and the encountered errors. If an item has no payload, the returned
+// array will contain a nil element at the item index.
+//
+// Returns:
+//   - []kmip.OperationPayload: The slice of operation payloads from the batch result.
+//   - error: An error if any batch item contains an error; otherwise, nil.
+func (br BatchResult) Unwrap() ([]kmip.OperationPayload, error) {
+	res := make([]kmip.OperationPayload, len(br))
+	var errs []error
+	for i, br := range br {
+		if err := br.Err(); err != nil {
+			errs = append(errs, err)
+		}
+		res[i] = br.ResponsePayload
+	}
+	return res, errors.Join(errs...)
+}
+
+// MustUnwrap is like Unwrap except that it panics if it encounters an error.
+// This function should probably not be used in production code and exists only to ease
+// testing and experimenting.
+//
+// Returns:
+//   - []kmip.OperationPayload: The slice of operation payloads from the batch result.
+//
+// Panics:
+//   - If any error is encountered in the batch result, this function panics with the error.
+func (br BatchResult) MustUnwrap() []kmip.OperationPayload {
+	res, err := br.Unwrap()
+	if err != nil {
+		panic(err)
+	}
+	return res
 }
