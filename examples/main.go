@@ -97,6 +97,7 @@ func main() {
 	register_ecdsa_sec1(client)
 
 	rekey(client)
+	rekey_keypair(client)
 
 	get(client)
 
@@ -387,6 +388,10 @@ func rekey(client *kmipclient.Client) {
 	client.Rekey(RESOURCE).MustExec()
 }
 
+func rekey_keypair(client *kmipclient.Client) {
+	client.RekeyKeyPair(RESOURCE).MustExec()
+}
+
 func query(client *kmipclient.Client) {
 	client.Query().All().MustExec()
 }
@@ -458,11 +463,11 @@ func test_register_ecdsa_wrong_alg(client *kmipclient.Client) {
 	client.Register().
 		Object(&kmip.PrivateKey{
 			KeyBlock: kmip.KeyBlock{
-				KeyFormatType: kmip.KeyFormatTypeTransparentECDSAPrivateKey,
+				KeyFormatType: kmip.KeyFormatTypeTransparentECPrivateKey,
 				KeyValue: &kmip.KeyValue{
 					Plain: &kmip.PlainKeyValue{
 						KeyMaterial: kmip.KeyMaterial{
-							TransparentECDSAPrivateKey: &kmip.TransparentECDSAPrivateKey{
+							TransparentECPrivateKey: &kmip.TransparentECPrivateKey{
 								RecommendedCurve: kmip.RecommendedCurveP_256,
 								D:                *ecKey.D,
 							},
