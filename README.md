@@ -166,7 +166,7 @@ See [examples](./examples) for more possibilities.
 | Notify               |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 | Put                  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 | Discover             |  N/A |  ✅  |  ✅  |  ✅  |  ✅  |
-| Re-key Key Pair      |  N/A |  ❌  |  ❌  |  ❌  |  ❌  |
+| Re-key Key Pair      |  N/A |  ✅  |  ✅  |  ✅  |  ✅  |
 | Encrypt              |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Decrypt              |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Sign                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
