@@ -2,7 +2,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/ovh/kmip-go.svg)](https://pkg.go.dev/github.com/ovh/kmip-go) [![license](https://img.shields.io/badge/license-Apache%202.0-red.svg?style=flat)](https://raw.githubusercontent.com/ovh/kmip-go/master/LICENSE) [![test](https://github.com/ovh/kmip-go/actions/workflows/test.yaml/badge.svg)](https://github.com/ovh/kmip-go/actions/workflows/test.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/ovh/kmip-go)](https://goreportcard.com/report/github.com/ovh/kmip-go)
 
 A comprehensive Go implementation of the Key Management Interoperability Protocol (KMIP), supporting KMIP versions 1.0 through 1.4. This library provides both client and server implementations with full support for cryptographic operations, key lifecycle management, and secure communication.
-See [KMIP v1.4 protocole specification](https://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.pdf).
+See [KMIP v1.4 protocol specification](https://docs.oasis-open.org/kmip/spec/v1.4/os/kmip-spec-v1.4-os.pdf).
 
 ## 🚀 Features
 
