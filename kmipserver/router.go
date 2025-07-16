@@ -54,9 +54,9 @@ func HandleFunc[Req, Resp kmip.OperationPayload](h func(ctx context.Context, req
 // a list of middleware functions to be applied to each operation, and a list
 // of supported KMIP protocol versions.
 type BatchExecutor struct {
-	routes      map[kmip.Operation]OperationHandler
-	middlewares []Middleware
-	// biMiddlewares     []BatchItemMiddleware
+	routes            map[kmip.Operation]OperationHandler
+	middlewares       []Middleware
+	biMiddlewares     []BatchItemMiddleware
 	supportedVersions []kmip.ProtocolVersion
 }
 
@@ -66,6 +66,7 @@ func NewBatchExecutor() *BatchExecutor {
 	return &BatchExecutor{
 		routes:            make(map[kmip.Operation]OperationHandler),
 		middlewares:       nil,
+		biMiddlewares:     nil,
 		supportedVersions: defaultSupportedVersion,
 	}
 }
@@ -88,11 +89,9 @@ func (exec *BatchExecutor) Use(m ...Middleware) {
 	exec.middlewares = append(exec.middlewares, m...)
 }
 
-// func (exec *BatchExecutor) BatchItemUse(m ...Middleware) {
-// 	exec.middlewares = append(exec.middlewares, m...)
-// }
-
-//TODO: Per batch item middlewares
+func (exec *BatchExecutor) BatchItemUse(m ...BatchItemMiddleware) {
+	exec.biMiddlewares = append(exec.biMiddlewares, m...)
+}
 
 // Route registers an OperationHandler for a specific KMIP operation.
 // It associates the given handler (hdl) with the provided operation (op)
@@ -182,8 +181,8 @@ func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestM
 	}
 
 	stopped := false
+	var next BatchItemNext
 	for i := range req.BatchItem {
-		//TODO: Middleware maybe ?
 		if stopped {
 			response.BatchItem[i] = kmip.ResponseBatchItem{
 				Operation:         req.BatchItem[i].Operation,
@@ -194,17 +193,30 @@ func (exec *BatchExecutor) handleRequest(ctx context.Context, req *kmip.RequestM
 			}
 			continue
 		}
-		response.BatchItem[i] = exec.executeItem(ctx, req.BatchItem[i])
-		if response.BatchItem[i].ResultStatus == kmip.ResultStatusOperationFailed && errorContinuationOption == kmip.BatchErrorContinuationOptionStop {
+		m := 0
+		next = func(ctx context.Context, bi *kmip.RequestBatchItem) (*kmip.ResponseBatchItem, error) {
+			if m < len(exec.biMiddlewares) {
+				biMdl := exec.biMiddlewares[m]
+				m++
+				return biMdl(next, ctx, bi)
+			}
+			return exec.executeItem(ctx, bi)
+		}
+		respBi, err := next(ctx, &req.BatchItem[i])
+		response.BatchItem[i] = *respBi
+		if err != nil {
+			handleBatchItemError(ctx, &response.BatchItem[i], err)
+		}
+
+		if (response.BatchItem[i].ResultStatus == kmip.ResultStatusOperationFailed) && errorContinuationOption == kmip.BatchErrorContinuationOptionStop {
 			stopped = true
 		}
 	}
 	return response, nil
 }
 
-func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatchItem) (resp kmip.ResponseBatchItem) {
-	var err error
-	resp = kmip.ResponseBatchItem{
+func (exec *BatchExecutor) executeItem(ctx context.Context, bi *kmip.RequestBatchItem) (resp *kmip.ResponseBatchItem, err error) {
+	resp = &kmip.ResponseBatchItem{
 		Operation:         bi.Operation,
 		UniqueBatchItemID: bi.UniqueBatchItemID,
 	}
@@ -227,14 +239,12 @@ func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatch
 			//TODO: Do not return the error message, but log it instead
 			e = fmt.Errorf("Internal Server Error: %s", er)
 		}
-		exec.handleBatchItemError(ctx, &resp, e)
+		exec.handleBatchItemError(ctx, resp, e)
 	}()
 
 	if me := bi.MessageExtension; me != nil {
 		if me.CriticalityIndicator {
-			//TODO: When batch item middleware support has landed, move this into a middleware maybe
-			exec.handleBatchItemError(ctx, &resp, Errorf(kmip.ResultReasonFeatureNotSupported, "Critical message extension not supported"))
-			return resp
+			return resp, Errorf(kmip.ResultReasonFeatureNotSupported, "Critical message extension not supported")
 		}
 	}
 
@@ -253,11 +263,7 @@ func (exec *BatchExecutor) executeItem(ctx context.Context, bi kmip.RequestBatch
 		}
 		resp.ResponsePayload, err = route.HandleOperation(ctx, pl)
 	}
-	if err != nil {
-		exec.handleBatchItemError(ctx, &resp, err)
-		return resp
-	}
-	return resp
+	return resp, err
 }
 
 func (exec *BatchExecutor) handleBatchItemError(ctx context.Context, bi *kmip.ResponseBatchItem, err error) {
