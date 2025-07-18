@@ -48,4 +48,13 @@ func DebugMiddleware(out io.Writer, marshal func(data any) []byte) Middleware {
 	}
 }
 
-// type BatchItemMiddleware func(next func(ctx context.Context, bi *kmip.RequestBatchItem) *kmip.ResponseBatchItem, ctx context.Context, bi *kmip.RequestBatchItem) *kmip.ResponseBatchItem
+// BatchItemNext defines a middleware function signature for batch items that takes a context and a KMIP request batch item,
+// and returns a KMIP response batch item. It is used to chain middleware handlers in the KMIP server's batch item
+// processing pipeline.
+type BatchItemNext func(ctx context.Context, bi *kmip.RequestBatchItem) (*kmip.ResponseBatchItem, error)
+
+// BatchItemMiddleware defines a function type that wraps the processing of a KMIP request batch item.
+// It takes the next handler in the chain, a context, and the incoming KMIP request batch item,
+// and returns a KMIP response batch item. This allows for implementing cross-cutting concerns
+// specific to individual batch items, such as logging, authentication, or request validation.
+type BatchItemMiddleware func(next BatchItemNext, ctx context.Context, bi *kmip.RequestBatchItem) (*kmip.ResponseBatchItem, error)
