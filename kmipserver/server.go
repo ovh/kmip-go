@@ -24,10 +24,22 @@ type RequestHandler interface {
 	HandleRequest(ctx context.Context, req *kmip.RequestMessage) *kmip.ResponseMessage
 }
 
+// ConnectHook is a function that can be used to perform actions when a new connection is established.
+// It takes a context.Context as input and returns a modified context.Context.
+type ConnectHook func(context.Context) context.Context
+
+// TerminateHook is a function that can be used to perform cleanup actions when a connection is terminated.
+// It takes a context.Context as input.
+//
+// NOTE:  That context may have already been canceled. To pass it to context-cancellable function consider using WithoutCancel().
+type TerminateHook func(context.Context)
+
 // Server represents a KMIP server instance that manages incoming network connections,
 // handles KMIP requests, and coordinates server lifecycle operations. It encapsulates
 // the network listener, request handler, logging, context management for graceful
-// shutdown, and a wait group for synchronizing goroutines.
+// shutdown, and a wait group for synchronizing goroutines. Additionally, it supports
+// hooks for connect and terminate events, allowing customization of behavior when a client
+// connects or disconnects.
 type Server struct {
 	listener   net.Listener
 	handler    RequestHandler
@@ -37,6 +49,26 @@ type Server struct {
 	recvCtx    context.Context
 	recvCancel func()
 	wg         *sync.WaitGroup
+	onConnect  ConnectHook
+	onClose    TerminateHook
+}
+
+// ConnectHook wraps the configured connectHook function, calling it with the provided context.
+// If no connectHook is set, it returns the original context without modification.
+func (srv *Server) connectHook(ctx context.Context) context.Context {
+	if srv.onConnect == nil {
+		return ctx
+	}
+	return srv.onConnect(ctx)
+}
+
+// TerminateHook wraps the configured terminateHook function, calling it with the provided context.
+// If no terminateHook is set, it does nothing.
+func (srv *Server) terminateHook(ctx context.Context) {
+	if srv.onClose == nil {
+		return
+	}
+	srv.onClose(ctx)
 }
 
 // NewServer creates and returns a new Server instance using the provided net.Listener and RequestHandler.
@@ -64,7 +96,35 @@ func NewServer(listener net.Listener, handler RequestHandler) *Server {
 		recvCtx,
 		recvCancel,
 		new(sync.WaitGroup),
+		nil,
+		nil,
 	}
+}
+
+// WithConnectHook sets the connect hook for the server, which is called when a new connection is established.
+// This hook can be used to modify the context for the connection.
+//
+// Parameters:
+//   - hook: The ConnectHook function to set.
+//
+// Returns:
+//   - The Server instance with the connect hook set.
+func (srv *Server) WithConnectHook(hook ConnectHook) *Server {
+	srv.onConnect = hook
+	return srv
+}
+
+// WithTerminateHook sets the terminate hook for the server, which is called when a connection is terminated.
+// This hook can be used to perform any necessary cleanup or logging.
+//
+// Parameters:
+//   - hook: The TerminateHook function to set.
+//
+// Returns:
+//   - The Server instance with the terminate hook set.
+func (srv *Server) WithTerminateHook(hook TerminateHook) *Server {
+	srv.onClose = hook
+	return srv
 }
 
 // Serve starts the KMIP server and listens for incoming client connections.
@@ -134,6 +194,11 @@ func (srv *Server) handleConn(conn net.Conn) {
 
 	// Create a client connection state aware context
 	ctx := newConnContext(stream.ctx, conn.RemoteAddr().String(), tlsState)
+
+	// Call the connections hooks to modify the context and cleanup as the connection is closed
+	ctx = srv.connectHook(ctx)
+	defer srv.terminateHook(ctx)
+
 	for {
 		msg, err := stream.recv(srv.recvCtx)
 		if err != nil {
