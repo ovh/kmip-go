@@ -46,6 +46,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"slices"
 	"sync"
@@ -66,6 +67,7 @@ type opts struct {
 	serverName        string
 	tlsCfg            *tls.Config
 	tlsCiphers        []uint16
+	dialer            func(context.Context, string) (net.Conn, error)
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
@@ -337,6 +339,20 @@ func WithTlsCipherSuites(ciphers ...uint16) Option {
 	}
 }
 
+// WithDialerUnsafe customize the low-level network dialer used to establish the (secured) connection.
+//
+// When this option is provided, every other TLS related options are be ignored, and it's
+// the dialer responsibility to setup the secured channel using TLS or any other security mechanism.
+//
+// This option is a low-level escape hatch mainly used for testing or to provide alternative secured
+// channel implementation. Use at your own risks.
+func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, error)) Option {
+	return func(o *opts) error {
+		o.dialer = dialer
+		return nil
+	}
+}
+
 // Client represents a KMIP client that manages a connection to a KMIP server,
 // handles protocol version negotiation, and supports middleware for request/response
 // processing. It provides thread-safe access to the underlying connection and
@@ -383,16 +399,22 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
 	}
 
-	tlsCfg, err := opts.tlsConfig()
-	if err != nil {
-		return nil, err
+	netDial := opts.dialer
+	if netDial == nil {
+		tlsCfg, err := opts.tlsConfig()
+		if err != nil {
+			return nil, err
+		}
+		netDial = func(ctx context.Context, addr string) (net.Conn, error) {
+			tlsDialer := tls.Dialer{
+				Config: tlsCfg.Clone(),
+			}
+			return tlsDialer.DialContext(ctx, "tcp", addr)
+		}
 	}
 
 	dialer := func(ctx context.Context) (*conn, error) {
-		tlsDialer := tls.Dialer{
-			Config: tlsCfg.Clone(),
-		}
-		conn, err := tlsDialer.DialContext(ctx, "tcp", addr)
+		conn, err := netDial(ctx, addr)
 		if err != nil {
 			return nil, err
 		}
