@@ -2,6 +2,8 @@ package kmipclient_test
 
 import (
 	"context"
+	"errors"
+	"net"
 	"os"
 	"sync"
 	"testing"
@@ -14,6 +16,7 @@ import (
 	"github.com/ovh/kmip-go/payloads"
 	"github.com/ovh/kmip-go/ttlv"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -376,4 +379,19 @@ func TestBatchResult_MustUnwrap_PanicsOnError(t *testing.T) {
 	require.Panics(t, func() {
 		_ = result.MustUnwrap()
 	})
+}
+
+func TestWithDialerUnsafe(t *testing.T) {
+	called := false
+	retErr := errors.New("not implemented")
+	_, err := kmipclient.Dial("1.2.3.4", kmipclient.WithDialerUnsafe(
+		func(ctx context.Context, addr string) (net.Conn, error) {
+			assert.Equal(t, "1.2.3.4", addr)
+			called = true
+			return nil, retErr
+		},
+	))
+
+	assert.True(t, called)
+	assert.ErrorIs(t, err, retErr)
 }
