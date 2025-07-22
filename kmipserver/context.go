@@ -115,3 +115,14 @@ func GetProtocolVersion(ctx context.Context) kmip.ProtocolVersion {
 	}
 	return bd.header.ProtocolVersion
 }
+
+// GetRequestHeader retrieves the KMIP request header from the provided context.
+// It panics if used outside the context of kmip request processing.
+// Returns the RequestHeader from the batch.
+func GetRequestHeader(ctx context.Context) kmip.RequestHeader {
+	bd, _ := ctx.Value(ctxBatch{}).(*batchData)
+	if bd == nil {
+		panic("not in a batch context")
+	}
+	return bd.header
+}
