@@ -25,8 +25,9 @@ type RequestHandler interface {
 }
 
 // ConnectHook is a function that can be used to perform actions when a new connection is established.
-// It takes a context.Context as input and returns a modified context.Context.
-type ConnectHook func(context.Context) context.Context
+// It takes a context.Context as input and returns a modified context.Context or an error
+// that immediately terminates the connection, without calling any termination hook.
+type ConnectHook func(context.Context) (context.Context, error)
 
 // TerminateHook is a function that can be used to perform cleanup actions when a connection is terminated.
 // It takes a context.Context as input.
@@ -55,9 +56,9 @@ type Server struct {
 
 // ConnectHook wraps the configured connectHook function, calling it with the provided context.
 // If no connectHook is set, it returns the original context without modification.
-func (srv *Server) connectHook(ctx context.Context) context.Context {
+func (srv *Server) connectHook(ctx context.Context) (context.Context, error) {
 	if srv.onConnect == nil {
-		return ctx
+		return ctx, nil
 	}
 	return srv.onConnect(ctx)
 }
@@ -196,7 +197,11 @@ func (srv *Server) handleConn(conn net.Conn) {
 	ctx := newConnContext(stream.ctx, conn.RemoteAddr().String(), tlsState)
 
 	// Call the connections hooks to modify the context and cleanup as the connection is closed
-	ctx = srv.connectHook(ctx)
+	ctx, err := srv.connectHook(ctx)
+	if err != nil {
+		logger.Warn("connection hook failed", "err", err)
+		return
+	}
 	defer srv.terminateHook(ctx)
 
 	for {
