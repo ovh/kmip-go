@@ -57,7 +57,7 @@ func (ex ExecCreateWantType) Object(objectType kmip.ObjectType, attrs ...kmip.At
 // the object type to SymmetricKey and attaches the relevant cryptographic attributes.
 //
 // Parameters:
-//   - alg: The cryptographic algorithm to use for the symmetric key (e.g., AES, TDES).
+//   - alg: The cryptographic algorithm to use for the symmetric key (e.g., AES, 3DES).
 //   - length: The length of the key in bits. Must be between 0 and math.MaxInt32.
 //   - usage: The intended usage mask for the key (bitmask of allowed operations).
 //
@@ -95,23 +95,23 @@ func (ex ExecCreateWantType) AES(length int, usage kmip.CryptographicUsageMask) 
 	return ex.SymmetricKey(kmip.CryptographicAlgorithmAES, length, usage)
 }
 
-// TDES creates a symmetric key using the Triple DES (TDES) cryptographic algorithm with the specified key length and usage mask.
-// It returns an ExecCreate configured for TDES key creation.
+// TDES creates a symmetric key using the 3DES cryptographic algorithm with the specified key length and usage mask.
+// It returns an ExecCreate configured for 3DES key creation.
 //
 // Parameters:
-//   - length: The length of the TDES key in bits.
+//   - length: The length of the 3DES key in bits.
 //   - usage: The intended cryptographic usage mask for the key.
 //
 // Returns:
-//   - ExecCreate: An instance configured for TDES key creation.
+//   - ExecCreate: An instance configured for 3DES key creation.
 //
-// Deprecated: TDES is considered insecure and shouldn't be used.
+// Deprecated: 3DES is considered insecure and shouldn't be used.
 //
 // Errors:
 //   - Panics if length is negative or exceeds math.MaxInt32.
 //   - Errors may be returned when executing the operation if the server does not support the requested key length.
 func (ex ExecCreateWantType) TDES(length int, usage kmip.CryptographicUsageMask) ExecCreate {
-	return ex.SymmetricKey(kmip.CryptographicAlgorithmTDES, length, usage)
+	return ex.SymmetricKey(kmip.CryptographicAlgorithm3DES, length, usage)
 }
 
 // Skipjack creates a symmetric key with the SKIPJACK cryptographic algorithm and a key length of 80 bits.
