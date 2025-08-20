@@ -29,7 +29,7 @@ func init() {
 	)
 	ttlv.RegisterBitmask[StorageStatusMask](
 		TagStorageStatusMask,
-		"OnlineStorage",
+		"OnLineStorage",
 		"ArchivalStorage",
 	)
 }
