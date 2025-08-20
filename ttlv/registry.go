@@ -151,7 +151,8 @@ func EnumStr[T ~uint32](value T) string {
 	return fmt.Sprintf("0x%08X", uint32(value))
 }
 
-func enumByName(tag int, name string) (uint32, error) {
+// EnumByName returns enum of a normalized name.
+func EnumByName(tag int, name string) (uint32, error) {
 	if reg := enumsByName[tag]; reg != nil {
 		n := reg[name]
 		return n, nil
