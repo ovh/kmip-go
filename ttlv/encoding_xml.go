@@ -320,7 +320,7 @@ func (dec *xmlReader) Enum(realtag, tag int) (uint32, error) {
 		parsed, err = strconv.ParseUint(val, 10, 32)
 		if err != nil {
 			var p uint32
-			p, err = enumByName(realtag, val)
+			p, err = EnumByName(realtag, val)
 			parsed = uint64(p)
 		}
 	}
