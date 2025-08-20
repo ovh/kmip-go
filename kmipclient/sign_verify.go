@@ -444,14 +444,14 @@ func normalizeDSACryptoParams(cparams *kmip.CryptographicParameters) {
 		case kmip.PaddingMethodPKCS1V1_5:
 			switch cparams.HashingAlgorithm {
 			case kmip.HashingAlgorithmSHA_256:
-				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_256WithRSAEncryptionPKCS_1v1_5
+				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_256WithRSAEncryption
 			case kmip.HashingAlgorithmSHA_384:
-				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_384WithRSAEncryptionPKCS_1v1_5
+				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_384WithRSAEncryption
 			case kmip.HashingAlgorithmSHA_512:
-				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_512WithRSAEncryptionPKCS_1v1_5
+				cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmSHA_512WithRSAEncryption
 			}
 		case kmip.PaddingMethodPSS:
-			cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmRSASSA_PSSPKCS_1v2_1
+			cparams.DigitalSignatureAlgorithm = kmip.DigitalSignatureAlgorithmRSASSA_PSS
 		}
 	case kmip.CryptographicAlgorithmEC, kmip.CryptographicAlgorithmECDSA:
 		switch cparams.HashingAlgorithm {
