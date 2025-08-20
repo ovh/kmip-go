@@ -15,6 +15,7 @@ func init() {
 		"UnwrapKey",
 		"Export",
 		"MACGenerate",
+		"MACVerify",
 		"DeriveKey",
 		"ContentCommitment",
 		"KeyAgreement",
@@ -57,6 +58,8 @@ const (
 	CryptographicUsageExport
 	// CryptographicUsageMACGenerate allows the object to be used for MAC generation.
 	CryptographicUsageMACGenerate
+	// CryptographicUsageMACVerify allows the object to be used for verifying MAC.
+	CryptographicUsageMACVerify
 	// CryptographicUsageDeriveKey allows the object to be used for key derivation.
 	CryptographicUsageDeriveKey
 	// CryptographicUsageContentCommitment allows the object to be used for content commitment (non-repudiation).
