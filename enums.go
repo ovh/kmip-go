@@ -90,17 +90,17 @@ func init() {
 	})
 	ttlv.RegisterEnum(TagCryptographicAlgorithm, map[CryptographicAlgorithm]string{
 		CryptographicAlgorithmDES:        "DES",
-		CryptographicAlgorithmTDES:       "TDES",
+		CryptographicAlgorithm3DES:       "DES3",
 		CryptographicAlgorithmAES:        "AES",
 		CryptographicAlgorithmRSA:        "RSA",
 		CryptographicAlgorithmDSA:        "DSA",
 		CryptographicAlgorithmECDSA:      "ECDSA",
-		CryptographicAlgorithmHMACSHA1:   "HMACSHA1",
-		CryptographicAlgorithmHMACSHA224: "HMACSHA224",
-		CryptographicAlgorithmHMACSHA256: "HMACSHA256",
-		CryptographicAlgorithmHMACSHA384: "HMACSHA384",
-		CryptographicAlgorithmHMACSHA512: "HMACSHA512",
-		CryptographicAlgorithmHMACMD5:    "HMACMD5",
+		CryptographicAlgorithmHMACSHA1:   "HMAC_SHA1",
+		CryptographicAlgorithmHMACSHA224: "HMAC_SHA224",
+		CryptographicAlgorithmHMACSHA256: "HMAC_SHA256",
+		CryptographicAlgorithmHMACSHA384: "HMAC_SHA384",
+		CryptographicAlgorithmHMACSHA512: "HMAC_SHA512",
+		CryptographicAlgorithmHMACMD5:    "HMAC_MD5",
 		CryptographicAlgorithmDH:         "DH",
 		CryptographicAlgorithmECDH:       "ECDH",
 		CryptographicAlgorithmECMQV:      "ECMQV",
@@ -816,7 +816,7 @@ type CryptographicAlgorithm uint32
 
 const (
 	CryptographicAlgorithmDES        CryptographicAlgorithm = 0x00000001
-	CryptographicAlgorithmTDES       CryptographicAlgorithm = 0x00000002
+	CryptographicAlgorithm3DES       CryptographicAlgorithm = 0x00000002
 	CryptographicAlgorithmAES        CryptographicAlgorithm = 0x00000003
 	CryptographicAlgorithmRSA        CryptographicAlgorithm = 0x00000004
 	CryptographicAlgorithmDSA        CryptographicAlgorithm = 0x00000005
