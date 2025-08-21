@@ -415,22 +415,22 @@ func init() {
 		EncodingOptionTTLVEncoding: "TTLVEncoding",
 	})
 	ttlv.RegisterEnum(TagDigitalSignatureAlgorithm, map[DigitalSignatureAlgorithm]string{
-		DigitalSignatureAlgorithmMD2WithRSAEncryptionPKCS_1v1_5:     "MD2WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmMD5WithRSAEncryptionPKCS_1v1_5:     "MD5WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmSHA_1WithRSAEncryptionPKCS_1v1_5:   "SHA_1WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmSHA_224WithRSAEncryptionPKCS_1v1_5: "SHA_224WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmSHA_256WithRSAEncryptionPKCS_1v1_5: "SHA_256WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmSHA_384WithRSAEncryptionPKCS_1v1_5: "SHA_384WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmSHA_512WithRSAEncryptionPKCS_1v1_5: "SHA_512WithRSAEncryptionPKCS_1V1_5",
-		DigitalSignatureAlgorithmRSASSA_PSSPKCS_1v2_1:               "RSASSA_PSSPKCS_1V2_1",
-		DigitalSignatureAlgorithmDSAWithSHA_1:                       "DSAWithSHA_1",
-		DigitalSignatureAlgorithmDSAWithSHA224:                      "DSAWithSHA224",
-		DigitalSignatureAlgorithmDSAWithSHA256:                      "DSAWithSHA256",
-		DigitalSignatureAlgorithmECDSAWithSHA_1:                     "ECDSAWithSHA_1",
-		DigitalSignatureAlgorithmECDSAWithSHA224:                    "ECDSAWithSHA224",
-		DigitalSignatureAlgorithmECDSAWithSHA256:                    "ECDSAWithSHA256",
-		DigitalSignatureAlgorithmECDSAWithSHA384:                    "ECDSAWithSHA384",
-		DigitalSignatureAlgorithmECDSAWithSHA512:                    "ECDSAWithSHA512",
+		DigitalSignatureAlgorithmMD2WithRSAEncryption:     "MD2WithRSAEncryption",
+		DigitalSignatureAlgorithmMD5WithRSAEncryption:     "MD5WithRSAEncryption",
+		DigitalSignatureAlgorithmSHA_1WithRSAEncryption:   "SHA_1WithRSAEncryption",
+		DigitalSignatureAlgorithmSHA_224WithRSAEncryption: "SHA_224WithRSAEncryption",
+		DigitalSignatureAlgorithmSHA_256WithRSAEncryption: "SHA_256WithRSAEncryption",
+		DigitalSignatureAlgorithmSHA_384WithRSAEncryption: "SHA_384WithRSAEncryption",
+		DigitalSignatureAlgorithmSHA_512WithRSAEncryption: "SHA_512WithRSAEncryption",
+		DigitalSignatureAlgorithmRSASSA_PSS:               "RSASSA_PSS",
+		DigitalSignatureAlgorithmDSAWithSHA_1:             "DSAWithSHA_1",
+		DigitalSignatureAlgorithmDSAWithSHA224:            "DSAWithSHA224",
+		DigitalSignatureAlgorithmDSAWithSHA256:            "DSAWithSHA256",
+		DigitalSignatureAlgorithmECDSAWithSHA_1:           "ECDSAWithSHA_1",
+		DigitalSignatureAlgorithmECDSAWithSHA224:          "ECDSAWithSHA224",
+		DigitalSignatureAlgorithmECDSAWithSHA256:          "ECDSAWithSHA256",
+		DigitalSignatureAlgorithmECDSAWithSHA384:          "ECDSAWithSHA384",
+		DigitalSignatureAlgorithmECDSAWithSHA512:          "ECDSAWithSHA512",
 
 		// KMIP 1.4.
 		DigitalSignatureAlgorithmSHA3_256WithRSAEncryption: "SHA3_256WithRSAEncryption",
@@ -1285,22 +1285,22 @@ const (
 type DigitalSignatureAlgorithm uint32
 
 const (
-	DigitalSignatureAlgorithmMD2WithRSAEncryptionPKCS_1v1_5     DigitalSignatureAlgorithm = 0x00000001
-	DigitalSignatureAlgorithmMD5WithRSAEncryptionPKCS_1v1_5     DigitalSignatureAlgorithm = 0x00000002
-	DigitalSignatureAlgorithmSHA_1WithRSAEncryptionPKCS_1v1_5   DigitalSignatureAlgorithm = 0x00000003
-	DigitalSignatureAlgorithmSHA_224WithRSAEncryptionPKCS_1v1_5 DigitalSignatureAlgorithm = 0x00000004
-	DigitalSignatureAlgorithmSHA_256WithRSAEncryptionPKCS_1v1_5 DigitalSignatureAlgorithm = 0x00000005
-	DigitalSignatureAlgorithmSHA_384WithRSAEncryptionPKCS_1v1_5 DigitalSignatureAlgorithm = 0x00000006
-	DigitalSignatureAlgorithmSHA_512WithRSAEncryptionPKCS_1v1_5 DigitalSignatureAlgorithm = 0x00000007
-	DigitalSignatureAlgorithmRSASSA_PSSPKCS_1v2_1               DigitalSignatureAlgorithm = 0x00000008
-	DigitalSignatureAlgorithmDSAWithSHA_1                       DigitalSignatureAlgorithm = 0x00000009
-	DigitalSignatureAlgorithmDSAWithSHA224                      DigitalSignatureAlgorithm = 0x0000000A
-	DigitalSignatureAlgorithmDSAWithSHA256                      DigitalSignatureAlgorithm = 0x0000000B
-	DigitalSignatureAlgorithmECDSAWithSHA_1                     DigitalSignatureAlgorithm = 0x0000000C
-	DigitalSignatureAlgorithmECDSAWithSHA224                    DigitalSignatureAlgorithm = 0x0000000D
-	DigitalSignatureAlgorithmECDSAWithSHA256                    DigitalSignatureAlgorithm = 0x0000000E
-	DigitalSignatureAlgorithmECDSAWithSHA384                    DigitalSignatureAlgorithm = 0x0000000F
-	DigitalSignatureAlgorithmECDSAWithSHA512                    DigitalSignatureAlgorithm = 0x00000010
+	DigitalSignatureAlgorithmMD2WithRSAEncryption     DigitalSignatureAlgorithm = 0x00000001
+	DigitalSignatureAlgorithmMD5WithRSAEncryption     DigitalSignatureAlgorithm = 0x00000002
+	DigitalSignatureAlgorithmSHA_1WithRSAEncryption   DigitalSignatureAlgorithm = 0x00000003
+	DigitalSignatureAlgorithmSHA_224WithRSAEncryption DigitalSignatureAlgorithm = 0x00000004
+	DigitalSignatureAlgorithmSHA_256WithRSAEncryption DigitalSignatureAlgorithm = 0x00000005
+	DigitalSignatureAlgorithmSHA_384WithRSAEncryption DigitalSignatureAlgorithm = 0x00000006
+	DigitalSignatureAlgorithmSHA_512WithRSAEncryption DigitalSignatureAlgorithm = 0x00000007
+	DigitalSignatureAlgorithmRSASSA_PSS               DigitalSignatureAlgorithm = 0x00000008
+	DigitalSignatureAlgorithmDSAWithSHA_1             DigitalSignatureAlgorithm = 0x00000009
+	DigitalSignatureAlgorithmDSAWithSHA224            DigitalSignatureAlgorithm = 0x0000000A
+	DigitalSignatureAlgorithmDSAWithSHA256            DigitalSignatureAlgorithm = 0x0000000B
+	DigitalSignatureAlgorithmECDSAWithSHA_1           DigitalSignatureAlgorithm = 0x0000000C
+	DigitalSignatureAlgorithmECDSAWithSHA224          DigitalSignatureAlgorithm = 0x0000000D
+	DigitalSignatureAlgorithmECDSAWithSHA256          DigitalSignatureAlgorithm = 0x0000000E
+	DigitalSignatureAlgorithmECDSAWithSHA384          DigitalSignatureAlgorithm = 0x0000000F
+	DigitalSignatureAlgorithmECDSAWithSHA512          DigitalSignatureAlgorithm = 0x00000010
 
 	// KMIP 1.4.
 	DigitalSignatureAlgorithmSHA3_256WithRSAEncryption DigitalSignatureAlgorithm = 0x00000011

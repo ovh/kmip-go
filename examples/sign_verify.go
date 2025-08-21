@@ -15,7 +15,7 @@ import (
 func test_sign_verify_rsa_pkcs1_15(client *kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
-		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmSHA_256WithRSAEncryptionPKCS_1v1_5,
+		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmSHA_256WithRSAEncryption,
 		// CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
 		// HashingAlgorithm:       kmip.HashingAlgorithmSHA_256,
 		// PaddingMethod:          kmip.PaddingMethodPKCS1V1_5,
@@ -41,7 +41,7 @@ func test_sign_verify_rsa_pkcs1_15(client *kmipclient.Client) {
 func test_sign_verify_rsa_pss(client *kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
-		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmRSASSA_PSSPKCS_1v2_1,
+		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmRSASSA_PSS,
 		// CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
 		HashingAlgorithm: kmip.HashingAlgorithmSHA_256,
 		// PaddingMethod:          kmip.PaddingMethodPSS,
