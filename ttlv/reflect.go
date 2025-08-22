@@ -76,7 +76,7 @@ func getFieldTag(fldT reflect.StructField, tagVal string) int {
 		// 	})
 		// 	continue
 		// }
-		if tg, err := getTagByName(fldT.Name); err == nil {
+		if tg, err := GetTagByName(fldT.Name); err == nil {
 			// Check if we already know a tag with the same name as the field
 			return tg
 		} else if tg, err := getTagForType(fldT.Type); err == nil {
@@ -100,7 +100,7 @@ func getFieldTag(fldT reflect.StructField, tagVal string) int {
 		return int(n)
 	}
 
-	numTag, err := getTagByName(tagVal)
+	numTag, err := GetTagByName(tagVal)
 	if err != nil {
 		panic(err)
 	}

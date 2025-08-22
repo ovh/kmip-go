@@ -232,7 +232,7 @@ func (dec *xmlReader) Tag() int {
 		}
 		return int(parsedTag)
 	}
-	tg, err := getTagByName(rawTag)
+	tg, err := GetTagByName(rawTag)
 	if err != nil {
 		return 0
 	}

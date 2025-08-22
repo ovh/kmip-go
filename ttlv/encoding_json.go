@@ -288,7 +288,7 @@ func (j *jsonReader) Tag() int {
 		}
 		return int(parsedTag)
 	}
-	tg, err := getTagByName(rawTag)
+	tg, err := GetTagByName(rawTag)
 	if err != nil {
 		// TODO: return error
 		return 0

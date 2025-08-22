@@ -20,7 +20,8 @@ var (
 	bitmaskByName = map[int]map[string]int32{}
 )
 
-func getTagByName(name string) (int, error) {
+// GetTagByName returns the tag integer associated with the given tag name.
+func GetTagByName(name string) (int, error) {
 	if tag, ok := tagByName[name]; ok {
 		return tag, nil
 	}
