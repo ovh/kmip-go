@@ -129,6 +129,30 @@ func EnumValues[T ~uint32]() iter.Seq2[T, string] {
 	}
 }
 
+// EnumValuesByName returns an iterator over registered enum values and names
+// for the given enum name. If the name is not a known enum, then the iterator will
+// yield an empty result set.
+func EnumValuesByName(name string) iter.Seq2[uint32, string] {
+	tag, ok := tagByName[name]
+	if !ok {
+		return func(yield func(uint32, string) bool) {}
+	}
+	return EnumValuesByTag(tag)
+}
+
+// EnumValuesByTag returns an iterator over the enum values and names for the
+// given tag. If the tag is not a known enum, then the iterator will yield an
+// empty result set.
+func EnumValuesByTag(tag int) iter.Seq2[uint32, string] {
+	return func(yield func(uint32, string) bool) {
+		for id, name := range enumNames[tag] {
+			if !yield(id, name) {
+				return
+			}
+		}
+	}
+}
+
 func isEnum(ty reflect.Type) bool {
 	_, ok := enums[ty]
 	return ok
