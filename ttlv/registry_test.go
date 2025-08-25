@@ -1,36 +1,50 @@
 package ttlv
 
 import (
-	"fmt"
 	"reflect"
+	"testing"
 )
 
-func ExampleEnumValuesByTag() {
+func TestEnumValuesByTag(t *testing.T) {
 	type EN uint32
-	RegisterEnum(0x420020, map[EN]string{
+
+	names := map[EN]string{
+		0x000000FD: "Foo",
+		0x000000FE: "Bar",
 		0x000000FF: "FooBar",
-	})
-
-	for en, value := range EnumValuesByTag(0x420020) {
-		fmt.Println(en, value)
 	}
+	RegisterEnum(0x420020, names)
 
-	// Output:
-	// 255 FooBar
+	for en, name := range EnumValuesByTag(0x420020) {
+		v, ok := names[EN(en)]
+		if !ok {
+			t.Errorf("Unexpected enum value: %d", en)
+		}
+		if v != name {
+			t.Errorf("Unexpected enum name: %s", name)
+		}
+	}
 }
 
-func ExampleEnumValuesByName() {
+func TestEnumValuesByName(t *testing.T) {
 	type EN uint32
-	RegisterEnum(0x420020, map[EN]string{
+
+	names := map[EN]string{
+		0x000000FD: "Foo",
+		0x000000FE: "Bar",
 		0x000000FF: "FooBar",
-	})
+	}
+	RegisterEnum(0x420020, names)
 
 	RegisterTag("EN", 0x420020, reflect.TypeFor[EN]())
 
-	for en, value := range EnumValuesByName("EN") {
-		fmt.Println(en, value)
+	for en, name := range EnumValuesByName("EN") {
+		v, ok := names[EN(en)]
+		if !ok {
+			t.Errorf("Unexpected enum value: %d", en)
+		}
+		if v != name {
+			t.Errorf("Unexpected enum name: %s", name)
+		}
 	}
-
-	// Output:
-	// 255 FooBar
 }
