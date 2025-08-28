@@ -1,6 +1,10 @@
 package kmip
 
-import "github.com/ovh/kmip-go/ttlv"
+import (
+	"bytes"
+
+	"github.com/ovh/kmip-go/ttlv"
+)
 
 //nolint:funlen // There's not cleaner way to do it
 func init() {
@@ -1616,142 +1620,649 @@ const (
 )
 
 // Text Marshaling for better display in json outputs.
+// Test UnmarshalText for return enums from json intputs.
 
 func (enum ResultStatus) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *ResultStatus) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagResultStatus, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ResultStatus(val)
+	return nil
+}
 func (enum ResultReason) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *ResultReason) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagResultReason, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ResultReason(val)
+	return nil
 }
 func (enum CredentialType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *CredentialType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagCredentialType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = CredentialType(val)
+	return nil
+}
 func (enum RevocationReasonCode) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *RevocationReasonCode) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagRevocationReasonCode, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = RevocationReasonCode(val)
+	return nil
 }
 func (enum BatchErrorContinuationOption) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *BatchErrorContinuationOption) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagBatchErrorContinuationOption, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = BatchErrorContinuationOption(val)
+	return nil
+}
 func (enum NameType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *NameType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagNameType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = NameType(val)
+	return nil
 }
 func (enum ObjectType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *ObjectType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagObjectType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ObjectType(val)
+	return nil
+}
 func (enum OpaqueDataType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *OpaqueDataType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagOpaqueDataType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = OpaqueDataType(val)
+	return nil
 }
 func (enum State) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *State) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagState, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = State(val)
+	return nil
+}
 func (enum CryptographicAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *CryptographicAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagCryptographicAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = CryptographicAlgorithm(val)
+	return nil
 }
 func (enum BlockCipherMode) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *BlockCipherMode) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagBlockCipherMode, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = BlockCipherMode(val)
+	return nil
+}
 func (enum PaddingMethod) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *PaddingMethod) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagPaddingMethod, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = PaddingMethod(val)
+	return nil
 }
 func (enum HashingAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *HashingAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagHashingAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = HashingAlgorithm(val)
+	return nil
+}
 func (enum KeyRoleType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *KeyRoleType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagKeyRoleType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = KeyRoleType(val)
+	return nil
 }
 func (enum RecommendedCurve) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *RecommendedCurve) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagRecommendedCurve, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = RecommendedCurve(val)
+	return nil
+}
 func (enum SecretDataType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *SecretDataType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagSecretDataType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = SecretDataType(val)
+	return nil
 }
 func (enum KeyFormatType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *KeyFormatType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagKeyFormatType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = KeyFormatType(val)
+	return nil
+}
 func (enum KeyCompressionType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *KeyCompressionType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagKeyCompressionType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = KeyCompressionType(val)
+	return nil
 }
 func (enum WrappingMethod) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *WrappingMethod) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagWrappingMethod, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = WrappingMethod(val)
+	return nil
+}
 func (enum CertificateType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *CertificateType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagCertificateType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = CertificateType(val)
+	return nil
 }
 func (enum LinkType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *LinkType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagLinkType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = LinkType(val)
+	return nil
+}
 func (enum QueryFunction) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *QueryFunction) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagQueryFunction, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = QueryFunction(val)
+	return nil
 }
 func (enum UsageLimitsUnit) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *UsageLimitsUnit) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagUsageLimitsUnit, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = UsageLimitsUnit(val)
+	return nil
+}
 func (enum CancellationResult) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *CancellationResult) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagCancellationResult, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = CancellationResult(val)
+	return nil
 }
 func (enum PutFunction) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *PutFunction) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagPutFunction, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = PutFunction(val)
+	return nil
+}
 func (enum CertificateRequestType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *CertificateRequestType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagCertificateRequestType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = CertificateRequestType(val)
+	return nil
 }
 func (enum SplitKeyMethod) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *SplitKeyMethod) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagSplitKeyMethod, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = SplitKeyMethod(val)
+	return nil
+}
 func (enum ObjectGroupMember) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *ObjectGroupMember) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagObjectGroupMember, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ObjectGroupMember(val)
+	return nil
 }
 func (enum EncodingOption) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *EncodingOption) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagEncodingOption, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = EncodingOption(val)
+	return nil
+}
 func (enum DigitalSignatureAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *DigitalSignatureAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagDigitalSignatureAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = DigitalSignatureAlgorithm(val)
+	return nil
 }
 func (enum AttestationType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *AttestationType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagAttestationType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = AttestationType(val)
+	return nil
+}
 func (enum AlternativeNameType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *AlternativeNameType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagAlternativeNameType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = AlternativeNameType(val)
+	return nil
 }
 func (enum KeyValueLocationType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *KeyValueLocationType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagKeyValueLocationType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = KeyValueLocationType(val)
+	return nil
+}
 func (enum ValidityIndicator) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *ValidityIndicator) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagValidityIndicator, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ValidityIndicator(val)
+	return nil
 }
 func (enum RNGAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *RNGAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagRNGAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = RNGAlgorithm(val)
+	return nil
+}
 func (enum DRBGAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *DRBGAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagDRBGAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = DRBGAlgorithm(val)
+	return nil
 }
 func (enum FIPS186Variation) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *FIPS186Variation) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagFIPS186Variation, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = FIPS186Variation(val)
+	return nil
+}
 func (enum ProfileName) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *ProfileName) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagProfileName, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ProfileName(val)
+	return nil
 }
 func (enum ValidationAuthorityType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *ValidationAuthorityType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagValidationAuthorityType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ValidationAuthorityType(val)
+	return nil
+}
 func (enum ValidationType) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *ValidationType) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagValidationType, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ValidationType(val)
+	return nil
 }
 func (enum UnwrapMode) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *UnwrapMode) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagUnwrapMode, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = UnwrapMode(val)
+	return nil
+}
 func (enum DestroyAction) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *DestroyAction) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagDestroyAction, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = DestroyAction(val)
+	return nil
 }
 func (enum ShreddingAlgorithm) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *ShreddingAlgorithm) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagShreddingAlgorithm, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ShreddingAlgorithm(val)
+	return nil
+}
 func (enum RNGMode) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *RNGMode) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagRNGMode, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = RNGMode(val)
+	return nil
 }
 func (enum ClientRegistrationMethod) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
 }
+func (enum *ClientRegistrationMethod) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagClientRegistrationMethod, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = ClientRegistrationMethod(val)
+	return nil
+}
 func (enum MaskGenerator) MarshalText() ([]byte, error) {
 	return []byte(ttlv.EnumStr(enum)), nil
+}
+func (enum *MaskGenerator) UnmarshalText(text []byte) error {
+	if bytes.ContainsRune(text, ' ') {
+		text = bytes.ReplaceAll(text, []byte{' '}, []byte{})
+	}
+	val, err := ttlv.EnumByName(TagMaskGenerator, string(text))
+	if err != nil {
+		return err
+	}
+	*enum = MaskGenerator(val)
+	return nil
 }

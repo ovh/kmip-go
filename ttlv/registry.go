@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"iter"
 	"reflect"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -167,7 +169,9 @@ func enumName(tag int, value uint32) string {
 func EnumStr[T ~uint32](value T) string {
 	if tag := enums[reflect.TypeFor[T]()]; tag != 0 {
 		name := enumName(tag, uint32(value))
-		return name
+		if name != "" {
+			return name
+		}
 	}
 	return fmt.Sprintf("0x%08X", uint32(value))
 }
@@ -175,8 +179,15 @@ func EnumStr[T ~uint32](value T) string {
 // EnumByName returns enum of a normalized name.
 func EnumByName(tag int, name string) (uint32, error) {
 	if reg := enumsByName[tag]; reg != nil {
-		n := reg[name]
-		return n, nil
+		n, ok := reg[name]
+		if !ok {
+			if strings.HasPrefix(name, "0x") {
+				i, err := strconv.ParseInt(name[2:], 16, 64)
+				return uint32(i), err
+			}
+		} else {
+			return n, nil
+		}
 	}
 	return 0, fmt.Errorf("Unknown enum value %q", name)
 }
