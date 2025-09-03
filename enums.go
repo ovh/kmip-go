@@ -691,6 +691,9 @@ func init() {
 	ttlv.RegisterEnum(TagMaskGenerator, map[MaskGenerator]string{
 		MaskGeneratorMGF1: "MGF1",
 	})
+	ttlv.RegisterEnum(TagKeyWrapType, map[KeyWrapType]string{
+		NotWrapped:   "NotWrapped",
+		AsRegistered: "AsRegistered"})
 }
 
 // ResultStatus represents the status of a KMIP operation result as defined by the KMIP specification.
@@ -777,8 +780,8 @@ const (
 type NameType uint32
 
 const (
-	NameTypeUninterpretedTextString NameType = 1
-	NameTypeUri                     NameType = 2
+	NameTypeUninterpretedTextString NameType = 0x00000001
+	NameTypeUri                     NameType = 0x00000002
 )
 
 type ObjectType uint32
@@ -1613,6 +1616,13 @@ type MaskGenerator uint32
 
 const (
 	MaskGeneratorMGF1 MaskGenerator = 0x00000001
+)
+
+type KeyWrapType uint32
+
+const (
+	NotWrapped   KeyWrapType = 0x00000001
+	AsRegistered KeyWrapType = 0x00000002
 )
 
 // Text Marshaling for better display in json outputs.
