@@ -75,8 +75,8 @@ func MarshalJSON(data any) []byte {
 
 // MarshalText serializes `data` into a textual and human-friendly form
 // of TTLV. Useful mainly for debugging.
-func MarshalText(data any) []byte {
-	enc := NewTextEncoder()
+func MarshalText(data any, hide ...bool) []byte {
+	enc := NewTextEncoder(hide...)
 	enc.Any(data)
 	return enc.Bytes()
 }

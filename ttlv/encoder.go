@@ -55,8 +55,8 @@ func NewJSONEncoder() Encoder {
 
 // NewTextEncoder create a new [Encoder] to print TTLV values into
 // a textual and human-friendly form. Mainly useful for debugging.
-func NewTextEncoder() Encoder {
-	return newEncoder(newTextWriter())
+func NewTextEncoder(hide ...bool) Encoder {
+	return newEncoder(newTextWriter(hide...))
 }
 
 // Bytes returns the internal byte array holding the encoded content.
