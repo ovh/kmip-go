@@ -82,7 +82,7 @@ func (j *textWriter) Bitmask(bitmasktag, tag int, value int32) {
 		bitmasktag = tag
 	}
 	j.encodeAppend(TypeInteger, tag, func(b []byte) []byte {
-		return appendBitmaskString(b, bitmasktag, value, " | ")
+		return AppendBitmaskString(b, bitmasktag, value, " | ")
 	})
 }
 
@@ -114,7 +114,7 @@ func (j *textWriter) Enum(enumtag, tag int, value uint32) {
 		enumtag = tag
 	}
 	j.encodeAppend(TypeEnumeration, tag, func(b []byte) []byte {
-		strVal := enumName(enumtag, value)
+		strVal := EnumName(enumtag, value)
 		if strVal == "" {
 			return fmt.Appendf(b, "0x%08X", value)
 		}
