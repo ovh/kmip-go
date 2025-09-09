@@ -102,7 +102,7 @@ func (enc *xmlWriter) Enum(enumtag, tag int, value uint32) {
 	if enumtag <= 0 {
 		enumtag = tag
 	}
-	strVal := enumName(enumtag, value)
+	strVal := EnumName(enumtag, value)
 	if strVal == "" {
 		strVal = fmt.Sprintf("0x%08X", value)
 	}

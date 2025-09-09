@@ -154,7 +154,9 @@ func isEnum(ty reflect.Type) bool {
 	return ok
 }
 
-func enumName(tag int, value uint32) string {
+// EnumName returns the string representation of an enum value. If it's known,
+// the string is the normalized name, otherwise it's an empty string.
+func EnumName(tag int, value uint32) string {
 	if reg := enumNames[tag]; reg != nil {
 		n := reg[value]
 		return n
@@ -166,7 +168,7 @@ func enumName(tag int, value uint32) string {
 // the string is the normalized name, otherwise it's the 0x prefixed hex value.
 func EnumStr[T ~uint32](value T) string {
 	if tag := enums[reflect.TypeFor[T]()]; tag != 0 {
-		name := enumName(tag, uint32(value))
+		name := EnumName(tag, uint32(value))
 		return name
 	}
 	return fmt.Sprintf("0x%08X", uint32(value))
@@ -206,10 +208,10 @@ func BitmaskStr[T ~int32](value T, sep string) string {
 // specifies the separator to use between bitmask components in the resulting string.
 // T must be a type whose underlying type is int32.
 func bitmaskString[T ~int32](tag int, value T, sep string) string {
-	return string(appendBitmaskString([]byte{}, tag, value, sep))
+	return string(AppendBitmaskString([]byte{}, tag, value, sep))
 }
 
-// appendBitmaskString appends a string representation of a bitmask value to the given byte slice.
+// AppendBitmaskString appends a string representation of a bitmask value to the given byte slice.
 // For each set bit in the value, it looks up a human-readable name from the bitmaskNames map using the provided tag.
 // If a name is not found for a set bit, it appends the bit's value as a hexadecimal string prefixed with "0x".
 // Multiple set bits are separated by the specified separator string.
@@ -226,7 +228,7 @@ func bitmaskString[T ~int32](tag int, value T, sep string) string {
 //
 // Returns:
 //   - []byte: the resulting byte slice with the appended string representation.
-func appendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []byte {
+func AppendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []byte {
 	if value == 0 {
 		return dst
 	}
