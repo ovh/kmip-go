@@ -115,7 +115,10 @@ const (
 )
 
 func (enum Operation) MarshalText() ([]byte, error) {
-	return []byte(ttlv.EnumStr(enum)), nil
+	return marshalText(enum)
+}
+func (enum *Operation) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, int(TagOperation), string(text))
 }
 
 type operationPayloadTypes struct {
