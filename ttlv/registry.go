@@ -240,6 +240,9 @@ func AppendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 		if v == 0 {
 			continue
 		}
+		if i < len(mapper) && mapper[i] == "" {
+			continue
+		}
 		if wrote {
 			dst = append(dst, bsep...)
 		}
@@ -256,7 +259,8 @@ func AppendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 	return dst
 }
 
-func bitmaskByStr(tag int, name string) (int32, error) {
+// BitmaskByStr returns bitmask of a normalized name.
+func BitmaskByStr(tag int, name string) (int32, error) {
 	if reg := bitmaskByName[tag]; reg != nil {
 		n := reg[name]
 		return n, nil
