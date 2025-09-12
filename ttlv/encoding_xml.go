@@ -422,7 +422,7 @@ func (dec *xmlReader) Bitmask(realtag, tag int) (int32, error) {
 			if err != nil {
 				// Look for the name
 				var p int32
-				p, err = bitmaskByStr(realtag, part)
+				p, err = BitmaskByStr(realtag, part)
 				parsed = int64(p)
 			}
 		}

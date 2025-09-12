@@ -1,6 +1,11 @@
 package kmip
 
-import "github.com/ovh/kmip-go/ttlv"
+import (
+	"strconv"
+	"strings"
+
+	"github.com/ovh/kmip-go/ttlv"
+)
 
 // init registers the bitmask string representations for CryptographicUsageMask and StorageStatusMask
 // with the KMIP TTLV package. This enables human-readable string formatting and parsing for these bitmask types.
@@ -91,6 +96,10 @@ func (mask CryptographicUsageMask) MarshalText() ([]byte, error) {
 	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
 }
 
+func (mask *CryptographicUsageMask) UnmarshalText(text []byte) error {
+	return maskUnmarshalText(mask, TagCryptographicUsageMask, string(text))
+}
+
 // StorageStatusMask represents a bitmask for storage status flags.
 // It is used to indicate various storage states using bitwise operations.
 // Each bit corresponds to a specific storage status as defined by the KMIP specification.
@@ -108,4 +117,40 @@ const (
 // This method never returns an error.
 func (mask StorageStatusMask) MarshalText() ([]byte, error) {
 	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
+}
+
+func (mask *StorageStatusMask) UnmarshalText(text []byte) error {
+	return maskUnmarshalText(mask, TagStorageStatusMask, string(text))
+}
+
+func maskUnmarshalText[T ~int32](mask *T, tag int, text string) error {
+	var parts []string
+	if strings.ContainsRune(text, '|') {
+		parts = strings.Split(text, "|")
+	} else {
+		parts = strings.Fields(text)
+	}
+
+	*mask = 0
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		var parsed int64
+		var err error
+		if strings.HasPrefix(part, "0x") || strings.HasPrefix(part, "0X") {
+			parsed, err = strconv.ParseInt(part[2:], 16, 32)
+		} else {
+			parsed, err = strconv.ParseInt(part, 10, 32)
+			if err != nil {
+				// Look for the name
+				var p int32
+				p, err = ttlv.BitmaskByStr(tag, part)
+				parsed = int64(p)
+			}
+		}
+		if err != nil {
+			return err
+		}
+		*mask |= T(parsed)
+	}
+	return nil
 }
