@@ -70,7 +70,7 @@ func init() {
 	})
 	ttlv.RegisterEnum(TagNameType, map[NameType]string{
 		NameTypeUninterpretedTextString: "UninterpretedTextString",
-		NameTypeUri:                     "Uri",
+		NameTypeUri:                     "URI",
 	})
 	ttlv.RegisterEnum(TagObjectType, map[ObjectType]string{
 		ObjectTypeCertificate:  "Certificate",
