@@ -70,7 +70,7 @@ func (pl *GetResponsePayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 		}
 
 		var err error
-		if pl.Object, err = kmip.NewObjectForType(pl.ObjectType); err != nil {
+		if pl.Object, err = newObjectForType(pl.ObjectType); err != nil {
 			return err
 		}
 		return d.Any(&pl.Object)
@@ -89,24 +89,33 @@ func (pl *GetResponsePayload) Secret() ([]byte, error) {
 	if pl.ObjectType != kmip.ObjectTypeSecretData {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeSecretData))
 	}
-	secret := pl.Object.(*kmip.SecretData)
-	return secret.Data()
+	secret, ok := pl.Object.(interface{ Data() ([]byte, error) })
+	if ok {
+		return secret.Data()
+	}
+	return nil, fmt.Errorf("Object does not implement Data() method")
 }
 
 func (pl *GetResponsePayload) SymmetricKey() ([]byte, error) {
 	if pl.ObjectType != kmip.ObjectTypeSymmetricKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeSymmetricKey))
 	}
-	key := pl.Object.(*kmip.SymmetricKey)
-	return key.KeyMaterial()
+	if key, ok := pl.Object.(interface{ KeyMaterial() ([]byte, error) }); ok {
+		return key.KeyMaterial()
+	}
+	return nil, fmt.Errorf("Object does not implement KeyMaterial() method")
 }
 
 func (pl *GetResponsePayload) X509Certificate() (*x509.Certificate, error) {
 	if pl.ObjectType != kmip.ObjectTypeCertificate {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeCertificate))
 	}
-	cert := pl.Object.(*kmip.Certificate)
-	return cert.X509Certificate()
+	if cert, ok := pl.Object.(interface {
+		X509Certificate() (*x509.Certificate, error)
+	}); ok {
+		return cert.X509Certificate()
+	}
+	return nil, fmt.Errorf("Object does not implement X509Certificate() method")
 }
 
 // PemCertificate returns the PEM encoded value of an x509 certificate. It returns an error
@@ -115,24 +124,34 @@ func (pl *GetResponsePayload) PemCertificate() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypeCertificate {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeCertificate))
 	}
-	cert := pl.Object.(*kmip.Certificate)
-	return cert.PemCertificate()
+	if cert, ok := pl.Object.(interface{ PemCertificate() (string, error) }); ok {
+		return cert.PemCertificate()
+	}
+	return "", fmt.Errorf("Object does not implement PemCertificate() method")
 }
 
 func (pl *GetResponsePayload) RsaPrivateKey() (*rsa.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	key := pl.Object.(*kmip.PrivateKey)
-	return key.RSA()
+	if key, ok := pl.Object.(interface {
+		RSA() (*rsa.PrivateKey, error)
+	}); ok {
+		return key.RSA()
+	}
+	return nil, fmt.Errorf("Object does not implement RSA() method")
 }
 
 func (pl *GetResponsePayload) EcdsaPrivateKey() (*ecdsa.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	key := pl.Object.(*kmip.PrivateKey)
-	return key.ECDSA()
+	if key, ok := pl.Object.(interface {
+		ECDSA() (*ecdsa.PrivateKey, error)
+	}); ok {
+		return key.ECDSA()
+	}
+	return nil, fmt.Errorf("Object does not implement ECDSA() method")
 }
 
 // PrivateKey parses and return the private key object into a go [crypto.PrivateKey] object.
@@ -140,7 +159,12 @@ func (pl *GetResponsePayload) PrivateKey() (crypto.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	return pl.Object.(*kmip.PrivateKey).CryptoPrivateKey()
+	if key, ok := pl.Object.(interface {
+		CryptoPrivateKey() (crypto.PrivateKey, error)
+	}); ok {
+		return key.CryptoPrivateKey()
+	}
+	return nil, fmt.Errorf("Object does not implement CryptoPrivateKey() method")
 }
 
 // PemPrivateKey format the private key into the PEM encoding of its PKCS #8, ASN.1 DER form.
@@ -148,23 +172,34 @@ func (pl *GetResponsePayload) PemPrivateKey() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	return pl.Object.(*kmip.PrivateKey).Pkcs8Pem()
+	if key, ok := pl.Object.(interface{ Pkcs8Pem() (string, error) }); ok {
+		return key.Pkcs8Pem()
+	}
+	return "", fmt.Errorf("Object does not implement Pkcs8Pem() method")
 }
 
 func (pl *GetResponsePayload) RsaPublicKey() (*rsa.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	key := pl.Object.(*kmip.PublicKey)
-	return key.RSA()
+	if obj, ok := pl.Object.(interface {
+		RSA() (*rsa.PublicKey, error)
+	}); ok {
+		return obj.RSA()
+	}
+	return nil, fmt.Errorf("Object does not implement RSA() method")
 }
 
 func (pl *GetResponsePayload) EcdsaPublicKey() (*ecdsa.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	key := pl.Object.(*kmip.PublicKey)
-	return key.ECDSA()
+	if key, ok := pl.Object.(interface {
+		ECDSA() (*ecdsa.PublicKey, error)
+	}); ok {
+		return key.ECDSA()
+	}
+	return nil, fmt.Errorf("Object does not implement EcdsaPublicKey() method")
 }
 
 // PublicKey parses and return the public key object into a go [crypto.PublicKey] object.
@@ -172,7 +207,12 @@ func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	return pl.Object.(*kmip.PublicKey).CryptoPublicKey()
+	if key, ok := pl.Object.(interface {
+		CryptoPublicKey() (crypto.PublicKey, error)
+	}); ok {
+		return key.CryptoPublicKey()
+	}
+	return nil, fmt.Errorf("Object does not implement CryptoPublicKey() method")
 }
 
 // PemPublicKey format the public key value into a PEM encoding of its PKIX, ASN.1 DER form.
@@ -182,5 +222,8 @@ func (pl *GetResponsePayload) PemPublicKey() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	return pl.Object.(*kmip.PublicKey).PkixPem()
+	if obj, ok := pl.Object.(interface{ PkixPem() (string, error) }); ok {
+		return obj.PkixPem()
+	}
+	return "", fmt.Errorf("Object does not implement PkixPem() method")
 }

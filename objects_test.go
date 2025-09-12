@@ -12,25 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ovh/kmip-go/ttlv"
-
 	"github.com/stretchr/testify/require"
 )
-
-func TestObjectTypes(t *testing.T) {
-	for ot := range objectTypes {
-		t.Run(ttlv.EnumStr(ot), func(t *testing.T) {
-			obj, err := NewObjectForType(ot)
-			require.NoError(t, err)
-			require.Equal(t, ot, obj.ObjectType())
-		})
-	}
-	t.Run("invalid", func(t *testing.T) {
-		obj, err := NewObjectForType(ObjectType(999))
-		require.Error(t, err)
-		require.Nil(t, obj)
-	})
-}
 
 func TestSecretData_Data(t *testing.T) {
 	t.Run("raw", func(t *testing.T) {

@@ -10,31 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"reflect"
 
 	"github.com/ovh/kmip-go/ttlv"
 )
-
-var objectTypes = map[ObjectType]reflect.Type{
-	ObjectTypeSecretData:   reflect.TypeFor[SecretData](),
-	ObjectTypeCertificate:  reflect.TypeFor[Certificate](),
-	ObjectTypeSymmetricKey: reflect.TypeFor[SymmetricKey](),
-	ObjectTypePublicKey:    reflect.TypeFor[PublicKey](),
-	ObjectTypePrivateKey:   reflect.TypeFor[PrivateKey](),
-	ObjectTypeSplitKey:     reflect.TypeFor[SplitKey](),
-	ObjectTypeOpaqueObject: reflect.TypeFor[OpaqueObject](),
-	ObjectTypeTemplate:     reflect.TypeFor[Template](),
-	ObjectTypePGPKey:       reflect.TypeFor[PGPKey](),
-}
-
-// TODO: Make it private.
-func NewObjectForType(objType ObjectType) (Object, error) {
-	ty, ok := objectTypes[objType]
-	if !ok {
-		return nil, fmt.Errorf("Invalid object type %X", objType)
-	}
-	return reflect.New(ty).Interface().(Object), nil
-}
 
 type Object interface {
 	ObjectType() ObjectType
