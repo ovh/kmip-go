@@ -51,7 +51,7 @@ func (pl *RegisterRequestPayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error 
 		}
 
 		var err error
-		if pl.Object, err = kmip.NewObjectForType(pl.ObjectType); err != nil {
+		if pl.Object, err = newObjectForType(pl.ObjectType); err != nil {
 			return err
 		}
 		return d.Any(&pl.Object)
