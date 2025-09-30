@@ -745,8 +745,8 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | Hash                 |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Create Split Key     |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Join Split Key       |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
-| Export               |  N/A |  N/A |  N/A |  N/A |  ❌  |
-| Import               |  N/A |  N/A |  N/A |  N/A |  ❌  |
+| Export               |  N/A |  N/A |  N/A |  N/A |  ✅  |
+| Import               |  N/A |  N/A |  N/A |  N/A |  ✅  |
 
 ### Managed Objects
 | Object        | v1.0 | v1.1 | v1.2 | v1.3 | v1.4 |
