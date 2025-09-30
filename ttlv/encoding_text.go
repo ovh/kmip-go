@@ -10,17 +10,30 @@ import (
 	"time"
 )
 
+const hiddenString = "******"
+
+var hiddenTags = map[int]bool{}
+
+func RegisterHideTag(tag int) {
+	hiddenTags[tag] = true
+}
+
 type textWriter struct {
 	buf    *bytes.Buffer
 	indent int
+	hide   bool
 }
 
 var _ writer = (*textWriter)(nil)
 
-func newTextWriter() *textWriter {
-	return &textWriter{
+func newTextWriter(hide ...bool) *textWriter {
+	tw := &textWriter{
 		buf: new(bytes.Buffer),
 	}
+	if len(hide) > 0 {
+		tw.hide = hide[0]
+	}
+	return tw
 }
 
 func (j *textWriter) writeIndent() {
@@ -96,6 +109,9 @@ func (j *textWriter) Bool(tag int, value bool) {
 // ByteString implements writer.
 func (j *textWriter) ByteString(tag int, str []byte) {
 	j.encodeAppend(TypeByteString, tag, func(b []byte) []byte {
+		if j.hide && hiddenTags[tag] {
+			return append(b, hiddenString...)
+		}
 		// TODO: Avoid intermediate string allocation
 		return append(b, strings.ToUpper(hex.EncodeToString(str))...)
 	})
@@ -139,6 +155,11 @@ func (j *textWriter) Struct(tag int, f func(writer)) {
 	enc := textWriter{
 		buf:    j.buf,
 		indent: j.indent + 1,
+		hide:   j.hide,
+	}
+	if j.hide && hiddenTags[tag] {
+		enc.buf.WriteString(hiddenString)
+		return
 	}
 	f(&enc)
 	if oLen == j.buf.Len() {
@@ -151,6 +172,9 @@ func (j *textWriter) Struct(tag int, f func(writer)) {
 // TextString implements writer.
 func (j *textWriter) TextString(tag int, str string) {
 	j.encodeAppend(TypeTextString, tag, func(b []byte) []byte {
+		if j.hide && hiddenTags[tag] {
+			return append(b, hiddenString...)
+		}
 		return append(b, str...)
 	})
 }
