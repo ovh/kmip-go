@@ -7,7 +7,7 @@ import (
 
 // ExecImport represents the execution of an import operation with the KMIP client.
 type ExecImport struct {
-	Executor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload]
+	AttributeExecutor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload, ExecImport]
 }
 
 // ExecExport represents the execution of an export operation with the KMIP client.
@@ -15,17 +15,23 @@ type ExecExport struct {
 	Executor[*payloads.ExportRequestPayload, *payloads.ExportResponsePayload]
 }
 
-// ExecImportWantsObject is a helper type that allows for fluent-style configuration of an import operation.
-type ExecImportWantsObject struct {
-	req    *payloads.ImportRequestPayload
-	client *Client
-}
-
 // Import initializes an import operation with the client.
-func (c *Client) Import() ExecImportWantsObject {
-	return ExecImportWantsObject{
-		client: c,
-		req:    &payloads.ImportRequestPayload{},
+func (c *Client) Import(id string, object kmip.Object) ExecImport {
+	return ExecImport{
+		AttributeExecutor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload, ExecImport]{
+			Executor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload]{
+				client: c,
+				req: &payloads.ImportRequestPayload{
+					UniqueIdentifier: id,
+				},
+			},
+			func(rrp **payloads.ImportRequestPayload) *[]kmip.Attribute {
+				return &(*rrp).Attribute
+			},
+			func(ae AttributeExecutor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload, ExecImport]) ExecImport {
+				return ExecImport{ae}
+			},
+		},
 	}
 }
 
@@ -40,26 +46,15 @@ func (c *Client) Export(id string) ExecExport {
 }
 
 // WithReplaceExisting sets the ReplaceExisting flag in the import request.
-func (ex ExecImportWantsObject) WithReplaceExisting(replaceExisting bool) ExecImportWantsObject {
+func (ex ExecImport) WithReplaceExisting(replaceExisting bool) ExecImport {
 	ex.req.ReplaceExisting = replaceExisting
 	return ex
 }
 
 // WithKeyWrapType sets the KeyWrapType in the import request.
-func (ex ExecImportWantsObject) WithKeyWrapType(keyWrapType kmip.KeyWrapType) ExecImportWantsObject {
+func (ex ExecImport) WithKeyWrapType(keyWrapType kmip.KeyWrapType) ExecImport {
 	ex.req.KeyWrapType = keyWrapType
 	return ex
-}
-
-// AAD sets the AuthenticatedEncryptionAdditionalData in the import request and finalizes the import operation.
-func (ex ExecImportWantsObject) Object(data kmip.Object) ExecImport {
-	ex.req.Object = data
-	return ExecImport{
-		Executor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload]{
-			client: ex.client,
-			req:    ex.req,
-		},
-	}
 }
 
 // WithKeyFormatType sets the KeyFormatType in the export request.
