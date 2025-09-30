@@ -1910,6 +1910,12 @@ func (enum MaskGenerator) MarshalText() ([]byte, error) {
 func (enum *MaskGenerator) UnmarshalText(text []byte) error {
 	return unmarshalText(enum, TagMaskGenerator, string(text))
 }
+func (enum KeyWrapType) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *KeyWrapType) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, int(TagKeyWrapType), string(text))
+}
 
 func marshalText[T ~uint32](enum T) ([]byte, error) {
 	s := ttlv.EnumStr(enum)

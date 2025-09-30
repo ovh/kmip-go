@@ -8,17 +8,28 @@ func init() {
 	kmip.RegisterOperationPayload[ExportRequestPayload, ExportResponsePayload](kmip.OperationExport)
 }
 
-// ImportRequestPayload represents the payload for the Import operation request.
+// This operation requests the server to Import a Managed Object specified by its Unique Identifier.
+// The request specifies the object being imported and all the attributes to be assigned to the object.
+// The attribute rules for each attribute for “Initially set by” and “When implicitly set” SHALL NOT be enforced as all attributes
+// MUST be set to the supplied values rather than any server generated values.
+//
+// Special authentication and authorization SHOULD be enforced to perform this request.
+// Only the object owner or an authorized security officer SHOULD be allowed to issue this request.
+//
+// The response contains the Unique Identifier provided in the request or assigned by the server.
+// The server SHALL copy the Unique Identifier returned by this operations into the ID Placeholder variable.
 type ImportRequestPayload struct {
-	// UniqueIdentifier is an optional field that specifies the unique identifier of the object to be imported.
+	// The Unique Identifier of the object to be imported.
 	UniqueIdentifier string
-	// ReplaceExisting is an optional field that specifies whether to replace an existing object with the imported one.
+	// A Boolean.  If specified and true then any existing object with the same Unique Identifier SHALL be replaced by this operation.
+	// If absent or false then the operation SHALL fail if there is an existing object with the same Unique Identifier.
 	ReplaceExisting bool `ttlv:",omitempty"`
-	// KeyWrapType is an optional field that specifies the key wrapping type used for the imported key material.
+	// If Not Wrapped then the server SHALL unwrap the object before storing it, and return an error if the wrapping key is not available.
+	// Otherwise the server SHALL store the object as provided.
 	KeyWrapType kmip.KeyWrapType `ttlv:",omitempty"`
-	// Attribute is an optional field that specifies additional attributes for the imported object.
+	// All of the object’s Attributes.
 	Attribute []kmip.Attribute `ttlv:",omitempty"`
-	// Object is a required field that specifies the object to be imported.
+	// The object value being imported, in the same manner as the Register operation.
 	Object kmip.Object
 }
 
@@ -27,9 +38,9 @@ func (a *ImportRequestPayload) Operation() kmip.Operation {
 	return kmip.OperationImport
 }
 
-// ImportResponsePayload represents the payload for the Import operation response.
+// Response for the Import operation.
 type ImportResponsePayload struct {
-	// UniqueIdentifier is a required field that specifies the unique identifier of the imported object.
+	// The Unique Identifier of the object.
 	UniqueIdentifier string
 }
 
@@ -38,17 +49,25 @@ func (a *ImportResponsePayload) Operation() kmip.Operation {
 	return kmip.OperationImport
 }
 
-// ExportRequestPayload represents the payload for the Export operation request.
+// This operation requests that the server returns a Managed Object specified by its Unique Identifier, together with its attributes.
+//
+// The Key Format Type, Key Wrap Type, Key Compression Type and Key Wrapping Specification SHALL have the same semantics as for the Get operation.
+// If the Managed Object has been Destroyed then the key material for the specified managed object SHALL not be returned in the response.
+//
+// The server SHALL copy the Unique Identifier returned by this operations into the ID Placeholder variable.
+// Special authentication and authorization SHOULD be enforced to perform this request.
+//
+// Only the object owner or an authorized security officer SHOULD be allowed to issue this request.
 type ExportRequestPayload struct {
-	// UniqueIdentifier is an optional field that specifies the unique identifier of the object to be exported.
+	// Determines the object being requested. If omitted, then the IDPlaceholder value is used by the server as the Unique Identifier.
 	UniqueIdentifier string `ttlv:",omitempty"`
-	// KeyFormatType is an optional field that specifies the format type of the exported key material.
+	// Determines the key format type to be returned.
 	KeyFormatType kmip.KeyFormatType `ttlv:",omitempty"`
-	// KeyWrapType is an optional field that specifies the key wrapping type used for the exported key material.
+	// Determines the Key Wrap Type of the returned key value.
 	KeyWrapType kmip.KeyWrapType `ttlv:",omitempty"`
-	// KeyCompressionType is an optional field that specifies the compression type used for the exported key material.
+	// Determines the compression method for elliptic curve public keys.
 	KeyCompressionType kmip.KeyCompressionType `ttlv:",omitempty"`
-	// KeyWrappingSpecification is an optional field that specifies the key wrapping specification for the exported key material.
+	// Specifies keys and other information for wrapping the returned object.
 	KeyWrappingSpecification kmip.KeyWrappingSpecification `ttlv:",omitempty"`
 }
 
@@ -57,15 +76,15 @@ func (a *ExportRequestPayload) Operation() kmip.Operation {
 	return kmip.OperationExport
 }
 
-// ExportResponsePayload represents the payload for the Export operation response.
+// Response for the Export operation.
 type ExportResponsePayload struct {
-	// ObjectType is a required field that specifies the type of the exported object.
+	// Type of object.
 	ObjectType kmip.ObjectType
-	// UniqueIdentifier is a required field that specifies the unique identifier of the exported object.
+	// The Unique Identifier of the object.
 	UniqueIdentifier string
-	// Attribute is a required field that specifies additional attributes for the exported object.
+	// All of the object’s Attributes.
 	Attribute []kmip.Attribute
-	// The object being returned.
+	// The object value being returned, in the same manner as the Get operation.
 	Object kmip.Object
 }
 
