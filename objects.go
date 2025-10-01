@@ -36,6 +36,12 @@ func NewObjectForType(objType ObjectType) (Object, error) {
 	return reflect.New(ty).Interface().(Object), nil
 }
 
+// RegisterObject allows to register a new object with its corresponding struct.
+// This is useful to extend the library with custom object or to add support for new object types.
+func RegisterObject(objType ObjectType, obj Object) {
+	objectTypes[objType] = reflect.TypeOf(obj).Elem()
+}
+
 type Object interface {
 	ObjectType() ObjectType
 }

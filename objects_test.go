@@ -32,6 +32,22 @@ func TestObjectTypes(t *testing.T) {
 	})
 }
 
+type CustomObject struct{}
+
+func (o *CustomObject) ObjectType() ObjectType {
+	return ObjectType(100)
+}
+
+func TestObject(t *testing.T) {
+	RegisterObject(ObjectType(100), &CustomObject{})
+
+	t.Run("custom", func(t *testing.T) {
+		obj, err := NewObjectForType(ObjectType(100))
+		require.NoError(t, err)
+		require.Equal(t, ObjectType(100), obj.ObjectType())
+	})
+}
+
 func TestSecretData_Data(t *testing.T) {
 	t.Run("raw", func(t *testing.T) {
 		data := []byte("foobar")
