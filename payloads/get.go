@@ -89,7 +89,10 @@ func (pl *GetResponsePayload) Secret() ([]byte, error) {
 	if pl.ObjectType != kmip.ObjectTypeSecretData {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeSecretData))
 	}
-	secret := pl.Object.(*kmip.SecretData)
+	secret, ok := pl.Object.(interface{ Data() ([]byte, error) })
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement Data() method")
+	}
 	return secret.Data()
 }
 
@@ -97,7 +100,10 @@ func (pl *GetResponsePayload) SymmetricKey() ([]byte, error) {
 	if pl.ObjectType != kmip.ObjectTypeSymmetricKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeSymmetricKey))
 	}
-	key := pl.Object.(*kmip.SymmetricKey)
+	key, ok := pl.Object.(interface{ KeyMaterial() ([]byte, error) })
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement KeyMaterial() method")
+	}
 	return key.KeyMaterial()
 }
 
@@ -105,7 +111,12 @@ func (pl *GetResponsePayload) X509Certificate() (*x509.Certificate, error) {
 	if pl.ObjectType != kmip.ObjectTypeCertificate {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeCertificate))
 	}
-	cert := pl.Object.(*kmip.Certificate)
+	cert, ok := pl.Object.(interface {
+		X509Certificate() (*x509.Certificate, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement X509Certificate() method")
+	}
 	return cert.X509Certificate()
 }
 
@@ -115,7 +126,10 @@ func (pl *GetResponsePayload) PemCertificate() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypeCertificate {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypeCertificate))
 	}
-	cert := pl.Object.(*kmip.Certificate)
+	cert, ok := pl.Object.(interface{ PemCertificate() (string, error) })
+	if !ok {
+		return "", fmt.Errorf("Object does not implement PemCertificate() method")
+	}
 	return cert.PemCertificate()
 }
 
@@ -123,7 +137,12 @@ func (pl *GetResponsePayload) RsaPrivateKey() (*rsa.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	key := pl.Object.(*kmip.PrivateKey)
+	key, ok := pl.Object.(interface {
+		RSA() (*rsa.PrivateKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement RSA() method")
+	}
 	return key.RSA()
 }
 
@@ -131,7 +150,12 @@ func (pl *GetResponsePayload) EcdsaPrivateKey() (*ecdsa.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	key := pl.Object.(*kmip.PrivateKey)
+	key, ok := pl.Object.(interface {
+		ECDSA() (*ecdsa.PrivateKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement ECDSA() method")
+	}
 	return key.ECDSA()
 }
 
@@ -140,7 +164,13 @@ func (pl *GetResponsePayload) PrivateKey() (crypto.PrivateKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	return pl.Object.(*kmip.PrivateKey).CryptoPrivateKey()
+	key, ok := pl.Object.(interface {
+		CryptoPrivateKey() (crypto.PrivateKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement CryptoPrivateKey() method")
+	}
+	return key.CryptoPrivateKey()
 }
 
 // PemPrivateKey format the private key into the PEM encoding of its PKCS #8, ASN.1 DER form.
@@ -148,14 +178,23 @@ func (pl *GetResponsePayload) PemPrivateKey() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypePrivateKey {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePrivateKey))
 	}
-	return pl.Object.(*kmip.PrivateKey).Pkcs8Pem()
+	key, ok := pl.Object.(interface{ Pkcs8Pem() (string, error) })
+	if !ok {
+		return "", fmt.Errorf("Object does not implement Pkcs8Pem() method")
+	}
+	return key.Pkcs8Pem()
 }
 
 func (pl *GetResponsePayload) RsaPublicKey() (*rsa.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	key := pl.Object.(*kmip.PublicKey)
+	key, ok := pl.Object.(interface {
+		RSA() (*rsa.PublicKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement RSA() method")
+	}
 	return key.RSA()
 }
 
@@ -163,7 +202,12 @@ func (pl *GetResponsePayload) EcdsaPublicKey() (*ecdsa.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	key := pl.Object.(*kmip.PublicKey)
+	key, ok := pl.Object.(interface {
+		ECDSA() (*ecdsa.PublicKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement ECDSA() method")
+	}
 	return key.ECDSA()
 }
 
@@ -172,7 +216,13 @@ func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return nil, fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	return pl.Object.(*kmip.PublicKey).CryptoPublicKey()
+	key, ok := pl.Object.(interface {
+		CryptoPublicKey() (crypto.PublicKey, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Object does not implement ECDSA() method")
+	}
+	return key.CryptoPublicKey()
 }
 
 // PemPublicKey format the public key value into a PEM encoding of its PKIX, ASN.1 DER form.
@@ -182,5 +232,9 @@ func (pl *GetResponsePayload) PemPublicKey() (string, error) {
 	if pl.ObjectType != kmip.ObjectTypePublicKey {
 		return "", fmt.Errorf("Invalid object type. Got %s but want %s", ttlv.EnumStr(pl.ObjectType), ttlv.EnumStr(kmip.ObjectTypePublicKey))
 	}
-	return pl.Object.(*kmip.PublicKey).PkixPem()
+	key, ok := pl.Object.(interface{ PkixPem() (string, error) })
+	if !ok {
+		return "", fmt.Errorf("Object does not implement PkixPem() method")
+	}
+	return key.PkixPem()
 }
