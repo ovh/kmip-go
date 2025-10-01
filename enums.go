@@ -70,7 +70,7 @@ func init() {
 	})
 	ttlv.RegisterEnum(TagNameType, map[NameType]string{
 		NameTypeUninterpretedTextString: "UninterpretedTextString",
-		NameTypeUri:                     "Uri",
+		NameTypeUri:                     "URI",
 	})
 	ttlv.RegisterEnum(TagObjectType, map[ObjectType]string{
 		ObjectTypeCertificate:  "Certificate",
@@ -697,6 +697,9 @@ func init() {
 	ttlv.RegisterEnum(TagMaskGenerator, map[MaskGenerator]string{
 		MaskGeneratorMGF1: "MGF1",
 	})
+	ttlv.RegisterEnum(TagKeyWrapType, map[KeyWrapType]string{
+		NotWrapped:   "NotWrapped",
+		AsRegistered: "AsRegistered"})
 }
 
 // ResultStatus represents the status of a KMIP operation result as defined by the KMIP specification.
@@ -783,8 +786,8 @@ const (
 type NameType uint32
 
 const (
-	NameTypeUninterpretedTextString NameType = 1
-	NameTypeUri                     NameType = 2
+	NameTypeUninterpretedTextString NameType = 0x00000001
+	NameTypeUri                     NameType = 0x00000002
 )
 
 type ObjectType uint32
@@ -1621,6 +1624,13 @@ const (
 	MaskGeneratorMGF1 MaskGenerator = 0x00000001
 )
 
+type KeyWrapType uint32
+
+const (
+	NotWrapped   KeyWrapType = 0x00000001
+	AsRegistered KeyWrapType = 0x00000002
+)
+
 // Text Marshaling for better display in json outputs.
 // Test UnmarshalText for return enums from json intputs.
 
@@ -1899,6 +1909,12 @@ func (enum MaskGenerator) MarshalText() ([]byte, error) {
 }
 func (enum *MaskGenerator) UnmarshalText(text []byte) error {
 	return unmarshalText(enum, TagMaskGenerator, string(text))
+}
+func (enum KeyWrapType) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *KeyWrapType) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, int(TagKeyWrapType), string(text))
 }
 
 func marshalText[T ~uint32](enum T) ([]byte, error) {
