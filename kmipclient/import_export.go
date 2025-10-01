@@ -76,7 +76,7 @@ func (ex ExecExport) WithKeyCompressionType(keyCompressionType kmip.KeyCompressi
 }
 
 // WithKeyWrappingSpecification sets the KeyWrappingSpecification in the export request.
-func (ex ExecExport) WithKeyWrappingSpecification(keyWrappingSpecification kmip.KeyWrappingSpecification) ExecExport {
+func (ex ExecExport) WithKeyWrappingSpecification(keyWrappingSpecification *kmip.KeyWrappingSpecification) ExecExport {
 	ex.req.KeyWrappingSpecification = keyWrappingSpecification
 	return ex
 }
