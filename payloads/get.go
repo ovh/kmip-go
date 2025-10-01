@@ -35,7 +35,7 @@ type GetRequestPayload struct {
 	// Determines the key format type to be returned.
 	KeyFormatType kmip.KeyFormatType `ttlv:",omitempty"`
 	// Determines the Key Wrap Type of the returned key value.
-	KeyWrapType kmip.KeyFormatType `ttlv:",omitempty,version=v1.4.."`
+	KeyWrapType kmip.KeyWrapType `ttlv:",omitempty,version=v1.4.."`
 	// Determines the compression method for elliptic curve public keys.
 	KeyCompressionType kmip.KeyCompressionType `ttlv:",omitempty"`
 	// Specifies keys and other information for wrapping the returned object. This field SHALL NOT be specified if the requested object is a Template.

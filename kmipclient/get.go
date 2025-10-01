@@ -47,15 +47,15 @@ func (ex ExecGet) WithKeyFormat(format kmip.KeyFormatType) ExecGet {
 // Use this to specify the desired wrapping format for the key material.
 //
 // Parameters:
-//   - format: The desired key wrap type.
+//   - keyWrapType: The desired key wrap type.
 //
 // Returns:
 //   - ExecGet: The updated ExecGet with the KeyWrapType set.
 //
 // Errors:
 //   - No error is returned by this method. If the wrap type is not supported by the server, an error may occur during execution.
-func (ex ExecGet) WithKeyWrapType(format kmip.KeyFormatType) ExecGet {
-	ex.req.KeyWrapType = format
+func (ex ExecGet) WithKeyWrapType(keyWrapType kmip.KeyWrapType) ExecGet {
+	ex.req.KeyWrapType = keyWrapType
 	return ex
 }
 
