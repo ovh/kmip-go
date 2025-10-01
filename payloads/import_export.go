@@ -68,7 +68,7 @@ type ExportRequestPayload struct {
 	// Determines the compression method for elliptic curve public keys.
 	KeyCompressionType kmip.KeyCompressionType `ttlv:",omitempty"`
 	// Specifies keys and other information for wrapping the returned object.
-	KeyWrappingSpecification kmip.KeyWrappingSpecification `ttlv:",omitempty"`
+	KeyWrappingSpecification *kmip.KeyWrappingSpecification `ttlv:",omitempty"`
 }
 
 // Operation returns the operation type for the ExportRequestPayload.
