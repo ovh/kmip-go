@@ -19,8 +19,6 @@ import (
 	"github.com/ovh/kmip-go/kmipclient"
 	"github.com/ovh/kmip-go/payloads"
 	"github.com/ovh/kmip-go/ttlv"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -31,6 +29,17 @@ const (
 )
 
 var RESOURCE = "cb0ea267-d912-4bd4-9be2-2093e1ed02a4"
+
+// newUUID generate a new random uuid. You would usually use a library
+// like github.com/google/uuid or github.com/gofrs/uuid to do that.
+func newUUID() string {
+	var b [16]byte
+	_, _ = rand.Read(b[:])
+	// Set version (4) and variant bits according to RFC 4122
+	b[6] = (b[6] & 0x0f) | 0x40 // Version 4
+	b[8] = (b[8] & 0x3f) | 0x80 // Variant is 10
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+}
 
 //nolint:funlen // list all examples
 func main() {
@@ -123,7 +132,7 @@ func newClient() *kmipclient.Client {
 		kmipclient.WithRootCAFile(CA),
 		kmipclient.WithClientCertFiles(CERT, KEY),
 		kmipclient.WithMiddlewares(
-			kmipclient.CorrelationValueMiddleware(uuid.NewString),
+			kmipclient.CorrelationValueMiddleware(newUUID),
 			// kmipclient.DebugMiddleware(os.Stdout, func(data any) []byte { b, _ := json.MarshalIndent(data, "", "    "); return b }),
 			kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),
 		),
