@@ -2,6 +2,7 @@ package kmip
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -125,6 +126,16 @@ func testEnum[T ~uint32](t *testing.T) {
 
 		var enum T
 		err = json.Unmarshal(gotName, &enum)
+		if err != nil {
+			t.Fatalf("Unmarshal(%s) error: %v", gotName, err)
+		}
+
+		if enum != T(val) {
+			t.Errorf("Unmarshal(%s) got %d, want %d", gotName, enum, val)
+			return
+		}
+
+		err = json.Unmarshal(fmt.Appendf(nil, `"%d"`, val), &enum)
 		if err != nil {
 			t.Fatalf("Unmarshal(%s) error: %v", gotName, err)
 		}

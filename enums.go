@@ -1935,7 +1935,14 @@ func unmarshalText[T ~uint32](dst *T, tag int, text string) error {
 			*dst = T(enum)
 			return nil
 		}
+	} else {
+		enum, err := strconv.ParseUint(text, 10, 32)
+		if err == nil {
+			*dst = T(enum)
+			return nil
+		}
 	}
+
 	enum, err := ttlv.EnumByName(tag, text)
 	if err != nil {
 		return err
