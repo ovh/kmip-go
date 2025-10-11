@@ -177,8 +177,10 @@ func EnumStr[T ~uint32](value T) string {
 // EnumByName returns enum of a normalized name.
 func EnumByName(tag int, name string) (uint32, error) {
 	if reg := enumsByName[tag]; reg != nil {
-		n := reg[name]
-		return n, nil
+		n, ok := reg[name]
+		if ok {
+			return n, nil
+		}
 	}
 	return 0, fmt.Errorf("Unknown enum value %q", name)
 }
@@ -262,8 +264,10 @@ func AppendBitmaskString[T ~int32](dst []byte, tag int, value T, sep string) []b
 // BitmaskByStr returns bitmask of a normalized name.
 func BitmaskByStr(tag int, name string) (int32, error) {
 	if reg := bitmaskByName[tag]; reg != nil {
-		n := reg[name]
-		return n, nil
+		n, ok := reg[name]
+		if ok {
+			return n, nil
+		}
 	}
 	return 0, fmt.Errorf("Unknown bitmask value %q", name)
 }
