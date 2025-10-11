@@ -18,6 +18,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"math/big"
 	"net"
 	"os"
@@ -27,7 +28,6 @@ import (
 	"github.com/ovh/kmip-go/kmipserver"
 	"github.com/ovh/kmip-go/ttlv"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,6 +36,15 @@ type TestingT interface {
 	Errorf(format string, args ...any)
 	FailNow()
 	Cleanup(func())
+}
+
+func newRequestId() string {
+	var b [16]byte
+	_, _ = rand.Read(b[:])
+	// Set version (4) and variant bits according to RFC 4122
+	b[6] = (b[6] & 0x0f) | 0x40 // Version 4
+	b[8] = (b[8] & 0x3f) | 0x80 // Variant is 10
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }
 
 // NewServer starts a new in-memory TLS server for testing purposes using the provided
@@ -107,7 +116,7 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.Client {
 	addr, ca := NewServer(t, hdl)
 	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
-		kmipclient.CorrelationValueMiddleware(uuid.NewString),
+		kmipclient.CorrelationValueMiddleware(newRequestId),
 		TestingMiddleware(t),
 		kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 	))
