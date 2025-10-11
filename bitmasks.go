@@ -134,6 +134,9 @@ func maskUnmarshalText[T ~int32](mask *T, tag int, text string) error {
 	*mask = 0
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
 		var parsed int64
 		var err error
 		if strings.HasPrefix(part, "0x") || strings.HasPrefix(part, "0X") {
