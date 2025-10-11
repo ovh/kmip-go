@@ -30,7 +30,7 @@ func init() {
 		ResultReasonCryptographicFailure:             "CryptographicFailure",
 		ResultReasonIllegalOperation:                 "IllegalOperation",
 		ResultReasonPermissionDenied:                 "PermissionDenied",
-		ResultReasonObjectarchived:                   "Objectarchived",
+		ResultReasonObjectArchived:                   "ObjectArchived",
 		ResultReasonIndexOutofBounds:                 "IndexOutofBounds",
 		ResultReasonApplicationNamespaceNotSupported: "ApplicationNamespaceNotSupported",
 		ResultReasonKeyFormatTypeNotSupported:        "KeyFormatTypeNotSupported",
@@ -733,7 +733,7 @@ const (
 	ResultReasonCryptographicFailure             ResultReason = 0x0000000A
 	ResultReasonIllegalOperation                 ResultReason = 0x0000000B
 	ResultReasonPermissionDenied                 ResultReason = 0x0000000C
-	ResultReasonObjectarchived                   ResultReason = 0x0000000D
+	ResultReasonObjectArchived                   ResultReason = 0x0000000D
 	ResultReasonIndexOutofBounds                 ResultReason = 0x0000000E
 	ResultReasonApplicationNamespaceNotSupported ResultReason = 0x0000000F
 	ResultReasonKeyFormatTypeNotSupported        ResultReason = 0x00000010
