@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/http"
 	"os"
 	"sync"
 	"testing"
@@ -394,4 +395,34 @@ func TestWithDialerUnsafe(t *testing.T) {
 
 	assert.True(t, called)
 	assert.ErrorIs(t, err, retErr)
+}
+
+func TestWithHttpMiddlewares(t *testing.T) {
+	router := kmipserver.NewBatchExecutor()
+	router.Route(kmip.OperationDiscoverVersions, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.DiscoverVersionsRequestPayload) (*payloads.DiscoverVersionsResponsePayload, error) {
+		return &payloads.DiscoverVersionsResponsePayload{
+			ProtocolVersion: []kmip.ProtocolVersion{
+				kmip.V1_3, kmip.V1_2,
+			},
+		}, nil
+	}))
+	addr, ca := kmiptest.NewHttpServer(t, router)
+	client, err := kmipclient.Dial(
+		addr,
+		kmipclient.WithRootCAPem([]byte(ca)),
+		kmipclient.WithEnabledHttp(),
+		kmipclient.WithHttpMiddlewares(
+			func(req *http.Request) error {
+				req.Header.Set("X-My-Header", "myvalue")
+				return nil
+			},
+		),
+		kmipclient.WithMiddlewares(
+			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
+		),
+		kmipclient.WithKmipVersions(kmip.V1_2, kmip.V1_3),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	require.EqualValues(t, client.Version(), kmip.V1_3)
 }
