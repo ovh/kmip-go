@@ -16,3 +16,10 @@ func TestClientServer(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 }
+
+func TestHttpClientServer(t *testing.T) {
+	client := NewHttpClientAndServer(t, kmipserver.NewBatchExecutor())
+	resp, err := client.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}

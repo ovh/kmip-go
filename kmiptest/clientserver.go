@@ -11,6 +11,7 @@
 package kmiptest
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -21,6 +22,7 @@ import (
 	"fmt"
 	"math/big"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -97,6 +99,61 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 	return list.Addr().String(), string(pemCA)
 }
 
+// NewHttpServer starts a new in-memory KMIP HTTP server for testing purposes using the provided
+// kmipserver.RequestHandler. It generates a self-signed ECDSA certificate for the server,
+// listens on a random local port, and starts serving requests in a separate goroutine.
+// The server is automatically shut down when the test completes. The function returns
+// the server's address and the PEM-encoded CA certificate as strings.
+//
+// Parameters:
+//   - t: A TestingT instance (typically *testing.T or *testing.B) used for test assertions and cleanup.
+//   - hdl: The kmipserver.RequestHandler to handle incoming requests.
+//
+// Returns:
+//   - addr: The address the server is listening on (e.g., "127.0.0.1:port").
+//   - ca: The PEM-encoded CA certificate used by the server.
+func NewHttpServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
+	caTpl := x509.Certificate{
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		SerialNumber: big.NewInt(2),
+		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1)},
+		NotAfter:     time.Now().AddDate(1, 0, 0),
+	}
+
+	k, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	cert, err := x509.CreateCertificate(rand.Reader, &caTpl, &caTpl, k.Public(), k)
+	require.NoError(t, err)
+
+	list, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{
+		Certificates: []tls.Certificate{{Certificate: [][]byte{cert}, PrivateKey: k}},
+		MinVersion:   tls.VersionTLS12,
+	})
+	require.NoError(t, err)
+
+	mux := http.NewServeMux()
+	mux.Handle("/kmip", kmipserver.NewHTTPHandler(hdl))
+
+	srv := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	go func() {
+		if err := srv.Serve(list); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			t.Errorf("server error: %w", err)
+		}
+	}()
+	t.Cleanup(func() {
+		if err := srv.Shutdown(context.Background()); err != nil {
+			t.Errorf("server failed to shutdown: %w", err)
+		}
+	})
+
+	pemCA := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert})
+	return list.Addr().String(), string(pemCA)
+}
+
 // NewClientAndServer creates and returns a new KMIP client connected to a test server.
 //
 // It starts a new KMIP server using the provided request handler `hdl` and establishes a client
@@ -120,6 +177,39 @@ func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.C
 		TestingMiddleware(t),
 		kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 	))
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	t.Cleanup(func() {
+		_ = client.Close()
+	})
+	return client
+}
+
+// NewHttpClientAndServer creates and returns a new KMIP HTTP client connected to a test server.
+//
+// It starts a new KMIP HTTP server using the provided request handler `hdl` and establishes a client
+// connection to it. The client is configured with the server's CA certificate, a correlation value
+// middleware, a testing middleware, and a debug middleware that outputs to stderr in XML format.
+//
+// The function registers a cleanup function to close the client connection when the test completes.
+//
+// Parameters:
+//   - t: A testing interface used for assertions and cleanup registration.
+//   - hdl: The KMIP server request handler.
+//
+// Returns:
+//   - A pointer to the initialized KMIP HTTP client.
+//
+// The function will fail the test if the client cannot be created.
+func NewHttpClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.Client {
+	addr, ca := NewHttpServer(t, hdl)
+	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)),
+		kmipclient.WithEnabledHttp(),
+		kmipclient.WithMiddlewares(
+			kmipclient.CorrelationValueMiddleware(newRequestId),
+			TestingMiddleware(t),
+			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
+		))
 	require.NoError(t, err)
 	require.NotNil(t, client)
 	t.Cleanup(func() {

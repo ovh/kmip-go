@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"time"
 
 	"github.com/ovh/kmip-go"
@@ -20,6 +21,9 @@ type Next func(context.Context, *kmip.RequestMessage) (*kmip.ResponseMessage, er
 // and returns a response message or an error. Middlewares can be used to implement
 // cross-cutting concerns such as logging, authentication, or error handling.
 type Middleware func(next Next, ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error)
+
+// HttpMiddleware defines a function type that wraps the processing of an HTTP request.
+type HttpMiddleware func(req *http.Request) error
 
 // DebugMiddleware returns a Middleware that logs the KMIP request and response messages
 // to the specified io.Writer. The messages are marshaled using the provided marshal
