@@ -125,17 +125,23 @@ func main() {
 	test_sensitive(client)
 }
 
-func newClient() *kmipclient.Client {
+func newClient() kmipclient.Client {
 	fmt.Println("Connecting to KMIP endpoint")
-	client, err := kmipclient.Dial(
+	netExec, err := kmipclient.Dial(
 		ADDR,
 		kmipclient.WithRootCAFile(CA),
 		kmipclient.WithClientCertFiles(CERT, KEY),
 		kmipclient.WithMiddlewares(
 			kmipclient.CorrelationValueMiddleware(newUUID),
-			// kmipclient.DebugMiddleware(os.Stdout, func(data any) []byte { b, _ := json.MarshalIndent(data, "", "    "); return b }),
 			kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),
 		),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
 		kmipclient.EnforceVersion(kmip.V1_4),
 	)
 	if err != nil {
@@ -145,8 +151,8 @@ func newClient() *kmipclient.Client {
 	return client
 }
 
-func discover(client *kmipclient.Client) {
-	msg := kmip.NewRequestMessage(kmip.V1_4,
+func discover(client kmipclient.Client) {
+	msg := []kmip.OperationPayload{
 		&payloads.DiscoverVersionsRequestPayload{
 			ProtocolVersion: []kmip.ProtocolVersion{
 				{
@@ -162,44 +168,44 @@ func discover(client *kmipclient.Client) {
 		&payloads.DiscoverVersionsRequestPayload{
 			ProtocolVersion: []kmip.ProtocolVersion{},
 		},
-	)
-	if _, err := client.Roundtrip(context.Background(), &msg); err != nil {
+	}
+	if _, err := client.Batch(context.Background(), msg...); err != nil {
 		panic(err)
 	}
 }
 
-func unsupported_operation(client *kmipclient.Client) {
+func unsupported_operation(client kmipclient.Client) {
 	req := kmip.NewUnknownPayload(0x8000041, ttlv.Value{Tag: kmip.TagUniqueIdentifier, Value: "abcdef"})
 	if _, err := client.Request(context.Background(), req); err != nil {
 		panic(err)
 	}
 }
 
-func activate(client *kmipclient.Client) {
+func activate(client kmipclient.Client) {
 	client.Activate(RESOURCE).MustExec()
 }
 
-func destroy(client *kmipclient.Client) {
+func destroy(client kmipclient.Client) {
 	client.Destroy(RESOURCE).MustExec()
 }
 
-func revoke(client *kmipclient.Client) {
+func revoke(client kmipclient.Client) {
 	client.Revoke(RESOURCE).
 		WithRevocationReasonCode(kmip.RevocationReasonCodeKeyCompromise).
 		MustExec()
 }
 
-func get_attribute_list(client *kmipclient.Client) {
+func get_attribute_list(client kmipclient.Client) {
 	client.GetAttributeList(RESOURCE).MustExec()
 }
 
-func get_attributes(client *kmipclient.Client) {
+func get_attributes(client kmipclient.Client) {
 	client.GetAttributes(RESOURCE).
 		// WithAttributes(kmip.AttributeNameName, kmip.AttributeNameObjectType).
 		MustExec()
 }
 
-func create_aes(client *kmipclient.Client) {
+func create_aes(client kmipclient.Client) {
 	client.Create().
 		AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt|kmip.CryptographicUsageWrapKey|kmip.CryptographicUsageUnwrapKey).
 		WithName("Test-PH-AES (go)").
@@ -207,21 +213,21 @@ func create_aes(client *kmipclient.Client) {
 		MustExec()
 }
 
-func create_3des(client *kmipclient.Client) {
+func create_3des(client kmipclient.Client) {
 	client.Create().
 		TDES(168, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt|kmip.CryptographicUsageWrapKey|kmip.CryptographicUsageUnwrapKey).
 		WithName("Test-PH-3DES (go)").
 		MustExec()
 }
 
-func create_skipjack(client *kmipclient.Client) {
+func create_skipjack(client kmipclient.Client) {
 	client.Create().
 		Skipjack(kmip.CryptographicUsageEncrypt | kmip.CryptographicUsageDecrypt | kmip.CryptographicUsageWrapKey | kmip.CryptographicUsageUnwrapKey).
 		WithName("Test-PH-Skipjack (go)").
 		MustExec()
 }
 
-func create_rsa(client *kmipclient.Client) {
+func create_rsa(client kmipclient.Client) {
 	client.CreateKeyPair().
 		RSA(4096, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 		// Common().WithName("Test-PH-RSA (go)").
@@ -230,29 +236,29 @@ func create_rsa(client *kmipclient.Client) {
 		MustExec()
 }
 
-func create_ecdsa(client *kmipclient.Client) {
+func create_ecdsa(client kmipclient.Client) {
 	client.CreateKeyPair().
 		ECDSA(kmip.RecommendedCurveP_256, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 		Common().WithName("Test-PH-ECDSA (go)").
 		MustExec()
 }
 
-func locate(client *kmipclient.Client) {
+func locate(client kmipclient.Client) {
 	client.Locate().
 		// WithAttribute(kmip.AttributeNameName, kmip.Name{NameValue: "Test-PH-Symmetric Raw (go)"}).
 		// WithAttribute(kmip.AttributeNameLink, kmip.Link{LinkedObjectIdentifier: "1139b0c0-1bca-4e40-98cd-af5d7f177391"}).
 		MustExec()
 }
 
-func archive(client *kmipclient.Client) {
+func archive(client kmipclient.Client) {
 	client.Archive(RESOURCE).MustExec()
 }
 
-func test_recover(client *kmipclient.Client) {
+func test_recover(client kmipclient.Client) {
 	client.Recover(RESOURCE).MustExec()
 }
 
-func register_secret(client *kmipclient.Client) {
+func register_secret(client kmipclient.Client) {
 	client.Register().
 		SecretString(kmip.SecretDataTypePassword, "Hello World").
 		WithName("Test-PH-Secret (go)").
@@ -260,7 +266,7 @@ func register_secret(client *kmipclient.Client) {
 		MustExec()
 }
 
-func register_aes_raw(client *kmipclient.Client) {
+func register_aes_raw(client kmipclient.Client) {
 	data := make([]byte, 24)
 	_, _ = rand.Read(data)
 	client.Register().WithKeyFormat(kmipclient.RAW).
@@ -270,14 +276,14 @@ func register_aes_raw(client *kmipclient.Client) {
 		MustExec()
 }
 
-func register_aes_transparent(client *kmipclient.Client) {
+func register_aes_transparent(client kmipclient.Client) {
 	client.Register().WithKeyFormat(kmipclient.Transparent).
 		SymmetricKey(kmip.CryptographicAlgorithmAES, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt, make([]byte, 32)).
 		WithName("Test-PH-Symmetric Raw 2 (go)").
 		MustExec()
 }
 
-func register_ecdsa_sec1(client *kmipclient.Client) {
+func register_ecdsa_sec1(client kmipclient.Client) {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		panic(err)
@@ -285,7 +291,7 @@ func register_ecdsa_sec1(client *kmipclient.Client) {
 	client.Register().WithKeyFormat(kmipclient.SEC1).EcdsaPrivateKey(key, kmip.CryptographicUsageSign).MustExec()
 }
 
-func register_ecdsa_transparent(client *kmipclient.Client) {
+func register_ecdsa_transparent(client kmipclient.Client) {
 	pkey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		panic(err)
@@ -293,7 +299,7 @@ func register_ecdsa_transparent(client *kmipclient.Client) {
 	client.Register().WithKeyFormat(kmipclient.Transparent).EcdsaPrivateKey(pkey, kmip.CryptographicUsageSign|kmip.CryptographicUsageVerify).MustExec()
 }
 
-func register_rsa_transparent(client *kmipclient.Client) {
+func register_rsa_transparent(client kmipclient.Client) {
 	pkey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic(err)
@@ -301,7 +307,7 @@ func register_rsa_transparent(client *kmipclient.Client) {
 	client.Register().WithKeyFormat(kmipclient.Transparent).RsaPrivateKey(pkey, kmip.CryptographicUsageSign|kmip.CryptographicUsageVerify).MustExec()
 }
 
-func register_split_key(client *kmipclient.Client) {
+func register_split_key(client kmipclient.Client) {
 	alg := kmip.CryptographicAlgorithmAES
 	clen := int32(4)
 	client.Register().Object(&kmip.SplitKey{
@@ -324,7 +330,7 @@ func register_split_key(client *kmipclient.Client) {
 		MustExec()
 }
 
-func register_opaque(client *kmipclient.Client) {
+func register_opaque(client kmipclient.Client) {
 	resp := client.Register().Object(&kmip.OpaqueObject{
 		OpaqueDataType:  kmip.OpaqueDataType(12),
 		OpaqueDataValue: []byte("foobar"),
@@ -333,7 +339,7 @@ func register_opaque(client *kmipclient.Client) {
 	client.Get(resp.UniqueIdentifier).MustExec()
 }
 
-func register_template(client *kmipclient.Client) {
+func register_template(client kmipclient.Client) {
 	activationDate := time.Now().AddDate(0, 0, 1).Round(time.Second)
 	resp := client.Register().Object(&kmip.Template{
 		Attribute: []kmip.Attribute{
@@ -350,7 +356,7 @@ func register_template(client *kmipclient.Client) {
 	}
 }
 
-func register_pgp(client *kmipclient.Client) {
+func register_pgp(client kmipclient.Client) {
 	key := []byte("foobar")
 	alg := kmip.CryptographicAlgorithmRSA
 	clen := int32(2048)
@@ -360,7 +366,7 @@ func register_pgp(client *kmipclient.Client) {
 	}).WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.CryptographicUsageSign|kmip.CryptographicUsageVerify).MustExec()
 }
 
-func register_certificate(client *kmipclient.Client) {
+func register_certificate(client kmipclient.Client) {
 	tmpl := x509.Certificate{
 		SerialNumber: big.NewInt(123456789),
 		Subject: pkix.Name{
@@ -393,23 +399,23 @@ func register_certificate(client *kmipclient.Client) {
 	client.GetAttributes(resp.UniqueIdentifier, kmip.AttributeNameX509CertificateIdentifier, kmip.AttributeNameX509CertificateIssuer, kmip.AttributeNameX509CertificateSubject, kmip.AttributeNameCertificateLength, kmip.AttributeNameFresh).MustExec()
 }
 
-func get(client *kmipclient.Client) {
+func get(client kmipclient.Client) {
 	client.Get(RESOURCE).MustExec()
 }
 
-func rekey(client *kmipclient.Client) {
+func rekey(client kmipclient.Client) {
 	client.Rekey(RESOURCE).MustExec()
 }
 
-func rekey_keypair(client *kmipclient.Client) {
+func rekey_keypair(client kmipclient.Client) {
 	client.RekeyKeyPair(RESOURCE).MustExec()
 }
 
-func query(client *kmipclient.Client) {
+func query(client kmipclient.Client) {
 	client.Query().All().MustExec()
 }
 
-func double_destroy(client *kmipclient.Client) {
+func double_destroy(client kmipclient.Client) {
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("test-double-destroy").
 		MustExec()
@@ -420,14 +426,14 @@ func double_destroy(client *kmipclient.Client) {
 	client.Destroy(res.UniqueIdentifier).MustExec()
 }
 
-func test_register(client *kmipclient.Client) {
+func test_register(client kmipclient.Client) {
 	client.Register().SecretString(kmip.SecretDataTypePassword, "azerty1234").MustExec()
 	client.Register().SymmetricKey(kmip.CryptographicAlgorithmAES, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt, []byte("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")).MustExec()
 	test_register_rsa(client)
 	test_register_ecdsa(client)
 }
 
-func test_register_rsa(client *kmipclient.Client) {
+func test_register_rsa(client kmipclient.Client) {
 	rsaKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	pkey := client.Register().RsaPrivateKey(rsaKey, kmip.CryptographicUsageSign).MustExec()
 	pubKey := client.Register().RsaPublicKey(&rsaKey.PublicKey, kmip.CryptographicUsageVerify).
@@ -448,7 +454,7 @@ func test_register_rsa(client *kmipclient.Client) {
 	}
 }
 
-func test_register_ecdsa(client *kmipclient.Client) {
+func test_register_ecdsa(client kmipclient.Client) {
 	ecKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	pkey := client.Register().EcdsaPrivateKey(ecKey, kmip.CryptographicUsageSign).WithName("test-register-ecdsa-priv").MustExec()
 	pubKey := client.Register().EcdsaPublicKey(&ecKey.PublicKey, kmip.CryptographicUsageVerify).
@@ -469,7 +475,7 @@ func test_register_ecdsa(client *kmipclient.Client) {
 	}
 }
 
-func test_register_ecdsa_wrong_alg(client *kmipclient.Client) {
+func test_register_ecdsa_wrong_alg(client kmipclient.Client) {
 	alg := kmip.CryptographicAlgorithmRSA
 	clen := int32(2048)
 	ecKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -495,7 +501,7 @@ func test_register_ecdsa_wrong_alg(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_usage_limits(client *kmipclient.Client) {
+func test_usage_limits(client kmipclient.Client) {
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("AES-test-usage-limits").
 		WithUsageLimit(10, kmip.UsageLimitsUnitObject).
@@ -560,7 +566,7 @@ func test_usage_limits(client *kmipclient.Client) {
 	client.Get(res.UniqueIdentifier).MustExec()
 }
 
-func test_get_uage_limits_no_attributes(client *kmipclient.Client) {
+func test_get_uage_limits_no_attributes(client kmipclient.Client) {
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("AES-test-usage-no-limit").
 		MustExec()
@@ -581,7 +587,7 @@ func test_get_uage_limits_no_attributes(client *kmipclient.Client) {
 	}).MustExec()
 }
 
-func test_extractable(client *kmipclient.Client) {
+func test_extractable(client kmipclient.Client) {
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithAttribute(kmip.AttributeNameExtractable, false).
 		// WithAttribute(kmip.AttributeNameNeverExtractable, false).
@@ -606,7 +612,7 @@ func test_extractable(client *kmipclient.Client) {
 	}
 }
 
-func test_sensitive(client *kmipclient.Client) {
+func test_sensitive(client kmipclient.Client) {
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithAttribute(kmip.AttributeNameSensitive, true).
 		MustExec()
@@ -630,7 +636,7 @@ func test_sensitive(client *kmipclient.Client) {
 	}
 }
 
-func test_get_unsupported_wrapped_key(client *kmipclient.Client) {
+func test_get_unsupported_wrapped_key(client kmipclient.Client) {
 	wrapKey := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).MustExec()
 
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
@@ -656,7 +662,7 @@ func test_get_unsupported_wrapped_key(client *kmipclient.Client) {
 	}
 }
 
-func test_get_register_wrapped_aes_key(client *kmipclient.Client) {
+func test_get_register_wrapped_aes_key(client kmipclient.Client) {
 	wrapKey := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).MustExec()
 
 	res := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
@@ -679,7 +685,7 @@ func test_get_register_wrapped_aes_key(client *kmipclient.Client) {
 	}).WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).MustExec()
 }
 
-func test_get_register_wrapped_rsa_key(client *kmipclient.Client) {
+func test_get_register_wrapped_rsa_key(client kmipclient.Client) {
 	wrapKey := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).MustExec()
 
 	res := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).MustExec()
@@ -700,7 +706,7 @@ func test_get_register_wrapped_rsa_key(client *kmipclient.Client) {
 	}).WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.CryptographicUsageSign).MustExec()
 }
 
-func test_get_register_wrapped_ecdsa_key(client *kmipclient.Client) {
+func test_get_register_wrapped_ecdsa_key(client kmipclient.Client) {
 	wrapKey := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).MustExec()
 
 	res := client.CreateKeyPair().ECDSA(kmip.RecommendedCurveP_256, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).MustExec()
@@ -721,7 +727,7 @@ func test_get_register_wrapped_ecdsa_key(client *kmipclient.Client) {
 	}).WithAttribute(kmip.AttributeNameCryptographicUsageMask, kmip.CryptographicUsageSign).MustExec()
 }
 
-func time_consuming_batch(client *kmipclient.Client) {
+func time_consuming_batch(client kmipclient.Client) {
 	req := &payloads.CreateKeyPairRequestPayload{
 		CommonTemplateAttribute: &kmip.TemplateAttribute{
 			Attribute: []kmip.Attribute{
@@ -738,7 +744,7 @@ func time_consuming_batch(client *kmipclient.Client) {
 	}
 }
 
-func test_locate_by_range(client *kmipclient.Client) {
+func test_locate_by_range(client kmipclient.Client) {
 	cleanupDomain(client)
 	now := time.Now()
 	now10 := now.Add(10 * time.Minute)

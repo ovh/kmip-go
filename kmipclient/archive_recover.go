@@ -17,7 +17,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecArchive.
 //   - If the object does not exist or cannot be archived, an error will be returned during execution.
-func (c *Client) Archive(id string) ExecArchive {
+func (c *KMIPClient) Archive(id string) ExecArchive {
 	return ExecArchive{
 		client: c,
 		req: &payloads.ArchiveRequestPayload{
@@ -54,7 +54,7 @@ type ExecArchive = Executor[*payloads.ArchiveRequestPayload, *payloads.ArchiveRe
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecRecover.
 //   - If the object does not exist or cannot be recovered, an error will be returned during execution.
-func (c *Client) Recover(id string) ExecRecover {
+func (c *KMIPClient) Recover(id string) ExecRecover {
 	return ExecRecover{
 		client: c,
 		req: &payloads.RecoverRequestPayload{

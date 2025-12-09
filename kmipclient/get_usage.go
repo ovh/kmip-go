@@ -16,7 +16,7 @@ import "github.com/ovh/kmip-go/payloads"
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecGetUsageAllocation.
 //   - If the object does not exist or the server rejects the operation, an error will be returned during execution.
-func (c *Client) GetUsageAllocation(id string, limitCount int64) ExecGetUsageAllocation {
+func (c *KMIPClient) GetUsageAllocation(id string, limitCount int64) ExecGetUsageAllocation {
 	return ExecGetUsageAllocation{
 		client: c,
 		req: &payloads.GetUsageAllocationRequestPayload{

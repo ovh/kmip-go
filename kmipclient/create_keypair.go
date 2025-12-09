@@ -17,7 +17,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecCreateKeyPair.
 //   - If the server does not support key pair creation or the request is malformed, an error will be returned during execution.
-func (c *Client) CreateKeyPair() ExecCreateKeyPair {
+func (c *KMIPClient) CreateKeyPair() ExecCreateKeyPair {
 	return ExecCreateKeyPair{
 		Executor[*payloads.CreateKeyPairRequestPayload, *payloads.CreateKeyPairResponsePayload]{
 			client: c,

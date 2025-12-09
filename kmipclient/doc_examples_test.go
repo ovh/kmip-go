@@ -19,12 +19,17 @@ import (
 // This shows the basic client setup with TLS certificates.
 func Example() {
 	// Connect to KMIP server with client certificates
-	client, err := kmipclient.Dial(
+	netEx, err := kmipclient.Dial(
 		"your-kmip-server.example.com:5696",
 		kmipclient.WithClientCertFiles("client-cert.pem", "client-key.pem"),
 		// Optionally specify root CA if needed
 		// kmipclient.WithRootCAFile("ca.pem"),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +41,11 @@ func Example() {
 // ExampleClient_Create demonstrates creating an AES symmetric key.
 // This is the most common operation for creating encryption keys.
 func ExampleClient_Create() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +65,11 @@ func ExampleClient_Create() {
 
 // ExampleClient_Create_withAttributes demonstrates creating a key with custom attributes.
 func ExampleClient_Create_withAttributes() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,7 +93,11 @@ func ExampleClient_Create_withAttributes() {
 
 // ExampleClient_Get demonstrates retrieving a symmetric key from the server.
 func ExampleClient_Get() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,7 +118,11 @@ func ExampleClient_Get() {
 
 // ExampleClient_Locate demonstrates searching for keys by attributes.
 func ExampleClient_Locate() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,7 +146,11 @@ func ExampleClient_Locate() {
 
 // ExampleClient_Encrypt demonstrates encrypting data with a key.
 func ExampleClient_Encrypt() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,7 +179,11 @@ func ExampleClient_Encrypt() {
 
 // ExampleClient_Decrypt demonstrates decrypting data with a key.
 func ExampleClient_Decrypt() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -176,7 +205,11 @@ func ExampleClient_Decrypt() {
 
 // ExampleClient_Batch demonstrates executing multiple operations in a single request.
 func ExampleClient_Batch() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -184,9 +217,9 @@ func ExampleClient_Batch() {
 
 	// Create two keys in a single batch request
 	resp, err := client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-1").
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-2")
-		}).Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		}).Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		return client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-3")
 	}).
 		Exec(kmipclient.OnBatchErr(kmip.BatchErrorContinuationOptionStop))
@@ -207,7 +240,11 @@ func ExampleClient_Batch() {
 
 // ExampleClient_CreateKeyPair demonstrates creating an asymmetric key pair.
 func ExampleClient_CreateKeyPair() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -230,7 +267,11 @@ func ExampleClient_CreateKeyPair() {
 
 // ExampleClient_GetAttributes demonstrates retrieving object attributes.
 func ExampleClient_GetAttributes() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -254,7 +295,11 @@ func ExampleClient_GetAttributes() {
 
 // ExampleClient_contextUsage demonstrates using context for request cancellation.
 func ExampleClient_contextUsage() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -277,7 +322,11 @@ func ExampleClient_contextUsage() {
 
 // ExampleClient_Destroy demonstrates destroying a key from the server.
 func ExampleClient_Destroy() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -294,7 +343,11 @@ func ExampleClient_Destroy() {
 
 // ExampleClient_Revoke demonstrates revoking a key.
 func ExampleClient_Revoke() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -314,7 +367,11 @@ func ExampleClient_Revoke() {
 
 // ExampleClient_Locate_byState demonstrates searching for keys by their state.
 func ExampleClient_Locate_byState() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -335,7 +392,11 @@ func ExampleClient_Locate_byState() {
 
 // ExampleClient_Register_raw demonstrates registering an existing key using low level kmip object
 func ExampleClient_Register_raw() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -376,7 +437,11 @@ func ExampleClient_Register_raw() {
 
 // ExampleClient_Register_highlevel demonstrates registering an existing key using high-level API
 func ExampleClient_Register_highlevel() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -400,7 +465,11 @@ func ExampleClient_Register_highlevel() {
 
 // ExampleClient_Register_highlevel demonstrates registering an existing and ECDSA keypair from go's stdlib.
 func ExampleClient_Register_ecdsa_keypair() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -445,7 +514,11 @@ func ExampleClient_Register_ecdsa_keypair() {
 
 // ExampleClient_GetAttributeList demonstrates getting all available attributes for a key.
 func ExampleClient_GetAttributeList() {
-	client, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	netEx, err := kmipclient.Dial("your-kmip-server.example.com:5696")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netEx))
 	if err != nil {
 		log.Fatal(err)
 	}

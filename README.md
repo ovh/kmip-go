@@ -57,9 +57,15 @@ import (
 
 func main() {
 	// Connect to KMIP server
-	client, err := kmipclient.Dial(
+	netExec, err := kmipclient.Dial(
 		"your-kmip-server:5696",
 		kmipclient.WithClientCertFiles("cert.pem", "key.pem"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec)
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -104,7 +110,7 @@ import (
 )
 
 // Connect with comprehensive options
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"eu-west-rbx.okms.ovh.net:5696",
 
 	// TLS Configuration
@@ -114,16 +120,18 @@ client, err := kmipclient.Dial(
 	kmipclient.WithServerName("kmip.example.com"),         // Server name for TLS
 	kmipclient.WithTlsConfig(tlsConfig),                   // Custom TLS config
 
-	// Protocol Version Configuration
-	kmipclient.WithKmipVersions(kmip.V1_4, kmip.V1_3),     // Supported versions
-	kmipclient.EnforceVersion(kmip.V1_4),                   // Enforce specific version
-
 	// Middleware
 	kmipclient.WithMiddlewares(
 		kmipclient.CorrelationValueMiddleware(uuid.NewString),
 		kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),
 		kmipclient.TimeoutMiddleware(30*time.Second),
 	),
+)
+client, err := kmipclient.NewClient(
+	kmipclient.WithClientNetworkExecutor(netExec)
+		// Protocol Version Configuration
+	kmipclient.WithKmipVersions(kmip.V1_4, kmip.V1_3),     // Supported versions
+	kmipclient.EnforceVersion(kmip.V1_4),                   // Enforce specific version
 )
 ```
 
@@ -344,11 +352,11 @@ for _, keyID := range keys.UniqueIdentifier {
 result := client.Create().
 	AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 	WithName("batch-key").
-	Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+	Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		// Use ID returned from previous operation
 		return client.Activate("")
 	}).
-	Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+	Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		// Use ID returned from previous operation
 		return client.GetAttributes("", kmip.AttributeNameState)
 	}).
@@ -517,7 +525,7 @@ func RetryMiddleware(maxRetries int) kmipclient.Middleware {
 }
 
 // Use middleware
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
 	kmipclient.WithMiddlewares(
 		RateLimitMiddleware(rate.NewLimiter(10, 1)),
@@ -615,19 +623,21 @@ if err != nil {
 ### Client Certificate Authentication
 ```go
 // From files
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
 	kmipclient.WithClientCertFiles("cert.pem", "key.pem"),
 )
 
+
 // From PEM data
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
 	kmipclient.WithClientCertPEM(certPEM, keyPEM),
 )
 
+
 // Multiple certificates
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
 	kmipclient.WithClientCertFiles("cert1.pem", "key1.pem"),
 	kmipclient.WithClientCertFiles("cert2.pem", "key2.pem"),
@@ -882,16 +892,20 @@ openssl s_client -connect your-kmip-server:5696 -cert cert.pem -key key.pem
 **Protocol Version Issues**
 ```go
 // Force a specific KMIP version
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
+)
+client, err := kmipclient.NewClient(
+	kmipclient.WithClientNetworkExecutor(netExec)
 	kmipclient.EnforceVersion(kmip.V1_4),
 )
+
 ```
 
 **Debug Logging**
 ```go
 // Enable debug logging to see TTLV messages
-client, err := kmipclient.Dial(
+netExec, err := kmipclient.Dial(
 	"server:5696",
 	kmipclient.WithMiddlewares(
 		kmipclient.DebugMiddleware(os.Stdout, ttlv.MarshalXML),

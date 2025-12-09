@@ -16,7 +16,7 @@ import (
 //
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecActivate.
-func (c *Client) Activate(id string) ExecActivate {
+func (c *KMIPClient) Activate(id string) ExecActivate {
 	return ExecActivate{
 		client: c,
 		req: &payloads.ActivateRequestPayload{

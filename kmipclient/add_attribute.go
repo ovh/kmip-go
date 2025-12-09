@@ -19,7 +19,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecAddAttribute.
 //   - If the attribute name or value is not supported by the server, an error will be returned during execution.
-func (c *Client) AddAttribute(id string, name kmip.AttributeName, value any) ExecAddAttribute {
+func (c *KMIPClient) AddAttribute(id string, name kmip.AttributeName, value any) ExecAddAttribute {
 	return ExecAddAttribute{
 		Executor[*payloads.AddAttributeRequestPayload, *payloads.AddAttributeResponsePayload]{
 			client: c,

@@ -222,14 +222,20 @@ func TestVersionNegociation(t *testing.T) {
 		}, nil
 	}))
 	addr, ca := kmiptest.NewServer(t, router)
-	client, err := kmipclient.Dial(
+	netEx, err := kmipclient.Dial(
 		addr,
 		kmipclient.WithRootCAPem([]byte(ca)),
 		kmipclient.WithMiddlewares(
 			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 		),
-		kmipclient.WithKmipVersions(kmip.V1_2, kmip.V1_3),
 	)
+	require.NoError(t, err)
+
+	client, err := kmipclient.NewClient(
+		kmipclient.WithKmipVersions(kmip.V1_2, kmip.V1_3),
+		kmipclient.WithClientNetworkExecutor(netEx),
+	)
+
 	require.NoError(t, err)
 	require.NotNil(t, client)
 	require.EqualValues(t, client.Version(), kmip.V1_3)
@@ -243,13 +249,18 @@ func TestVersionNegociation_NoCommon(t *testing.T) {
 		}, nil
 	}))
 	addr, ca := kmiptest.NewServer(t, router)
-	client, err := kmipclient.Dial(
+	netEx, err := kmipclient.Dial(
 		addr,
 		kmipclient.WithRootCAPem([]byte(ca)),
 		kmipclient.WithMiddlewares(
 			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 		),
+	)
+	require.NoError(t, err)
+
+	client, err := kmipclient.NewClient(
 		kmipclient.WithKmipVersions(kmip.V1_1, kmip.V1_2),
+		kmipclient.WithClientNetworkExecutor(netEx),
 	)
 	require.Error(t, err)
 	require.Nil(t, client)
@@ -270,13 +281,18 @@ func TestVersionNegociation_v1_0_Fallback_unsupported(t *testing.T) {
 		return nil, kmipserver.ErrOperationNotSupported
 	}))
 	addr, ca := kmiptest.NewServer(t, router)
-	client, err := kmipclient.Dial(
+	netEx, err := kmipclient.Dial(
 		addr,
 		kmipclient.WithRootCAPem([]byte(ca)),
 		kmipclient.WithMiddlewares(
 			kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 		),
+	)
+	require.NoError(t, err)
+
+	client, err := kmipclient.NewClient(
 		kmipclient.WithKmipVersions(kmip.V1_3, kmip.V1_4),
+		kmipclient.WithClientNetworkExecutor(netEx),
 	)
 	require.Error(t, err)
 	require.Nil(t, client)
@@ -309,10 +325,10 @@ func TestBatchExec_ThenAndExec(t *testing.T) {
 	// Build a batch with two operations
 	batch := client.Create().
 		AES(256, kmip.CryptographicUsageEncrypt).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Activate("")
 		}).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Revoke("")
 		})
 
@@ -337,7 +353,7 @@ func TestBatchExec_Exec_ErrorPropagation(t *testing.T) {
 	// }))
 
 	batch := client.Create().AES(256, kmip.CryptographicUsageEncrypt).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Activate("id1")
 		})
 

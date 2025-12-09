@@ -9,7 +9,7 @@ import (
 
 // Create initializes and returns a new ExecCreateWantType instance associated with the current Client.
 // This method is typically used to begin the creation process for a KMIP object using the client context.
-func (c *Client) Create() ExecCreateWantType {
+func (c *KMIPClient) Create() ExecCreateWantType {
 	return ExecCreateWantType{
 		client: c,
 	}
@@ -18,7 +18,15 @@ func (c *Client) Create() ExecCreateWantType {
 // ExecCreateWantType encapsulates the dependencies required to execute a create operation,
 // primarily holding a reference to the Client used for communication with the KMIP server.
 type ExecCreateWantType struct {
-	client *Client
+	client Client
+}
+
+// NewExecCreateWantType initializes and returns a new ExecCreateWantType instance with the provided client.
+// This function is useful for creating an ExecCreateWantType when you have a client instance already available.
+func NewExecCreateWantType(c Client) ExecCreateWantType {
+	return ExecCreateWantType{
+		client: c,
+	}
 }
 
 // Object creates a new ExecCreate instance configured to create a KMIP object of the specified type,

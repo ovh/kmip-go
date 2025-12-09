@@ -15,7 +15,7 @@ import "github.com/ovh/kmip-go/payloads"
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecGetAttributeList.
 //   - If the object does not exist or the server rejects the operation, an error will be returned during execution.
-func (c *Client) GetAttributeList(id string) ExecGetAttributeList {
+func (c *KMIPClient) GetAttributeList(id string) ExecGetAttributeList {
 	return ExecGetAttributeList{
 		client: c,
 		req: &payloads.GetAttributeListRequestPayload{

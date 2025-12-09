@@ -13,10 +13,16 @@
 //
 // Usage Example:
 //
-//	client, err := kmipclient.Dial("kmip.example.com:5696",
+//	netExec, err := kmipclient.Dial("kmip.example.com:5696",
 //		kmipclient.WithClientCertFiles("client.crt", "client.key"),
 //		kmipclient.WithRootCAFile("ca.crt"),
 //	)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+// client, err := kmipclient.NewClient(kmipclient.WithClientNetworkExecutor(netExec))
+//
 //	if err != nil {
 //		log.Fatal(err)
 //	}
@@ -29,7 +35,8 @@
 //
 // Types:
 //
-//   - Client: Represents a KMIP client connection.
+//   - Client: Represents a KMIP client controller.
+//   - ClientNetworkExecutor : Represents the network connection.
 //   - Option: Functional option for configuring the client.
 //   - Executor: Generic type for building and executing KMIP requests.
 //   - AttributeExecutor: Executor with attribute-building helpers.
@@ -41,15 +48,10 @@ package kmipclient
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
+	"crypto"
 	"errors"
 	"fmt"
-	"io"
-	"net"
-	"os"
 	"slices"
-	"sync"
 
 	"github.com/ovh/kmip-go"
 	"github.com/ovh/kmip-go/payloads"
@@ -59,83 +61,14 @@ import (
 var supportedVersions = []kmip.ProtocolVersion{kmip.V1_4, kmip.V1_3, kmip.V1_2, kmip.V1_1, kmip.V1_0}
 
 type opts struct {
-	middlewares       []Middleware
 	supportedVersions []kmip.ProtocolVersion
 	enforceVersion    *kmip.ProtocolVersion
-	rootCAs           [][]byte
-	certs             []tls.Certificate
-	serverName        string
-	tlsCfg            *tls.Config
-	tlsCiphers        []uint16
-	dialer            func(context.Context, string) (net.Conn, error)
+	netExec           ClientNetworkExecutor
+
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
-
-func (o *opts) tlsConfig() (*tls.Config, error) {
-	cfg := o.tlsCfg
-	if cfg == nil {
-		cfg = &tls.Config{
-			MinVersion: tls.VersionTLS12, // As required by KMIP 1.4 spec
-
-			// CipherSuites: []uint16{
-			// 	// Mandatory support as per KMIP 1.4 spec
-			// 	// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
-			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA256, // insecure
-
-			// 	// Optional support as per KMIP 1.4 spec
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA,            // insecure
-			// 	tls.TLS_RSA_WITH_AES_256_CBC_SHA,            // insecure
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, // insecure
-			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,      // insecure
-			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,   // insecure
-			// },
-		}
-	}
-	if cfg.RootCAs == nil {
-		if len(o.rootCAs) > 0 {
-			cfg.RootCAs = x509.NewCertPool()
-		} else {
-			var err error
-			if cfg.RootCAs, err = x509.SystemCertPool(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	for _, ca := range o.rootCAs {
-		cfg.RootCAs.AppendCertsFromPEM(ca)
-	}
-	cfg.Certificates = append(cfg.Certificates, o.certs...)
-	if cfg.ServerName == "" {
-		cfg.ServerName = o.serverName
-	}
-
-	for _, cipher := range o.tlsCiphers {
-		if !slices.Contains(cfg.CipherSuites, cipher) {
-			cfg.CipherSuites = append(cfg.CipherSuites, cipher)
-		}
-	}
-
-	return cfg, nil
-}
-
 type Option func(*opts) error
-
-// WithMiddlewares returns an Option that appends the provided Middleware(s) to the client's middleware chain.
-// This allows customization of the client's behavior by injecting additional processing steps.
-//
-// Usage:
-//
-//	client.New(WithMiddlewares(mw1, mw2, ...))
-func WithMiddlewares(middlewares ...Middleware) Option {
-	return func(o *opts) error {
-		o.middlewares = append(o.middlewares, middlewares...)
-		return nil
-	}
-}
 
 // WithKmipVersions returns an Option that sets the supported KMIP protocol versions for the client.
 // It appends the provided versions to the existing list, sorts them in descending order,
@@ -179,216 +112,18 @@ func EnforceVersion(v kmip.ProtocolVersion) Option {
 	}
 }
 
-// WithRootCAFile returns an Option that appends the contents of the specified
-// PEM-encoded root CA file to the client's list of root certificate authorities.
-// If the provided path is empty, no action is taken. If reading the file fails,
-// the returned Option will propagate the error.
-func WithRootCAFile(path string) Option {
+func WithClientNetworkExecutor(net ClientNetworkExecutor) Option {
 	return func(o *opts) error {
-		if path == "" {
-			return nil
-		}
-		pem, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		o.rootCAs = append(o.rootCAs, pem)
+		o.netExec = net
 		return nil
 	}
 }
 
-// WithRootCAPem returns an Option that appends the provided PEM-encoded root CA certificate
-// to the client's list of trusted root CAs. This can be used to add custom or additional
-// root certificates for TLS connections.
-//
-// pem: The PEM-encoded root CA certificate as a byte slice.
-//
-// Example usage:
-//
-//	client, err := NewClient(WithRootCAPem(myRootCA))
-func WithRootCAPem(pem []byte) Option {
-	return func(o *opts) error {
-		o.rootCAs = append(o.rootCAs, pem)
-		return nil
-	}
+func NewClient(options ...Option) (Client, error) {
+	return NewClientCtx(context.Background(), options...)
 }
 
-// WithClientCert returns an Option that appends the provided TLS client certificate
-// to the client's certificate list. This is used to configure the client for mutual TLS authentication.
-//
-// - cert: The tls.Certificate to be added to the client's certificate pool.
-//
-// Returns an Option that can be used to configure the client.
-func WithClientCert(cert tls.Certificate) Option {
-	return func(o *opts) error {
-		o.certs = append(o.certs, cert)
-		return nil
-	}
-}
-
-// WithClientCertFiles returns an Option that loads a client certificate and key from the specified
-// files and appends them to the client's certificate pool. It returns an error if the certificate
-// or key cannot be loaded.
-//
-// - certFile: path to the PEM-encoded client certificate file.
-// - keyFile:  path to the PEM-encoded private key file.
-func WithClientCertFiles(certFile, keyFile string) Option {
-	return func(o *opts) error {
-		tlsCert, err := tls.LoadX509KeyPair(certFile, keyFile)
-		if err != nil {
-			return err
-		}
-		o.certs = append(o.certs, tlsCert)
-		return nil
-	}
-}
-
-// WithClientCertPEM returns an Option that adds a client certificate to the TLS configuration
-// using the provided PEM-encoded certificate and key blocks. The certificate and key must be
-// in PEM format. If the certificate or key is invalid, an error is returned.
-func WithClientCertPEM(certPEMBlock, keyPEMBlock []byte) Option {
-	return func(o *opts) error {
-		tlsCert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
-		if err != nil {
-			return err
-		}
-		o.certs = append(o.certs, tlsCert)
-		return nil
-	}
-}
-
-// WithServerName returns an Option that sets the server name to be used by the client.
-// This can be useful for specifying the expected server name in TLS connections.
-//
-// Parameters:
-//   - name: the server name to use.
-//
-// Returns:
-//   - Option: a function that sets the server name in the client's options.
-//   - error   - An error if the connection or protocol negotiation fails.
-func WithServerName(name string) Option {
-	return func(o *opts) error {
-		o.serverName = name
-		return nil
-	}
-}
-
-// WithTlsConfig returns an Option that sets the TLS configuration for the client.
-// It allows fine-grained customization of the underlying TLS settings used for secure communication.
-//
-// Parameters:
-//   - cfg: A pointer to a tls.Config struct containing the desired TLS settings.
-//
-// Returns:
-//   - Option: A function that applies the provided TLS configuration to the client options.
-//   - error   - An error if the connection or protocol negotiation fails.
-func WithTlsConfig(cfg *tls.Config) Option {
-	return func(o *opts) error {
-		o.tlsCfg = cfg
-		return nil
-	}
-}
-
-// WithTlsCipherSuiteNames returns an Option that configures the TLS cipher suites to use,
-// based on the provided list of cipher suite names. Each name is matched against the list
-// of supported and insecure cipher suites. If a name does not match any known cipher suite,
-// an error is returned. This option allows fine-grained control over the TLS cipher suites
-// used by the client for secure connections.
-//
-// Example usage:
-//
-//	client, err := NewClient(
-//	    WithTlsCipherSuiteNames("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384"),
-//	)
-func WithTlsCipherSuiteNames(ciphers ...string) Option {
-	return func(o *opts) error {
-	search:
-		for _, cipherName := range ciphers {
-			for _, s := range tls.CipherSuites() {
-				if s.Name != cipherName {
-					continue
-				}
-				o.tlsCiphers = append(o.tlsCiphers, s.ID)
-				continue search
-			}
-			for _, s := range tls.InsecureCipherSuites() {
-				if s.Name != cipherName {
-					continue
-				}
-				o.tlsCiphers = append(o.tlsCiphers, s.ID)
-				continue search
-			}
-			return fmt.Errorf("invalid TLS cipher name %q", cipherName)
-		}
-		return nil
-	}
-}
-
-// WithTlsCipherSuites returns an Option that appends the provided TLS cipher suite IDs
-// to the client's list of supported cipher suites. The cipher suites should be specified
-// as uint16 values, typically using the constants defined in the crypto/tls package.
-// This allows customization of the TLS handshake to restrict or prioritize certain ciphers.
-//
-// Example usage:
-//
-//	client := NewClient(WithTlsCipherSuites(tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256))
-func WithTlsCipherSuites(ciphers ...uint16) Option {
-	return func(o *opts) error {
-		o.tlsCiphers = append(o.tlsCiphers, ciphers...)
-		return nil
-	}
-}
-
-// WithDialerUnsafe customize the low-level network dialer used to establish the (secured) connection.
-//
-// When this option is provided, every other TLS related options are be ignored, and it's
-// the dialer responsibility to setup the secured channel using TLS or any other security mechanism.
-//
-// This option is a low-level escape hatch mainly used for testing or to provide alternative secured
-// channel implementation. Use at your own risks.
-func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, error)) Option {
-	return func(o *opts) error {
-		o.dialer = dialer
-		return nil
-	}
-}
-
-// Client represents a KMIP client that manages a connection to a KMIP server,
-// handles protocol version negotiation, and supports middleware for request/response
-// processing. It provides thread-safe access to the underlying connection and
-// configuration options such as supported protocol versions and custom dialers.
-type Client struct {
-	lock              *sync.Mutex
-	conn              *conn
-	version           *kmip.ProtocolVersion
-	supportedVersions []kmip.ProtocolVersion
-	dialer            func(context.Context) (*conn, error)
-	middlewares       []Middleware
-	addr              string
-}
-
-// Dial establishes a connection to the KMIP server at the specified address using the provided options.
-// It is a convenience wrapper around DialContext with a background context.
-// Returns a pointer to a Client and an error, if any occurs during connection setup.
-func Dial(addr string, options ...Option) (*Client, error) {
-	return DialContext(context.Background(), addr, options...)
-}
-
-// DialContext establishes a new KMIP client connection to the specified address using the provided context and optional configuration options.
-// It applies the given options, sets up TLS configuration, and negotiates the protocol version with the server.
-// Returns a pointer to the initialized Client or an error if the connection or negotiation fails.
-//
-// Parameters:
-//
-//   - ctx    - The context for controlling cancellation and timeout of the dialing process.
-//   - addr   - The network address of the KMIP server to connect to.
-//   - options - Optional configuration functions to customize client behavior.
-//
-// Returns:
-//
-//   - *Client - The initialized KMIP client.
-//   - error   - An error if the connection or protocol negotiation fails.
-func DialContext(ctx context.Context, addr string, options ...Option) (*Client, error) {
+func NewClientCtx(ctx context.Context, options ...Option) (Client, error) {
 	opts := opts{}
 	for _, o := range options {
 		if err := o(&opts); err != nil {
@@ -399,41 +134,14 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
 	}
 
-	netDial := opts.dialer
-	if netDial == nil {
-		tlsCfg, err := opts.tlsConfig()
-		if err != nil {
-			return nil, err
-		}
-		netDial = func(ctx context.Context, addr string) (net.Conn, error) {
-			tlsDialer := tls.Dialer{
-				Config: tlsCfg.Clone(),
-			}
-			return tlsDialer.DialContext(ctx, "tcp", addr)
-		}
+	if opts.netExec == nil {
+		return nil, fmt.Errorf("Missing network connector for KMIP Client")
 	}
 
-	dialer := func(ctx context.Context) (*conn, error) {
-		conn, err := netDial(ctx, addr)
-		if err != nil {
-			return nil, err
-		}
-		return newConn(conn), nil
-	}
-
-	stream, err := dialer(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	c := &Client{
-		lock:              new(sync.Mutex),
-		conn:              stream,
-		dialer:            dialer,
+	c := &KMIPClient{
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
-		middlewares:       opts.middlewares,
-		addr:              addr,
+		networkExecutor:   opts.netExec,
 	}
 
 	// Negotiate protocol version
@@ -445,8 +153,69 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 	return c, nil
 }
 
+// Client represents a KMIP client that manages a connection to a KMIP server,
+// handles protocol version negotiation, and supports middleware for request/response
+// processing. It provides thread-safe access to the underlying connection and
+// configuration options such as supported protocol versions and custom dialers.
+type Client interface {
+	Clone() (Client, error)
+	CloneCtx(context.Context) (Client, error)
+	Version() kmip.ProtocolVersion
+	Request(context.Context, kmip.OperationPayload) (kmip.OperationPayload, error)
+	Batch(context.Context, ...kmip.OperationPayload) (BatchResult, error)
+	BatchOpt(context.Context, []kmip.OperationPayload, ...BatchOption) (BatchResult, error)
+	Close() error
+
+	Get(id string) ExecGet
+	AddAttribute(id string, name kmip.AttributeName, value any) ExecAddAttribute
+	Query() ExecQuery
+	Encrypt(id string) ExecEncryptWantsData
+	Decrypt(id string) ExecDecryptWantsData
+	GetAttributeList(id string) ExecGetAttributeList
+	GetUsageAllocation(id string, limitCount int64) ExecGetUsageAllocation
+	Activate(id string) ExecActivate
+	Create() ExecCreateWantType
+	Locate() ExecLocate
+	Sign(id string) ExecSignWantsData
+	SignatureVerify(id string) ExecSignatureVerifyWantsData
+	Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error)
+	ObtainLease(id string) ExecObtainLease
+	Archive(id string) ExecArchive
+	Recover(id string) ExecRecover
+	Import(id string, object kmip.Object) ExecImport
+	Export(id string) ExecExport
+	RekeyKeyPair(privateKeyId string) ExecRekeyKeyPair
+	Rekey(id string) ExecRekey
+	Destroy(id string) ExecDestroy
+	ModifyAttribute(id string, name kmip.AttributeName, value any) ExecModifyAttribute
+	Revoke(id string) ExecRevoke
+	CreateKeyPair() ExecCreateKeyPair
+	GetAttributes(id string, attributes ...kmip.AttributeName) ExecGetAttributes
+	Register() ExecRegisterWantType
+	DeleteAttribute(id string, name kmip.AttributeName) ExecDeleteAttribute
+}
+
+// KMIPClient implements Client and manages a connection to a KMIP server, handling
+// protocol version negotiation, middleware for request/response processing, and batch operations.
+type KMIPClient struct {
+	version           *kmip.ProtocolVersion
+	supportedVersions []kmip.ProtocolVersion
+	networkExecutor   ClientNetworkExecutor
+}
+
+// Close terminates the client's connection and releases any associated resources.
+// It returns an error if the connection could not be closed.
+func (c *KMIPClient) Close() error {
+	return c.networkExecutor.Close()
+}
+
+// Version returns the KMIP protocol version used by the client.
+func (c *KMIPClient) Version() kmip.ProtocolVersion {
+	return *c.version
+}
+
 // Clone is like CloneCtx but uses internally a background context.
-func (c *Client) Clone() (*Client, error) {
+func (c *KMIPClient) Clone() (Client, error) {
 	return c.CloneCtx(context.Background())
 }
 
@@ -456,109 +225,17 @@ func (c *Client) Clone() (*Client, error) {
 // protocol version negotiation.
 //
 // Cloning a closed client is valid and will create a new connected client.
-func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
-	stream, err := c.dialer(ctx)
+func (c *KMIPClient) CloneCtx(ctx context.Context) (Client, error) {
+	networkExecutor, err := c.networkExecutor.Clone()
 	if err != nil {
 		return nil, err
 	}
-	version := *c.version
-	return &Client{
-		lock:              new(sync.Mutex),
-		version:           &version,
-		supportedVersions: slices.Clone(c.supportedVersions),
-		dialer:            c.dialer,
-		middlewares:       slices.Clone(c.middlewares),
-		conn:              stream,
-		addr:              c.addr,
+
+	return &KMIPClient{
+		networkExecutor:   networkExecutor,
+		version:           c.version,
+		supportedVersions: c.supportedVersions,
 	}, nil
-}
-
-// Version returns the KMIP protocol version used by the client.
-func (c *Client) Version() kmip.ProtocolVersion {
-	return *c.version
-}
-
-// Addr returns the address of the KMIP server that the client is configured to connect to.
-func (c *Client) Addr() string {
-	return c.addr
-}
-
-// Close terminates the client's connection and releases any associated resources.
-// It returns an error if the connection could not be closed.
-func (c *Client) Close() error {
-	return c.conn.Close()
-}
-
-func (c *Client) reconnect(ctx context.Context) error {
-	// fmt.Println("Reconnecting")
-	if c.conn != nil {
-		_ = c.conn.Close()
-		c.conn = nil
-	}
-	stream, err := c.dialer(ctx)
-	if err != nil {
-		return err
-	}
-	c.conn = stream
-	return nil
-}
-
-// doRountrip sends a KMIP request message to the server and returns the corresponding response message.
-// It ensures thread safety by locking the client during the operation. If the connection is not established,
-// it attempts to reconnect. The method includes a retry mechanism for transient connection errors such as
-// io.EOF and io.ErrClosedPipe, attempting to reconnect and resend the request up to three times before failing.
-// Returns the response message on success, or an error if the operation ultimately fails.
-func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if c.conn == nil {
-		if err := c.reconnect(ctx); err != nil {
-			return nil, err
-		}
-	}
-
-	//TODO: Better reconnection loop. Do we really need a retry counter here ?
-	retry := 3
-	for {
-		resp, err := c.conn.roundtrip(ctx, msg)
-		if err == nil {
-			return resp, nil
-		}
-		if retry <= 0 || (!errors.Is(err, io.EOF) && !errors.Is(err, io.ErrClosedPipe)) {
-			return nil, err
-		}
-		if err := c.reconnect(ctx); err != nil {
-			return nil, err
-		}
-		retry--
-	}
-}
-
-// Roundtrip sends a KMIP request message through the client's middleware chain and returns the response.
-// Each middleware can process the request and response, or pass it along to the next middleware in the chain.
-// The final handler sends the request using the client's doRountrip method.
-//
-// Parameters:
-//
-//   - ctx - The context for controlling cancellation and deadlines.
-//   - msg - The KMIP request message to be sent.
-//
-// Returns:
-//
-//   - *kmip.ResponseMessage - The KMIP response message received.
-//   - error - Any error encountered during processing or sending the request.
-func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
-	i := 0
-	var next func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error)
-	next = func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
-		if i < len(c.middlewares) {
-			mdl := c.middlewares[i]
-			i++
-			return mdl(next, ctx, req)
-		}
-		return c.doRountrip(ctx, req)
-	}
-	return next(ctx, msg)
 }
 
 // negotiateVersion negotiates the KMIP protocol version to be used by the client.
@@ -570,7 +247,7 @@ func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip
 //
 // Returns:
 //   - error: If negotiation fails, no common version is found, or the server returns an error.
-func (c *Client) negotiateVersion(ctx context.Context) error {
+func (c *KMIPClient) negotiateVersion(ctx context.Context) error {
 	if c.version != nil {
 		return nil
 	}
@@ -578,7 +255,7 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 		ProtocolVersion: c.supportedVersions,
 	})
 
-	resp, err := c.Roundtrip(ctx, &msg)
+	resp, err := c.networkExecutor.Roundtrip(ctx, &msg)
 	if err != nil {
 		return err
 	}
@@ -617,7 +294,7 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 // Returns:
 //
 //   - The response payload for the operation, or an error if the request fails or the response contains an error.
-func (c *Client) Request(ctx context.Context, payload kmip.OperationPayload) (kmip.OperationPayload, error) {
+func (c *KMIPClient) Request(ctx context.Context, payload kmip.OperationPayload) (kmip.OperationPayload, error) {
 	resp, err := c.Batch(ctx, payload)
 	if err != nil {
 		return nil, err
@@ -642,7 +319,7 @@ func (c *Client) Request(ctx context.Context, payload kmip.OperationPayload) (km
 //
 //	BatchResult - The results of the batch operations.
 //	error       - An error if the batch request fails.
-func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (BatchResult, error) {
+func (c *KMIPClient) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (BatchResult, error) {
 	return c.BatchOpt(ctx, payloads)
 }
 
@@ -659,12 +336,12 @@ func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (
 // Returns:
 //   - BatchResult: The result items from the batch response.
 //   - error: An error if the request fails or the batch count does not match.
-func (c *Client) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload, opts ...BatchOption) (BatchResult, error) {
+func (c *KMIPClient) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload, opts ...BatchOption) (BatchResult, error) {
 	msg := kmip.NewRequestMessage(*c.version, payloads...)
 	for _, opt := range opts {
 		opt(&msg)
 	}
-	resp, err := c.Roundtrip(ctx, &msg)
+	resp, err := c.networkExecutor.Roundtrip(ctx, &msg)
 	if err != nil {
 		return nil, err
 	}
@@ -693,9 +370,28 @@ func OnBatchErr(opt kmip.BatchErrorContinuationOption) BatchOption {
 // Req and Resp are type parameters constrained to kmip.OperationPayload, allowing
 // Executor to be used with various KMIP operation request and response types.
 type Executor[Req, Resp kmip.OperationPayload] struct {
-	client *Client
+	client Client
 	req    Req
 	err    error
+}
+
+// NewExecutor creates a new Executor instance with the provided client and request payload.
+// It initializes the Executor with the specified client and request payload, ready for further
+// configuration and execution of the KMIP operation.
+//
+// Parameters:
+//
+//   - c: The client to be used for executing the KMIP operation.
+//   - req: The request payload for the KMIP operation.
+//
+// Returns:
+//
+//   - Executor[Req, Resp]: A new Executor instance configured with the provided client and request payload.
+func NewExecutor[Req, Resp kmip.OperationPayload](c Client, req Req) Executor[Req, Resp] {
+	return Executor[Req, Resp]{
+		client: c,
+		req:    req,
+	}
 }
 
 // Exec sends the request to the remote KMIP server, and returns the parsed response.
@@ -772,6 +468,30 @@ type AttributeExecutor[Req, Resp kmip.OperationPayload, Wrap any] struct {
 	Executor[Req, Resp]
 	attrFunc func(*Req) *[]kmip.Attribute
 	wrap     func(AttributeExecutor[Req, Resp, Wrap]) Wrap
+}
+
+// NewAttributeExecutor creates a new AttributeExecutor instance with the provided Executor, attribute function, and wrap function.
+//
+// Type Parameters:
+//   - Req:  The request payload type, which must implement kmip.OperationPayload.
+//   - Resp: The response payload type, which must implement kmip.OperationPayload.
+//   - Wrap: An arbitrary type used for wrapping or extending the executor.
+//
+// Parameters:
+//   - ex: The Executor to be used for executing the KMIP operation.
+//   - attrFunc: A function that takes a pointer to the request payload and returns a pointer to a slice of kmip.Attribute.
+//   - wrap: A function that takes an AttributeExecutor and returns a value of type Wrap.
+//
+// Returns:
+//   - AttributeExecutor[Req, Resp, Wrap]: A new AttributeExecutor instance configured with the provided Executor, attribute function, and wrap function.
+func NewAttributeExecutor[Req, Resp kmip.OperationPayload, Wrap any](ex Executor[Req, Resp],
+	attrFunc func(*Req) *[]kmip.Attribute,
+	wrap func(AttributeExecutor[Req, Resp, Wrap]) Wrap) AttributeExecutor[Req, Resp, Wrap] {
+	return AttributeExecutor[Req, Resp, Wrap]{
+		Executor: ex,
+		attrFunc: attrFunc,
+		wrap:     wrap,
+	}
 }
 
 // WithAttributes appends the provided KMIP attributes to the request's attribute list.
@@ -866,7 +586,7 @@ type PayloadBuilder interface {
 // It holds a reference to the client, any error encountered during batch construction,
 // and the list of operation payloads to be executed as a batch.
 type BatchExec struct {
-	client *Client
+	client Client
 	err    error
 	batch  []kmip.OperationPayload
 }
@@ -876,7 +596,7 @@ type BatchExec struct {
 // Executor, it propagates the error to the BatchExec. Otherwise, it builds the
 // new request and adds it to the batch. Returns a BatchExec containing the
 // updated batch and any error encountered during the build process.
-func (ex Executor[Req, Resp]) Then(f func(client *Client) PayloadBuilder) BatchExec {
+func (ex Executor[Req, Resp]) Then(f func(client Client) PayloadBuilder) BatchExec {
 	batch := BatchExec{
 		client: ex.client,
 		batch:  []kmip.OperationPayload{ex.req},
@@ -900,7 +620,7 @@ func (ex Executor[Req, Resp]) Then(f func(client *Client) PayloadBuilder) BatchE
 // If an error has already occurred in the batch execution, it returns the existing BatchExec without modification.
 // Otherwise, it builds the payload using the PayloadBuilder returned by f, appends it to the batch, and returns the updated BatchExec.
 // If building the payload results in an error, the error is stored in the BatchExec and returned.
-func (ex BatchExec) Then(f func(client *Client) PayloadBuilder) BatchExec {
+func (ex BatchExec) Then(f func(client Client) PayloadBuilder) BatchExec {
 	if ex.err != nil {
 		return ex
 	}

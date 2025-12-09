@@ -12,7 +12,7 @@ import (
 	"github.com/ovh/kmip-go/kmipclient"
 )
 
-func test_sign_verify_rsa_pkcs1_15(client *kmipclient.Client) {
+func test_sign_verify_rsa_pkcs1_15(client kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
 		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmSHA_256WithRSAEncryption,
@@ -38,7 +38,7 @@ func test_sign_verify_rsa_pkcs1_15(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_sign_verify_rsa_pss(client *kmipclient.Client) {
+func test_sign_verify_rsa_pss(client kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
 		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmRSASSA_PSS,
@@ -64,7 +64,7 @@ func test_sign_verify_rsa_pss(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_sign_verify_ecdsa(client *kmipclient.Client) {
+func test_sign_verify_ecdsa(client kmipclient.Client) {
 	data := []byte("foobarbaz")
 	cparams := kmip.CryptographicParameters{
 		DigitalSignatureAlgorithm: kmip.DigitalSignatureAlgorithmECDSAWithSHA256,
@@ -87,7 +87,7 @@ func test_sign_verify_ecdsa(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_crypto_signer_rsa_pkcs1_15(client *kmipclient.Client) {
+func test_crypto_signer_rsa_pkcs1_15(client kmipclient.Client) {
 	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 		Common().WithName("Test-Sign-RSA-4").
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
@@ -109,7 +109,7 @@ func test_crypto_signer_rsa_pkcs1_15(client *kmipclient.Client) {
 	}
 }
 
-func test_crypto_signer_rsa_pss(client *kmipclient.Client) {
+func test_crypto_signer_rsa_pss(client kmipclient.Client) {
 	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 		Common().WithName("Test-Sign-RSA-4").
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
@@ -131,7 +131,7 @@ func test_crypto_signer_rsa_pss(client *kmipclient.Client) {
 	}
 }
 
-func test_crypto_signer_ecdsa(client *kmipclient.Client) {
+func test_crypto_signer_ecdsa(client kmipclient.Client) {
 	key := client.CreateKeyPair().ECDSA(kmip.RecommendedCurveP_256, kmip.CryptographicUsageSign, kmip.CryptographicUsageVerify).
 		Common().WithName("Test-Sign-ECDSA").
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).

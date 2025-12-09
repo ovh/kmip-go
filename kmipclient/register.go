@@ -25,7 +25,7 @@ import (
 //
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecRegister.
-func (c *Client) Register() ExecRegisterWantType {
+func (c *KMIPClient) Register() ExecRegisterWantType {
 	return ExecRegisterWantType{
 		client: c,
 	}
@@ -50,8 +50,23 @@ type ExecRegister struct {
 // ExecRegisterWantType represents the desired type for the register operation.
 // It allows setting the key format and specifying the object to register.
 type ExecRegisterWantType struct {
-	client    *Client
+	client    Client
 	keyFormat KeyFormat
+}
+
+// NewExecRegisterWantType creates a new instance of ExecRegisterWantType with the provided client and key format.
+// This function is typically used internally to initialize the registration process with specific parameters.
+//
+// Parameters:
+//   - c: The KMIP client used for the registration operation.
+//   - keyFormat: The desired key format for the object being registered.
+//
+// Returns:
+//   - ExecRegisterWantType: An instance configured with the specified client and key format.
+func NewExecRegisterWantType(c Client) ExecRegisterWantType {
+	return ExecRegisterWantType{
+		client: c,
+	}
 }
 
 // error sets an error for the register operation and returns an ExecRegister with the error set.
