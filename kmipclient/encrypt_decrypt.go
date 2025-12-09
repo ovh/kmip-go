@@ -41,19 +41,37 @@ type ExecDecrypt struct {
 // Use WithIvCounterNonce, WithAAD, and WithCryptographicParameters to set encryption options, then call Data() to finalize.
 type ExecEncryptWantsData struct {
 	req    *payloads.EncryptRequestPayload
-	client *Client
+	client Client
+}
+
+// NewExecEncryptWantsData creates a new instance of ExecEncryptWantsData with the provided client and request payload.
+// This function initializes the necessary components to configure encryption parameters before setting the data to be encrypted.
+func NewExecEncryptWantsData(c Client, req *payloads.EncryptRequestPayload) ExecEncryptWantsData {
+	return ExecEncryptWantsData{
+		client: c,
+		req:    req,
+	}
 }
 
 // ExecDecryptWantsData is a builder for configuring decryption parameters before providing the data to decrypt.
 // Use WithIvCounterNonce, WithAAD, WithCryptographicParameters, and WithAuthTag to set decryption options, then call Data() to finalize.
 type ExecDecryptWantsData struct {
 	req    *payloads.DecryptRequestPayload
-	client *Client
+	client Client
+}
+
+// NewExecDecryptWantsData creates a new instance of ExecDecryptWantsData with the provided client and request payload.
+// This function initializes the necessary components to configure encryption parameters before setting the data to be encrypted.
+func NewExecDecryptWantsData(c Client, req *payloads.DecryptRequestPayload) ExecDecryptWantsData {
+	return ExecDecryptWantsData{
+		client: c,
+		req:    req,
+	}
 }
 
 // Encrypt creates an ExecEncryptWantsData builder for encrypting data with the specified key ID.
 // Returns an ExecEncryptWantsData that can be further configured before calling Data().
-func (c *Client) Encrypt(id string) ExecEncryptWantsData {
+func (c *KMIPClient) Encrypt(id string) ExecEncryptWantsData {
 	return ExecEncryptWantsData{
 		client: c,
 		req: &payloads.EncryptRequestPayload{
@@ -64,7 +82,7 @@ func (c *Client) Encrypt(id string) ExecEncryptWantsData {
 
 // Decrypt creates an ExecDecryptWantsData builder for decrypting data with the specified key ID.
 // Returns an ExecDecryptWantsData that can be further configured before calling Data().
-func (c *Client) Decrypt(id string) ExecDecryptWantsData {
+func (c *KMIPClient) Decrypt(id string) ExecDecryptWantsData {
 	return ExecDecryptWantsData{
 		client: c,
 		req: &payloads.DecryptRequestPayload{

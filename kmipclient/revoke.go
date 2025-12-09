@@ -20,7 +20,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecRevoke.
 //   - If the object does not exist or cannot be revoked, an error will be returned during execution.
-func (c *Client) Revoke(id string) ExecRevoke {
+func (c *KMIPClient) Revoke(id string) ExecRevoke {
 	return ExecRevoke{
 		Executor[*payloads.RevokeRequestPayload, *payloads.RevokeResponsePayload]{
 			client: c,

@@ -19,7 +19,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecGetAttributes.
 //   - If the object does not exist or the server rejects the operation, an error will be returned during execution.
-func (c *Client) GetAttributes(id string, attributes ...kmip.AttributeName) ExecGetAttributes {
+func (c *KMIPClient) GetAttributes(id string, attributes ...kmip.AttributeName) ExecGetAttributes {
 	return ExecGetAttributes{
 		Executor[*payloads.GetAttributesRequestPayload, *payloads.GetAttributesResponsePayload]{
 			client: c,

@@ -113,13 +113,17 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 //   - A pointer to the initialized KMIP client.
 //
 // The function will fail the test if the client cannot be created.
-func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.Client {
+func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) kmipclient.Client {
 	addr, ca := NewServer(t, hdl)
-	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
+	netExec, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
 		kmipclient.CorrelationValueMiddleware(newRequestId),
 		TestingMiddleware(t),
 		kmipclient.DebugMiddleware(os.Stderr, ttlv.MarshalXML),
 	))
+	require.NoError(t, err)
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
+	)
 	require.NoError(t, err)
 	require.NotNil(t, client)
 	t.Cleanup(func() {

@@ -30,9 +30,13 @@ func TestTimeoutMiddleware_Expire(t *testing.T) {
 
 	addr, ca := kmiptest.NewServer(t, router)
 
-	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
+	netExec, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
 		kmipclient.TimeoutMiddleware(5*time.Second),
 	))
+	require.NoError(t, err)
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
+	)
 	require.NoError(t, err)
 
 	_, err = client.Activate("foobar").Exec()
@@ -47,11 +51,14 @@ func TestTimeoutMiddleware_NoExpire(t *testing.T) {
 
 	addr, ca := kmiptest.NewServer(t, router)
 
-	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
+	netExec, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
 		kmipclient.TimeoutMiddleware(5*time.Second),
 	))
 	require.NoError(t, err)
-
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
+	)
+	require.NoError(t, err)
 	_, err = client.Activate("foobar").Exec()
 	require.NoError(t, err)
 }
@@ -73,11 +80,14 @@ func TestTimeoutMiddleware_ZeroTimeout(t *testing.T) {
 
 	addr, ca := kmiptest.NewServer(t, router)
 
-	client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
+	netExec, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)), kmipclient.WithMiddlewares(
 		kmipclient.TimeoutMiddleware(0),
 	))
 	require.NoError(t, err)
-
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
+	)
+	require.NoError(t, err)
 	_, err = client.Activate("foobar").Exec()
 	require.NoError(t, err)
 }

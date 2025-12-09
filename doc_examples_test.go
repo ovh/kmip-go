@@ -16,11 +16,17 @@ import (
 // This shows the basic client setup with TLS certificates.
 func Example() {
 	// Connect to KMIP server with client certificates
-	client, err := kmipclient.Dial(
+	netExec, err := kmipclient.Dial(
 		"your-kmip-server.example.com:5696",
 		kmipclient.WithClientCertFiles("client-cert.pem", "client-key.pem"),
 		// Optionally specify root CA if needed
 		// kmipclient.WithRootCAFile("ca.pem"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client, err := kmipclient.NewClient(
+		kmipclient.WithClientNetworkExecutor(netExec),
 	)
 	if err != nil {
 		log.Fatal(err)

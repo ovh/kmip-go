@@ -17,7 +17,7 @@ import (
 //
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecGet.
-func (c *Client) Get(id string) ExecGet {
+func (c *KMIPClient) Get(id string) ExecGet {
 	return ExecGet{
 		Executor[*payloads.GetRequestPayload, *payloads.GetResponsePayload]{
 			client: c,
