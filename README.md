@@ -344,11 +344,11 @@ for _, keyID := range keys.UniqueIdentifier {
 result := client.Create().
 	AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 	WithName("batch-key").
-	Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+	Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		// Use ID returned from previous operation
 		return client.Activate("")
 	}).
-	Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+	Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		// Use ID returned from previous operation
 		return client.GetAttributes("", kmip.AttributeNameState)
 	}).

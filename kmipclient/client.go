@@ -41,6 +41,7 @@ package kmipclient
 
 import (
 	"context"
+	"crypto"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -357,7 +358,49 @@ func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, e
 // handles protocol version negotiation, and supports middleware for request/response
 // processing. It provides thread-safe access to the underlying connection and
 // configuration options such as supported protocol versions and custom dialers.
-type Client struct {
+type Client interface {
+	Clone() (Client, error)
+	CloneCtx(context.Context) (Client, error)
+	Version() kmip.ProtocolVersion
+	Addr() string
+	Close() error
+	Roundtrip(context.Context, *kmip.RequestMessage) (*kmip.ResponseMessage, error)
+	Request(context.Context, kmip.OperationPayload) (kmip.OperationPayload, error)
+	Batch(context.Context, ...kmip.OperationPayload) (BatchResult, error)
+	BatchOpt(context.Context, []kmip.OperationPayload, ...BatchOption) (BatchResult, error)
+
+	Get(id string) ExecGet
+	AddAttribute(id string, name kmip.AttributeName, value any) ExecAddAttribute
+	Query() ExecQuery
+	Encrypt(id string) ExecEncryptWantsData
+	Decrypt(id string) ExecDecryptWantsData
+	GetAttributeList(id string) ExecGetAttributeList
+	GetUsageAllocation(id string, limitCount int64) ExecGetUsageAllocation
+	Activate(id string) ExecActivate
+	Create() ExecCreateWantType
+	Locate() ExecLocate
+	Sign(id string) ExecSignWantsData
+	SignatureVerify(id string) ExecSignatureVerifyWantsData
+	Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error)
+	ObtainLease(id string) ExecObtainLease
+	Archive(id string) ExecArchive
+	Recover(id string) ExecRecover
+	Import(id string, object kmip.Object) ExecImport
+	Export(id string) ExecExport
+	RekeyKeyPair(privateKeyId string) ExecRekeyKeyPair
+	Rekey(id string) ExecRekey
+	Destroy(id string) ExecDestroy
+	ModifyAttribute(id string, name kmip.AttributeName, value any) ExecModifyAttribute
+	Revoke(id string) ExecRevoke
+	CreateKeyPair() ExecCreateKeyPair
+	GetAttributes(id string, attributes ...kmip.AttributeName) ExecGetAttributes
+	Register() ExecRegisterWantType
+	DeleteAttribute(id string, name kmip.AttributeName) ExecDeleteAttribute
+}
+
+// KMIPClient implements Client and manages a connection to a KMIP server, handling
+// protocol version negotiation, middleware for request/response processing, and batch operations.
+type KMIPClient struct {
 	lock              *sync.Mutex
 	conn              *conn
 	version           *kmip.ProtocolVersion
@@ -370,7 +413,7 @@ type Client struct {
 // Dial establishes a connection to the KMIP server at the specified address using the provided options.
 // It is a convenience wrapper around DialContext with a background context.
 // Returns a pointer to a Client and an error, if any occurs during connection setup.
-func Dial(addr string, options ...Option) (*Client, error) {
+func Dial(addr string, options ...Option) (Client, error) {
 	return DialContext(context.Background(), addr, options...)
 }
 
@@ -386,9 +429,9 @@ func Dial(addr string, options ...Option) (*Client, error) {
 //
 // Returns:
 //
-//   - *Client - The initialized KMIP client.
+//   - Client - The initialized KMIP client.
 //   - error   - An error if the connection or protocol negotiation fails.
-func DialContext(ctx context.Context, addr string, options ...Option) (*Client, error) {
+func DialContext(ctx context.Context, addr string, options ...Option) (Client, error) {
 	opts := opts{}
 	for _, o := range options {
 		if err := o(&opts); err != nil {
@@ -426,7 +469,7 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		return nil, err
 	}
 
-	c := &Client{
+	c := &KMIPClient{
 		lock:              new(sync.Mutex),
 		conn:              stream,
 		dialer:            dialer,
@@ -446,7 +489,7 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 }
 
 // Clone is like CloneCtx but uses internally a background context.
-func (c *Client) Clone() (*Client, error) {
+func (c *KMIPClient) Clone() (Client, error) {
 	return c.CloneCtx(context.Background())
 }
 
@@ -456,13 +499,13 @@ func (c *Client) Clone() (*Client, error) {
 // protocol version negotiation.
 //
 // Cloning a closed client is valid and will create a new connected client.
-func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
+func (c *KMIPClient) CloneCtx(ctx context.Context) (Client, error) {
 	stream, err := c.dialer(ctx)
 	if err != nil {
 		return nil, err
 	}
 	version := *c.version
-	return &Client{
+	return &KMIPClient{
 		lock:              new(sync.Mutex),
 		version:           &version,
 		supportedVersions: slices.Clone(c.supportedVersions),
@@ -474,22 +517,22 @@ func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
 }
 
 // Version returns the KMIP protocol version used by the client.
-func (c *Client) Version() kmip.ProtocolVersion {
+func (c *KMIPClient) Version() kmip.ProtocolVersion {
 	return *c.version
 }
 
 // Addr returns the address of the KMIP server that the client is configured to connect to.
-func (c *Client) Addr() string {
+func (c *KMIPClient) Addr() string {
 	return c.addr
 }
 
 // Close terminates the client's connection and releases any associated resources.
 // It returns an error if the connection could not be closed.
-func (c *Client) Close() error {
+func (c *KMIPClient) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Client) reconnect(ctx context.Context) error {
+func (c *KMIPClient) reconnect(ctx context.Context) error {
 	// fmt.Println("Reconnecting")
 	if c.conn != nil {
 		_ = c.conn.Close()
@@ -508,7 +551,7 @@ func (c *Client) reconnect(ctx context.Context) error {
 // it attempts to reconnect. The method includes a retry mechanism for transient connection errors such as
 // io.EOF and io.ErrClosedPipe, attempting to reconnect and resend the request up to three times before failing.
 // Returns the response message on success, or an error if the operation ultimately fails.
-func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+func (c *KMIPClient) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if c.conn == nil {
@@ -547,7 +590,7 @@ func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmi
 //
 //   - *kmip.ResponseMessage - The KMIP response message received.
 //   - error - Any error encountered during processing or sending the request.
-func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+func (c *KMIPClient) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	i := 0
 	var next func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error)
 	next = func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
@@ -570,7 +613,7 @@ func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip
 //
 // Returns:
 //   - error: If negotiation fails, no common version is found, or the server returns an error.
-func (c *Client) negotiateVersion(ctx context.Context) error {
+func (c *KMIPClient) negotiateVersion(ctx context.Context) error {
 	if c.version != nil {
 		return nil
 	}
@@ -617,7 +660,7 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 // Returns:
 //
 //   - The response payload for the operation, or an error if the request fails or the response contains an error.
-func (c *Client) Request(ctx context.Context, payload kmip.OperationPayload) (kmip.OperationPayload, error) {
+func (c *KMIPClient) Request(ctx context.Context, payload kmip.OperationPayload) (kmip.OperationPayload, error) {
 	resp, err := c.Batch(ctx, payload)
 	if err != nil {
 		return nil, err
@@ -642,7 +685,7 @@ func (c *Client) Request(ctx context.Context, payload kmip.OperationPayload) (km
 //
 //	BatchResult - The results of the batch operations.
 //	error       - An error if the batch request fails.
-func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (BatchResult, error) {
+func (c *KMIPClient) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (BatchResult, error) {
 	return c.BatchOpt(ctx, payloads)
 }
 
@@ -659,7 +702,7 @@ func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (
 // Returns:
 //   - BatchResult: The result items from the batch response.
 //   - error: An error if the request fails or the batch count does not match.
-func (c *Client) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload, opts ...BatchOption) (BatchResult, error) {
+func (c *KMIPClient) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload, opts ...BatchOption) (BatchResult, error) {
 	msg := kmip.NewRequestMessage(*c.version, payloads...)
 	for _, opt := range opts {
 		opt(&msg)
@@ -693,9 +736,28 @@ func OnBatchErr(opt kmip.BatchErrorContinuationOption) BatchOption {
 // Req and Resp are type parameters constrained to kmip.OperationPayload, allowing
 // Executor to be used with various KMIP operation request and response types.
 type Executor[Req, Resp kmip.OperationPayload] struct {
-	client *Client
+	client Client
 	req    Req
 	err    error
+}
+
+// NewExecutor creates a new Executor instance with the provided client and request payload.
+// It initializes the Executor with the specified client and request payload, ready for further
+// configuration and execution of the KMIP operation.
+//
+// Parameters:
+//
+//   - c: The client to be used for executing the KMIP operation.
+//   - req: The request payload for the KMIP operation.
+//
+// Returns:
+//
+//   - Executor[Req, Resp]: A new Executor instance configured with the provided client and request payload.
+func NewExecutor[Req, Resp kmip.OperationPayload](c Client, req Req) Executor[Req, Resp] {
+	return Executor[Req, Resp]{
+		client: c,
+		req:    req,
+	}
 }
 
 // Exec sends the request to the remote KMIP server, and returns the parsed response.
@@ -866,7 +928,7 @@ type PayloadBuilder interface {
 // It holds a reference to the client, any error encountered during batch construction,
 // and the list of operation payloads to be executed as a batch.
 type BatchExec struct {
-	client *Client
+	client Client
 	err    error
 	batch  []kmip.OperationPayload
 }
@@ -876,7 +938,7 @@ type BatchExec struct {
 // Executor, it propagates the error to the BatchExec. Otherwise, it builds the
 // new request and adds it to the batch. Returns a BatchExec containing the
 // updated batch and any error encountered during the build process.
-func (ex Executor[Req, Resp]) Then(f func(client *Client) PayloadBuilder) BatchExec {
+func (ex Executor[Req, Resp]) Then(f func(client Client) PayloadBuilder) BatchExec {
 	batch := BatchExec{
 		client: ex.client,
 		batch:  []kmip.OperationPayload{ex.req},
@@ -900,7 +962,7 @@ func (ex Executor[Req, Resp]) Then(f func(client *Client) PayloadBuilder) BatchE
 // If an error has already occurred in the batch execution, it returns the existing BatchExec without modification.
 // Otherwise, it builds the payload using the PayloadBuilder returned by f, appends it to the batch, and returns the updated BatchExec.
 // If building the payload results in an error, the error is stored in the BatchExec and returned.
-func (ex BatchExec) Then(f func(client *Client) PayloadBuilder) BatchExec {
+func (ex BatchExec) Then(f func(client Client) PayloadBuilder) BatchExec {
 	if ex.err != nil {
 		return ex
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/ovh/kmip-go/payloads"
 )
 
-func test_encrypt_decrypt_aes(client *kmipclient.Client) {
+func test_encrypt_decrypt_aes(client kmipclient.Client) {
 	iv := []byte("abcdefghijkl")
 	plain := []byte("Hello World!")
 	aad := []byte("toto")
@@ -44,7 +44,7 @@ func test_encrypt_decrypt_aes(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_encrypt_decrypt_aes_default(client *kmipclient.Client) {
+func test_encrypt_decrypt_aes_default(client kmipclient.Client) {
 	plain := []byte("Hello World!")
 	aad := []byte("toto")
 
@@ -73,7 +73,7 @@ func test_encrypt_decrypt_aes_default(client *kmipclient.Client) {
 		MustExec()
 }
 
-func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
+func test_encrypt_encrypt_aes_cbc_pkcs5(client kmipclient.Client) {
 	keyId := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithName("Test-Encrypt-CBC").
 		MustExec().
@@ -117,7 +117,7 @@ func test_encrypt_encrypt_aes_cbc_pkcs5(client *kmipclient.Client) {
 	}
 }
 
-func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
+func test_encrypt_decrypt_rsa_oaep(client kmipclient.Client) {
 	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageDecrypt, kmip.CryptographicUsageEncrypt).
 		Common().
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
@@ -151,7 +151,7 @@ func test_encrypt_decrypt_rsa_oaep(client *kmipclient.Client) {
 	}
 }
 
-func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
+func test_encrypt_decrypt_rsa_pkcs1(client kmipclient.Client) {
 	key := client.CreateKeyPair().RSA(2048, kmip.CryptographicUsageDecrypt, kmip.CryptographicUsageEncrypt).
 		Common().
 		WithAttribute(kmip.AttributeNameState, kmip.StateActive).
@@ -183,7 +183,7 @@ func test_encrypt_decrypt_rsa_pkcs1(client *kmipclient.Client) {
 	}
 }
 
-func test_encrypt_decrypt_aes_with_usage(client *kmipclient.Client) {
+func test_encrypt_decrypt_aes_with_usage(client kmipclient.Client) {
 	keyId := client.Create().AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
 		WithUsageLimit(1, kmip.UsageLimitsUnitByte).
 		MustExec().

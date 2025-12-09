@@ -15,7 +15,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecLocate.
 //   - If the search criteria are not supported or the server rejects the operation, an error will be returned during execution.
-func (c *Client) Locate() ExecLocate {
+func (c *KMIPClient) Locate() ExecLocate {
 	return ExecLocate{
 		AttributeExecutor[*payloads.LocateRequestPayload, *payloads.LocateResponsePayload, ExecLocate]{
 			Executor[*payloads.LocateRequestPayload, *payloads.LocateResponsePayload]{

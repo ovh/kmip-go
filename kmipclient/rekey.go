@@ -20,7 +20,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecRekey.
 //   - If the object does not exist or cannot be rekeyed, an error will be returned during execution.
-func (c *Client) Rekey(id string) ExecRekey {
+func (c *KMIPClient) Rekey(id string) ExecRekey {
 	return ExecRekey{
 		AttributeExecutor[*payloads.RekeyRequestPayload, *payloads.RekeyResponsePayload, ExecRekey]{
 			Executor[*payloads.RekeyRequestPayload, *payloads.RekeyResponsePayload]{

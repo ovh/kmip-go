@@ -5,7 +5,7 @@ import (
 	"github.com/ovh/kmip-go/payloads"
 )
 
-func (c *Client) Query() ExecQuery {
+func (c *KMIPClient) Query() ExecQuery {
 	return ExecQuery{
 		Executor[*payloads.QueryRequestPayload, *payloads.QueryResponsePayload]{
 			client: c,

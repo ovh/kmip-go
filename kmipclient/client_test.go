@@ -309,10 +309,10 @@ func TestBatchExec_ThenAndExec(t *testing.T) {
 	// Build a batch with two operations
 	batch := client.Create().
 		AES(256, kmip.CryptographicUsageEncrypt).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Activate("")
 		}).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Revoke("")
 		})
 
@@ -337,7 +337,7 @@ func TestBatchExec_Exec_ErrorPropagation(t *testing.T) {
 	// }))
 
 	batch := client.Create().AES(256, kmip.CryptographicUsageEncrypt).
-		Then(func(c *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(c kmipclient.Client) kmipclient.PayloadBuilder {
 			return c.Activate("id1")
 		})
 

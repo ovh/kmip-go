@@ -10,17 +10,17 @@ import (
 	"github.com/ovh/kmip-go/payloads"
 )
 
-func test_batch_helper(client *kmipclient.Client) {
+func test_batch_helper(client kmipclient.Client) {
 	resp := client.Create().
 		AES(256, kmip.CryptographicUsageEncrypt|kmip.CryptographicUsageDecrypt).
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Activate("")
 		}).
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Revoke("").
 				WithRevocationReasonCode(kmip.RevocationReasonCodeCessationOfOperation)
 		}).
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Destroy("")
 		}).MustExec().
 		MustUnwrap()
@@ -28,13 +28,13 @@ func test_batch_helper(client *kmipclient.Client) {
 	fmt.Println(resp[3].(*payloads.DestroyResponsePayload).UniqueIdentifier)
 }
 
-func test_encrypt_by_name(client *kmipclient.Client) {
+func test_encrypt_by_name(client kmipclient.Client) {
 	iv := make([]byte, kmip.AES_GCM.IVLength)
 	_, _ = rand.Read(iv)
 
 	res := client.Locate().
 		WithName("my-encryption-AES-key").
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Encrypt("").
 				WithCryptographicParameters(kmip.AES_GCM).
 				WithIvCounterNonce(iv).

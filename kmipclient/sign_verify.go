@@ -52,23 +52,23 @@ type ExecSignatureVerify struct {
 
 type ExecSignWantsData struct {
 	req    *payloads.SignRequestPayload
-	client *Client
+	client Client
 }
 
 type ExecSignatureVerifyWantsData struct {
 	req    *payloads.SignatureVerifyRequestPayload
-	client *Client
+	client Client
 }
 
 type ExecSignatureVerifyWantsSignature struct {
 	req    *payloads.SignatureVerifyRequestPayload
-	client *Client
+	client Client
 }
 
 // Sign initializes a signing operation for the object identified by the given unique identifier.
 // It returns an ExecSignWantsData struct, which allows the caller to provide the data to be signed.
 // The signing operation is not executed until the data is supplied.
-func (c *Client) Sign(id string) ExecSignWantsData {
+func (c *KMIPClient) Sign(id string) ExecSignWantsData {
 	return ExecSignWantsData{
 		client: c,
 		req: &payloads.SignRequestPayload{
@@ -122,7 +122,7 @@ func (ex ExecSignWantsData) DigestedData(data []byte) ExecSign {
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecSignatureVerifyWantsData or ExecSignatureVerify.
 //   - If the object does not exist or the server rejects the operation, an error will be returned during execution.
-func (c *Client) SignatureVerify(id string) ExecSignatureVerifyWantsData {
+func (c *KMIPClient) SignatureVerify(id string) ExecSignatureVerifyWantsData {
 	return ExecSignatureVerifyWantsData{
 		client: c,
 		req: &payloads.SignatureVerifyRequestPayload{
@@ -200,7 +200,7 @@ func (ex ExecSignatureVerifyWantsSignature) Signature(sig []byte) ExecSignatureV
 // Returns:
 //   - crypto.Signer: The signer object that can be used for signing operations.
 //   - error: An error if the key attributes are invalid or if required keys are missing.
-func (c *Client) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
+func (c *KMIPClient) Signer(ctx context.Context, privateKeyId, publicKeyId string) (crypto.Signer, error) {
 	if privateKeyId == "" && publicKeyId == "" {
 		return nil, errors.New("at least one of public key or private key ID must be given")
 	}
@@ -271,7 +271,7 @@ type cryptoSigner struct {
 	alg          kmip.CryptographicAlgorithm
 	privateKeyId string
 	publicKey    crypto.PublicKey
-	client       *Client
+	client       Client
 }
 
 // Public implements crypto.Signer.

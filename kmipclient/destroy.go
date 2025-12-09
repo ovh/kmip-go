@@ -18,7 +18,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecDestroy.
 //   - If the object does not exist or cannot be destroyed, an error will be returned during execution.
-func (c *Client) Destroy(id string) ExecDestroy {
+func (c *KMIPClient) Destroy(id string) ExecDestroy {
 	return ExecDestroy{
 		client: c,
 		req: &payloads.DestroyRequestPayload{

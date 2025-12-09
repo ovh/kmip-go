@@ -5,7 +5,7 @@ import (
 	"github.com/ovh/kmip-go/kmipclient"
 )
 
-func cleanupDomain(client *kmipclient.Client) {
+func cleanupDomain(client kmipclient.Client) {
 	println("Listing all objects")
 	resp := client.Locate().MustExec()
 	for _, id := range resp.UniqueIdentifier {
@@ -25,7 +25,7 @@ func cleanupDomain(client *kmipclient.Client) {
 	println("Deleted", len(resp.UniqueIdentifier), "managed objects")
 }
 
-func activateAll(client *kmipclient.Client) {
+func activateAll(client kmipclient.Client) {
 	println("Listing all objects")
 	resp := client.Locate().MustExec()
 	for _, id := range resp.UniqueIdentifier {

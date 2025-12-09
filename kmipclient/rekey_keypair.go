@@ -18,7 +18,7 @@ type ExecRekeyKeyPair struct {
 
 // RekeyKeyPair initializes a RekeyKeyPair operation for the given private key ID.
 // It returns an ExecRekeyKeyPair builder for setting template attributes and executing the operation.
-func (c *Client) RekeyKeyPair(privateKeyId string) ExecRekeyKeyPair {
+func (c *KMIPClient) RekeyKeyPair(privateKeyId string) ExecRekeyKeyPair {
 	return ExecRekeyKeyPair{
 		AttributeExecutor[*payloads.RekeyKeyPairRequestPayload, *payloads.RekeyKeyPairResponsePayload, ExecRekeyKeyPair]{
 			Executor[*payloads.RekeyKeyPairRequestPayload, *payloads.RekeyKeyPairResponsePayload]{

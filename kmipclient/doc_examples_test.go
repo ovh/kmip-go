@@ -184,9 +184,9 @@ func ExampleClient_Batch() {
 
 	// Create two keys in a single batch request
 	resp, err := client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-1").
-		Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 			return client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-2")
-		}).Then(func(client *kmipclient.Client) kmipclient.PayloadBuilder {
+		}).Then(func(client kmipclient.Client) kmipclient.PayloadBuilder {
 		return client.Create().AES(256, kmip.CryptographicUsageEncrypt).WithName("batch-key-3")
 	}).
 		Exec(kmipclient.OnBatchErr(kmip.BatchErrorContinuationOptionStop))

@@ -25,7 +25,7 @@ import (
 //
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecRegister.
-func (c *Client) Register() ExecRegisterWantType {
+func (c *KMIPClient) Register() ExecRegisterWantType {
 	return ExecRegisterWantType{
 		client: c,
 	}
@@ -50,7 +50,7 @@ type ExecRegister struct {
 // ExecRegisterWantType represents the desired type for the register operation.
 // It allows setting the key format and specifying the object to register.
 type ExecRegisterWantType struct {
-	client    *Client
+	client    Client
 	keyFormat KeyFormat
 }
 

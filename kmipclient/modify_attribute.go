@@ -20,7 +20,7 @@ import (
 // Errors:
 //   - This function does not return errors directly. Errors may be returned when executing the ExecModifyAttribute.
 //   - If the attribute or object does not exist, or the server rejects the operation, an error will be returned during execution.
-func (c *Client) ModifyAttribute(id string, name kmip.AttributeName, value any) ExecModifyAttribute {
+func (c *KMIPClient) ModifyAttribute(id string, name kmip.AttributeName, value any) ExecModifyAttribute {
 	return ExecModifyAttribute{
 		Executor[*payloads.ModifyAttributeRequestPayload, *payloads.ModifyAttributeResponsePayload]{
 			client: c,

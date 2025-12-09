@@ -16,7 +16,7 @@ type ExecExport struct {
 }
 
 // Import initializes an import operation with the client.
-func (c *Client) Import(id string, object kmip.Object) ExecImport {
+func (c *KMIPClient) Import(id string, object kmip.Object) ExecImport {
 	return ExecImport{
 		AttributeExecutor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload, ExecImport]{
 			Executor[*payloads.ImportRequestPayload, *payloads.ImportResponsePayload]{
@@ -36,7 +36,7 @@ func (c *Client) Import(id string, object kmip.Object) ExecImport {
 }
 
 // Export initializes an export operation with the client for a given key ID.
-func (c *Client) Export(id string) ExecExport {
+func (c *KMIPClient) Export(id string) ExecExport {
 	return ExecExport{
 		Executor[*payloads.ExportRequestPayload, *payloads.ExportResponsePayload]{
 			client: c,
