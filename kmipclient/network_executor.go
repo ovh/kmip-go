@@ -7,15 +7,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/ovh/kmip-go"
+	"github.com/ovh/kmip-go/kmipserver"
 )
 
-type networtkOpts struct {
+type networkOpts struct {
 	middlewares []Middleware
 	rootCAs     [][]byte
 	certs       []tls.Certificate
@@ -25,9 +28,12 @@ type networtkOpts struct {
 	dialer      func(context.Context, string) (net.Conn, error)
 }
 
-type NetworkOption func(*networtkOpts) error
+type NetworkOption func(*networkOpts) error
 
-func (o *networtkOpts) tlsConfig() (*tls.Config, error) {
+// tlsConfig builds the TLS configuration based on the provided network options.
+// It merges custom TLS settings, root CAs, client certificates, and cipher suites.
+// Returns the configured *tls.Config or an error if the system certificate pool cannot be loaded.
+func (o *networkOpts) tlsConfig() (*tls.Config, error) {
 	cfg := o.tlsCfg
 	if cfg == nil {
 		cfg = &tls.Config{
@@ -82,7 +88,7 @@ func (o *networtkOpts) tlsConfig() (*tls.Config, error) {
 // If the provided path is empty, no action is taken. If reading the file fails,
 // the returned NetworkOption will propagate the error.
 func WithRootCAFile(path string) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		if path == "" {
 			return nil
 		}
@@ -105,7 +111,7 @@ func WithRootCAFile(path string) NetworkOption {
 //
 //	client, err := NewClient(WithRootCAPem(myRootCA))
 func WithRootCAPem(pem []byte) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.rootCAs = append(o.rootCAs, pem)
 		return nil
 	}
@@ -118,7 +124,7 @@ func WithRootCAPem(pem []byte) NetworkOption {
 //
 // Returns an NetworkOption that can be used to configure the client.
 func WithClientCert(cert tls.Certificate) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.certs = append(o.certs, cert)
 		return nil
 	}
@@ -131,7 +137,7 @@ func WithClientCert(cert tls.Certificate) NetworkOption {
 // - certFile: path to the PEM-encoded client certificate file.
 // - keyFile:  path to the PEM-encoded private key file.
 func WithClientCertFiles(certFile, keyFile string) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		tlsCert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			return err
@@ -145,7 +151,7 @@ func WithClientCertFiles(certFile, keyFile string) NetworkOption {
 // using the provided PEM-encoded certificate and key blocks. The certificate and key must be
 // in PEM format. If the certificate or key is invalid, an error is returned.
 func WithClientCertPEM(certPEMBlock, keyPEMBlock []byte) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		tlsCert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
 		if err != nil {
 			return err
@@ -165,7 +171,7 @@ func WithClientCertPEM(certPEMBlock, keyPEMBlock []byte) NetworkOption {
 //   - NetworkOption: a function that sets the server name in the client's options.
 //   - error   - An error if the connection or protocol negotiation fails.
 func WithServerName(name string) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.serverName = name
 		return nil
 	}
@@ -181,7 +187,7 @@ func WithServerName(name string) NetworkOption {
 //   - NetworkOption: A function that applies the provided TLS configuration to the client options.
 //   - error   - An error if the connection or protocol negotiation fails.
 func WithTlsConfig(cfg *tls.Config) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.tlsCfg = cfg
 		return nil
 	}
@@ -199,7 +205,7 @@ func WithTlsConfig(cfg *tls.Config) NetworkOption {
 //	    WithTlsCipherSuiteNames("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384"),
 //	)
 func WithTlsCipherSuiteNames(ciphers ...string) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 	search:
 		for _, cipherName := range ciphers {
 			for _, s := range tls.CipherSuites() {
@@ -231,7 +237,7 @@ func WithTlsCipherSuiteNames(ciphers ...string) NetworkOption {
 //
 //	client := NewClient(WithTlsCipherSuites(tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256))
 func WithTlsCipherSuites(ciphers ...uint16) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.tlsCiphers = append(o.tlsCiphers, ciphers...)
 		return nil
 	}
@@ -245,7 +251,7 @@ func WithTlsCipherSuites(ciphers ...uint16) NetworkOption {
 // This option is a low-level escape hatch mainly used for testing or to provide alternative secured
 // channel implementation. Use at your own risks.
 func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, error)) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.dialer = dialer
 		return nil
 	}
@@ -258,12 +264,18 @@ func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, e
 //
 //	client.New(WithMiddlewares(mw1, mw2, ...))
 func WithMiddlewares(middlewares ...Middleware) NetworkOption {
-	return func(o *networtkOpts) error {
+	return func(o *networkOpts) error {
 		o.middlewares = append(o.middlewares, middlewares...)
 		return nil
 	}
 }
 
+// ClientNetworkExecutor defines the interface for executing network operations
+// in a KMIP client. It provides methods for connection management and message
+// roundtrip communication with a KMIP server.
+//
+// Implementations of ClientNetworkExecutor must be safe for concurrent use
+// unless otherwise specified.
 type ClientNetworkExecutor interface {
 	Clone() (ClientNetworkExecutor, error)
 	CloneCtx(context.Context) (ClientNetworkExecutor, error)
@@ -282,10 +294,16 @@ type KMIPClientNetworkExecutor struct {
 
 // Close terminates the client's connection and releases any associated resources.
 // It returns an error if the connection could not be closed.
+// Close terminates the client's connection and releases any associated resources.
 func (c *KMIPClientNetworkExecutor) Close() error {
+	if c == nil || c.conn == nil {
+		return nil
+	}
 	return c.conn.Close()
 }
 
+// reconnect closes any existing connection and establishes a new one using the configured dialer.
+// It is used internally to recover from transient connection failures.
 func (c *KMIPClientNetworkExecutor) reconnect(ctx context.Context) error {
 	// fmt.Println("Reconnecting")
 	if c.conn != nil {
@@ -305,7 +323,8 @@ func (c *KMIPClientNetworkExecutor) reconnect(ctx context.Context) error {
 // it attempts to reconnect. The method includes a retry mechanism for transient connection errors such as
 // io.EOF and io.ErrClosedPipe, attempting to reconnect and resend the request up to three times before failing.
 // Returns the response message on success, or an error if the operation ultimately fails.
-func (c *KMIPClientNetworkExecutor) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+// doRountrip sends a KMIP request and returns the response, handling reconnection and retries.
+func (c *KMIPClientNetworkExecutor) doRoundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if c.conn == nil {
@@ -314,7 +333,7 @@ func (c *KMIPClientNetworkExecutor) doRountrip(ctx context.Context, msg *kmip.Re
 		}
 	}
 
-	//TODO: Better reconnection loop. Do we really need a retry counter here ?
+	// TODO: Better reconnection loop. Keep a small retry counter for transient errors.
 	retry := 3
 	for {
 		resp, err := c.conn.roundtrip(ctx, msg)
@@ -344,6 +363,8 @@ func (c *KMIPClientNetworkExecutor) doRountrip(ctx context.Context, msg *kmip.Re
 //
 //   - *kmip.ResponseMessage - The KMIP response message received.
 //   - error - Any error encountered during processing or sending the request.
+//
+// Roundtrip sends a KMIP request through the middleware chain and returns the response.
 func (c *KMIPClientNetworkExecutor) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	i := 0
 	var next func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error)
@@ -353,22 +374,24 @@ func (c *KMIPClientNetworkExecutor) Roundtrip(ctx context.Context, msg *kmip.Req
 			i++
 			return mdl(next, ctx, req)
 		}
-		return c.doRountrip(ctx, req)
+		return c.doRoundtrip(ctx, req)
 	}
 	return next(ctx, msg)
 }
 
 // Clone is like CloneCtx but uses internally a background context.
+// Clone creates a new client with a fresh connection using a background context.
 func (c *KMIPClientNetworkExecutor) Clone() (ClientNetworkExecutor, error) {
 	return c.CloneCtx(context.Background())
 }
 
 // CloneCtx clones the current kmip client into a new independent client
-// with a separate new connection. The new client inherits allt he configured parameters
+// with a separate new connection. The new client inherits all he configured parameters
 // as well as the negotiated kmip protocol version. Meaning that cloning a client does not perform
 // protocol version negotiation.
 //
 // Cloning a closed client is valid and will create a new connected client.
+// CloneCtx creates a new client with a fresh connection using the provided context.
 func (c *KMIPClientNetworkExecutor) CloneCtx(ctx context.Context) (ClientNetworkExecutor, error) {
 	stream, err := c.dialer(ctx)
 	if err != nil {
@@ -384,13 +407,15 @@ func (c *KMIPClientNetworkExecutor) CloneCtx(ctx context.Context) (ClientNetwork
 }
 
 // Addr returns the address of the KMIP server that the client is configured to connect to.
+// Addr returns the address of the KMIP server the client is configured to connect to.
 func (c *KMIPClientNetworkExecutor) Addr() string {
 	return c.addr
 }
 
 // Dial establishes a connection to the KMIP server at the specified address using the provided options.
 // It is a convenience wrapper around DialContext with a background context.
-// Returns a pointer to a Client and an error, if any occurs during connection setup.
+// Returns a pointer to a ClientNetworkExecutor and an error, if any occurs during connection setup.
+// Dial establishes a KMIP client connection to the given address using the supplied options.
 func Dial(addr string, options ...NetworkOption) (ClientNetworkExecutor, error) {
 	return DialContext(context.Background(), addr, options...)
 }
@@ -409,8 +434,10 @@ func Dial(addr string, options ...NetworkOption) (ClientNetworkExecutor, error) 
 //
 //   - Client - The initialized KMIP client.
 //   - error   - An error if the connection or protocol negotiation fails.
+//
+// DialContext establishes a KMIP client connection to the given address using the supplied options and context.
 func DialContext(ctx context.Context, addr string, options ...NetworkOption) (ClientNetworkExecutor, error) {
-	opts := networtkOpts{}
+	opts := networkOpts{}
 	for _, o := range options {
 		if err := o(&opts); err != nil {
 			return nil, err
@@ -454,4 +481,201 @@ func DialContext(ctx context.Context, addr string, options ...NetworkOption) (Cl
 		}
 
 	return c, nil
+}
+
+/* KMIPClientNetworkExecutor with fallback */
+
+type connectionEntry struct {
+	url  string
+	opts []NetworkOption
+
+	client    ClientNetworkExecutor
+	lastError time.Time
+}
+
+// ClientConnectionPool represents a pool of KMIP client connections with
+// automatic fallback. It implements the `ClientNetworkExecutor` interface and
+// will try configured endpoints in order, skipping ones that recently failed.
+type ClientConnectionPool struct {
+	clients []connectionEntry
+	timeout time.Duration
+}
+
+// Close terminates the client's connection and releases any associated resources.
+// It returns an error if the connection could not be closed.
+// Close terminates all underlying client connections and releases resources.
+func (c *ClientConnectionPool) Close() error {
+	var err error
+	for _, conEntry := range c.clients {
+		if conEntry.client == nil {
+			continue
+		}
+		if closeErr := conEntry.client.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}
+	return err
+}
+
+// Roundtrip sends a KMIP request message to one of the available clients in the pool
+// and returns the response. It implements a failover mechanism that attempts each client
+// in sequence until one succeeds.
+//
+// The method skips clients that have recently failed, waiting for the configured timeout
+// period before retrying them. For each available client, it establishes a connection
+// if needed and attempts to send the request.
+//
+// A client is considered successful if it returns a response without error. If a client
+// returns a KMIP-specific error (other than a general failure), that error is immediately
+// returned to the caller without trying other clients. For transient errors or general
+// failures, the method moves on to the next client in the pool.
+//
+// Parameters:
+//
+//   - ctx - The context for controlling cancellation and deadlines.
+//   - msg - The KMIP request message to be sent.
+//
+// Returns:
+//
+//   - *kmip.ResponseMessage - The KMIP response message received.
+//   - error - Any error encountered during processing or sending the request.
+func (c *ClientConnectionPool) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+	for i := range c.clients {
+		ci := &c.clients[i]
+		// skip until timeout expired since last failure
+		if !time.Now().After(ci.lastError.Add(c.timeout)) {
+			continue
+		}
+		if ci.client == nil {
+			client, err := Dial(ci.url, ci.opts...)
+			if err != nil {
+				slog.Debug("failed to dial kmip server", "err", err, "url", ci.url)
+				ci.lastError = time.Now()
+				continue
+			}
+			ci.client = client
+		}
+		resp, err := ci.client.Roundtrip(ctx, msg)
+		if err == nil {
+			return resp, nil
+		}
+		if kmipErr, ok := err.(kmipserver.Error); ok && kmipErr.Reason != kmip.ResultReasonGeneralFailure {
+			// server returned a specific KMIP error (not a generic failure): return it to caller
+			return resp, err
+		}
+		slog.Debug("client unreachable or returned transient error, trying next", "err", err, "url", ci.url)
+		ci.lastError = time.Now()
+	}
+	return nil, fmt.Errorf("all clients returned an error or were unreachable")
+}
+
+// Clone is like CloneCtx but uses internally a background context.
+// Clone creates a new fallback executor with fresh connections using a background context.
+func (c *ClientConnectionPool) Clone() (ClientNetworkExecutor, error) {
+	return c.CloneCtx(context.Background())
+}
+
+// CloneCtx creates a new ClientConnectionPool with cloned network executors for each
+// connection in the pool. Each client connection is cloned using its CloneCtx method
+// with the provided context. The cloned pool maintains the same URLs and options as
+// the original pool. Returns an error if any client cloning fails.
+func (c *ClientConnectionPool) CloneCtx(ctx context.Context) (ClientNetworkExecutor, error) {
+	cliCopy := []connectionEntry{}
+	for _, cli := range c.clients {
+		var cloneCli ClientNetworkExecutor = nil
+		var err error
+		if cli.client != nil {
+			cloneCli, err = cli.client.CloneCtx(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+		cliCopy = append(cliCopy, connectionEntry{
+			client: cloneCli,
+			url:    cli.url,
+			opts:   cli.opts,
+		})
+	}
+	return &ClientConnectionPool{
+		clients: cliCopy,
+		timeout: c.timeout,
+	}, nil
+}
+
+// Addr returns the address of the primary KMIP server in the fallback list.
+func (c *ClientConnectionPool) Addr() string {
+	if len(c.clients) == 0 {
+		return ""
+	}
+	if c.clients[0].client != nil {
+		return c.clients[0].client.Addr()
+	}
+	// fallback to returning the configured URL if client isn't connected yet
+	return c.clients[0].url
+}
+
+// DialWithFallback establishes a network connection to one of the provided addresses
+// with a fallback mechanism. It attempts to connect to each address in sequence until
+// a successful connection is established or all addresses are exhausted.
+//
+// Parameters:
+//   - addr: a slice of network addresses to attempt connection to
+//   - timeout: the maximum duration to wait for a connection to be established
+//   - options: optional NetworkOption values to configure the connection behavior
+//
+// Returns:
+//   - ClientNetworkExecutor: a network executor interface for executing KMIP operations
+//   - error: an error if all connection attempts fail or if an invalid parameter is provided
+//
+// This function uses context.Background() as the context for the connection attempt.
+// For more control over the context, use DialWithFallbackContext instead.
+func DialWithFallback(addr []string, timeout time.Duration, options ...NetworkOption) (ClientNetworkExecutor, error) {
+	return DialWithFallbackContext(context.Background(), addr, timeout, options...)
+}
+
+// DialWithFallbackContext establishes connections to multiple KMIP servers with fallback support.
+// It attempts to dial each address in the provided list and creates a connection pool that can
+// failover between servers if one becomes unavailable.
+//
+// Parameters:
+//   - ctx: Context for managing cancellation and timeouts during connection setup
+//   - addr: Slice of server addresses to attempt connections to
+//   - timeout: Duration to wait before considering a connection attempt failed
+//   - options: Variable number of NetworkOption configurations to apply to each connection
+//
+// Returns:
+//   - ClientNetworkExecutor: A connection pool managing connections to the servers
+//   - error: Always returns nil; connection failures are logged as warnings and stored in the pool
+//
+// Note: Failed connections are recorded with the current timestamp and will be retried
+// by the connection pool. Successful connections are immediately added to the available pool.
+func DialWithFallbackContext(ctx context.Context, addr []string, timeout time.Duration, options ...NetworkOption) (ClientNetworkExecutor, error) {
+	clientList := []connectionEntry{}
+	for _, url := range addr {
+		cli, err := Dial(url, options...)
+		if err != nil {
+			slog.Warn("Could not connect to client", "url", url)
+			clientList = append(clientList,
+				connectionEntry{
+					client:    nil,
+					lastError: time.Now(),
+					url:       url,
+					opts:      options,
+				},
+			)
+		} else {
+			clientList = append(clientList,
+				connectionEntry{
+					client: cli,
+					url:    url,
+					opts:   options,
+				},
+			)
+		}
+	}
+
+	return &ClientConnectionPool{
+		clients: clientList,
+		timeout: timeout,
+	}, nil
 }
