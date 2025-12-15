@@ -67,7 +67,7 @@ type opts struct {
 	serverName        string
 	tlsCfg            *tls.Config
 	tlsCiphers        []uint16
-	dialer            func(context.Context, string) (net.Conn, error)
+	dialer            DialerFunc
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
@@ -339,6 +339,8 @@ func WithTlsCipherSuites(ciphers ...uint16) Option {
 	}
 }
 
+type DialerFunc func(ctx context.Context, addr string, tlsCfg *tls.Config) (net.Conn, error)
+
 // WithDialerUnsafe customize the low-level network dialer used to establish the (secured) connection.
 //
 // When this option is provided, every other TLS related options are be ignored, and it's
@@ -346,11 +348,18 @@ func WithTlsCipherSuites(ciphers ...uint16) Option {
 //
 // This option is a low-level escape hatch mainly used for testing or to provide alternative secured
 // channel implementation. Use at your own risks.
-func WithDialerUnsafe(dialer func(ctx context.Context, addr string) (net.Conn, error)) Option {
+func WithDialerUnsafe(dialer DialerFunc) Option {
 	return func(o *opts) error {
 		o.dialer = dialer
 		return nil
 	}
+}
+
+func TlsDialer(ctx context.Context, addr string, tlsCfg *tls.Config) (net.Conn, error) {
+	tlsDialer := tls.Dialer{
+		Config: tlsCfg,
+	}
+	return tlsDialer.DialContext(ctx, "tcp", addr)
 }
 
 // Client represents a KMIP client that manages a connection to a KMIP server,
@@ -401,20 +410,16 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 
 	netDial := opts.dialer
 	if netDial == nil {
-		tlsCfg, err := opts.tlsConfig()
-		if err != nil {
-			return nil, err
-		}
-		netDial = func(ctx context.Context, addr string) (net.Conn, error) {
-			tlsDialer := tls.Dialer{
-				Config: tlsCfg.Clone(),
-			}
-			return tlsDialer.DialContext(ctx, "tcp", addr)
-		}
+		netDial = TlsDialer
+	}
+
+	tlsCfg, err := opts.tlsConfig()
+	if err != nil {
+		return nil, err
 	}
 
 	dialer := func(ctx context.Context) (*conn, error) {
-		conn, err := netDial(ctx, addr)
+		conn, err := netDial(ctx, addr, tlsCfg)
 		if err != nil {
 			return nil, err
 		}

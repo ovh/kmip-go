@@ -2,7 +2,9 @@ package kmipclient_test
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
@@ -385,7 +387,7 @@ func TestWithDialerUnsafe(t *testing.T) {
 	called := false
 	retErr := errors.New("not implemented")
 	_, err := kmipclient.Dial("1.2.3.4", kmipclient.WithDialerUnsafe(
-		func(ctx context.Context, addr string) (net.Conn, error) {
+		func(ctx context.Context, addr string, _ *tls.Config) (net.Conn, error) {
 			assert.Equal(t, "1.2.3.4", addr)
 			called = true
 			return nil, retErr
@@ -394,4 +396,36 @@ func TestWithDialerUnsafe(t *testing.T) {
 
 	assert.True(t, called)
 	assert.ErrorIs(t, err, retErr)
+}
+
+func TestWithDialerPool(t *testing.T) {
+	keyid := "8d857fd6-61c0-434a-bd53-f478bd72360b"
+	router1 := kmipserver.NewBatchExecutor()
+	router1.Route(kmip.OperationLocate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.LocateRequestPayload) (*payloads.LocateResponsePayload, error) {
+		slog.Info("server locate")
+		var nbItem int32 = 1
+		return &payloads.LocateResponsePayload{
+			LocatedItems:     &nbItem,
+			UniqueIdentifier: []string{keyid},
+		}, nil
+	}))
+
+	addr1, ca1 := kmiptest.NewServer(t, router1)
+
+	router2 := kmipserver.NewBatchExecutor()
+	addr2, ca2 := kmiptest.NewServer(t, router2)
+
+	client, err := kmipclient.Dial("unused",
+		kmipclient.WithDialerPool(1*time.Second, addr1, addr2),
+		kmipclient.WithRootCAPem([]byte(ca1)),
+		kmipclient.WithRootCAPem([]byte(ca2)),
+	)
+
+	_, err = client.Request(context.Background(), &payloads.DiscoverVersionsRequestPayload{})
+	require.NoError(t, err)
+	resp, err := client.Locate().Exec()
+	require.NoError(t, err)
+	require.Equal(t, int32(1), *resp.LocatedItems)
+	require.Equal(t, keyid, resp.UniqueIdentifier[0])
+	// assert.True(t, false)
 }
