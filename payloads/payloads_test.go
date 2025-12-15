@@ -47,3 +47,54 @@ func TestRegisterRequestPayload_Encode_Decode(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, req, decodedReq)
 }
+
+func TestImportRequestPayload_Encode_Decode(t *testing.T) {
+	secret := []byte("foobar")
+	req := &payloads.ImportRequestPayload{
+		UniqueIdentifier: "foo",
+		Attribute: []kmip.Attribute{
+			{AttributeName: kmip.AttributeNameName, AttributeValue: kmip.Name{NameValue: "bar", NameType: kmip.NameTypeUninterpretedTextString}},
+			{AttributeName: kmip.AttributeNameObjectType, AttributeValue: kmip.ObjectTypeSecretData},
+		},
+		Object: &kmip.SecretData{
+			SecretDataType: kmip.SecretDataTypePassword,
+			KeyBlock:       kmip.KeyBlock{KeyFormatType: kmip.KeyFormatTypeRaw, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &secret}}}},
+		},
+	}
+
+	enc := ttlv.NewTTLVEncoder()
+	enc.TagAny(kmip.TagRequestPayload, req)
+	ttlvReq := enc.Bytes()
+	decodedReq := &payloads.ImportRequestPayload{}
+	dec, err := ttlv.NewTTLVDecoder(ttlvReq)
+	require.NoError(t, err)
+	err = dec.TagAny(kmip.TagRequestPayload, decodedReq)
+	require.NoError(t, err)
+	require.EqualValues(t, req, decodedReq)
+}
+
+func TestExportResponsePayload_Encode_Decode(t *testing.T) {
+	secret := []byte("foobar")
+	req := &payloads.ExportResponsePayload{
+		ObjectType:       kmip.ObjectTypeSecretData,
+		UniqueIdentifier: "foo",
+		Attribute: []kmip.Attribute{
+			{AttributeName: kmip.AttributeNameName, AttributeValue: kmip.Name{NameValue: "bar", NameType: kmip.NameTypeUninterpretedTextString}},
+			{AttributeName: kmip.AttributeNameObjectType, AttributeValue: kmip.ObjectTypeSecretData},
+		},
+		Object: &kmip.SecretData{
+			SecretDataType: kmip.SecretDataTypePassword,
+			KeyBlock:       kmip.KeyBlock{KeyFormatType: kmip.KeyFormatTypeRaw, KeyValue: &kmip.KeyValue{Plain: &kmip.PlainKeyValue{KeyMaterial: kmip.KeyMaterial{Bytes: &secret}}}},
+		},
+	}
+
+	enc := ttlv.NewTTLVEncoder()
+	enc.TagAny(kmip.TagRequestPayload, req)
+	ttlvReq := enc.Bytes()
+	decodedReq := &payloads.ExportResponsePayload{}
+	dec, err := ttlv.NewTTLVDecoder(ttlvReq)
+	require.NoError(t, err)
+	err = dec.TagAny(kmip.TagRequestPayload, decodedReq)
+	require.NoError(t, err)
+	require.EqualValues(t, req, decodedReq)
+}

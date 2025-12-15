@@ -1,6 +1,11 @@
 package payloads
 
-import "github.com/ovh/kmip-go"
+import (
+	"errors"
+
+	"github.com/ovh/kmip-go"
+	"github.com/ovh/kmip-go/ttlv"
+)
 
 // init registers the Import and Export operation payloads with the KMIP package.
 func init() {
@@ -28,9 +33,42 @@ type ImportRequestPayload struct {
 	// Otherwise the server SHALL store the object as provided.
 	KeyWrapType kmip.KeyWrapType `ttlv:",omitempty"`
 	// All of the object’s Attributes.
-	Attribute []kmip.Attribute `ttlv:",omitempty"`
+	Attribute []kmip.Attribute
 	// The object value being imported, in the same manner as the Register operation.
 	Object kmip.Object
+}
+
+func (pl *ImportRequestPayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
+	return d.Struct(tag, func(d *ttlv.Decoder) error {
+		if err := d.TagAny(kmip.TagUniqueIdentifier, &pl.UniqueIdentifier); err != nil {
+			return err
+		}
+
+		if err := d.Opt(kmip.TagReplaceExisting, &pl.ReplaceExisting); err != nil {
+			return err
+		}
+
+		if err := d.Opt(kmip.TagKeyWrapType, &pl.ReplaceExisting); err != nil {
+			return err
+		}
+
+		if err := d.Any(&pl.Attribute); err != nil {
+			return err
+		}
+
+		for i := range pl.Attribute {
+			if pl.Attribute[i].AttributeName == kmip.AttributeNameObjectType {
+				if objType, ok := pl.Attribute[i].AttributeValue.(kmip.ObjectType); ok {
+					var err error
+					if pl.Object, err = kmip.NewObjectForType(objType); err != nil {
+						return err
+					}
+					return d.Any(&pl.Object)
+				}
+			}
+		}
+		return errors.New("object type attribute not found in import request")
+	})
 }
 
 // Operation returns the operation type for the ImportRequestPayload.
@@ -91,4 +129,24 @@ type ExportResponsePayload struct {
 // Operation returns the operation type for the ExportResponsePayload.
 func (a *ExportResponsePayload) Operation() kmip.Operation {
 	return kmip.OperationExport
+}
+
+func (pl *ExportResponsePayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
+	return d.Struct(tag, func(d *ttlv.Decoder) error {
+		if err := d.Any(&pl.ObjectType); err != nil {
+			return err
+		}
+		if err := d.TagAny(kmip.TagUniqueIdentifier, &pl.UniqueIdentifier); err != nil {
+			return err
+		}
+		if err := d.Any(&pl.Attribute); err != nil {
+			return err
+		}
+
+		var err error
+		if pl.Object, err = kmip.NewObjectForType(pl.ObjectType); err != nil {
+			return err
+		}
+		return d.Any(&pl.Object)
+	})
 }
