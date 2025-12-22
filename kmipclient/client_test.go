@@ -385,8 +385,7 @@ func TestWithDialerUnsafe(t *testing.T) {
 	called := false
 	retErr := errors.New("not implemented")
 	_, err := kmipclient.Dial("1.2.3.4", kmipclient.WithDialerUnsafe(
-		func(ctx context.Context, addr string) (net.Conn, error) {
-			assert.Equal(t, "1.2.3.4", addr)
+		func(ctx context.Context) (net.Conn, error) {
 			called = true
 			return nil, retErr
 		},

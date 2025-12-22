@@ -127,3 +127,95 @@ func NewClientAndServer(t TestingT, hdl kmipserver.RequestHandler) *kmipclient.C
 	})
 	return client
 }
+
+// NewServerWithHandle behaves like NewServer but also returns the created *kmipserver.Server
+// instance so callers can interact with the server lifecycle directly (for example to shutdown
+// it mid-test). The returned server will also be registered for cleanup and shutdown when the
+// test completes.
+func NewServerWithHandle(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string, srv *kmipserver.Server) {
+	caTpl := x509.Certificate{
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		SerialNumber: big.NewInt(2),
+		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1)},
+		NotAfter:     time.Now().AddDate(1, 0, 0),
+	}
+
+	k, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	cert, err := x509.CreateCertificate(rand.Reader, &caTpl, &caTpl, k.Public(), k)
+	require.NoError(t, err)
+
+	list, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{
+		Certificates: []tls.Certificate{{Certificate: [][]byte{cert}, PrivateKey: k}},
+		MinVersion:   tls.VersionTLS12,
+	})
+	require.NoError(t, err)
+
+	srv = kmipserver.NewServer(list, hdl)
+	go func() {
+		if err := srv.Serve(); err != nil && !errors.Is(err, kmipserver.ErrShutdown) {
+			t.Errorf("server error: %w", err)
+		}
+	}()
+	t.Cleanup(func() {
+		if err := srv.Shutdown(); err != nil {
+			if errors.Is(err, kmipserver.ErrShutdown) || errors.Is(err, net.ErrClosed) {
+				return
+			}
+			t.Errorf("server failed to shutdown: %w", err)
+		}
+	})
+
+	pemCA := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert})
+	return list.Addr().String(), string(pemCA), srv
+}
+
+// GenerateSelfSignedCertPEM generates a self-signed certificate and returns the PEM-encoded
+// certificate and private key. Useful for tests that need to rebind TLS listeners on the same address.
+func GenerateSelfSignedCertPEM() (certPEM, keyPEM []byte, err error) {
+	caTpl := x509.Certificate{
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		SerialNumber: big.NewInt(3),
+		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1)},
+		NotAfter:     time.Now().AddDate(1, 0, 0),
+	}
+	k, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, nil, err
+	}
+	certDER, err := x509.CreateCertificate(rand.Reader, &caTpl, &caTpl, k.Public(), k)
+	if err != nil {
+		return nil, nil, err
+	}
+	certPEM = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
+	keyBytes, err := x509.MarshalECPrivateKey(k)
+	if err != nil {
+		return nil, nil, err
+	}
+	keyPEM = pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyBytes})
+	return certPEM, keyPEM, nil
+}
+
+// ListenWithCert starts a TLS listener on a random free port using the provided cert/key PEMs.
+// Returns the created net.Listener and its address.
+func ListenWithCert(t TestingT, certPEM, keyPEM []byte) (ln net.Listener, addr string) {
+	tlsCert, err := tls.X509KeyPair(certPEM, keyPEM)
+	require.NoError(t, err)
+	ln, err = tls.Listen("tcp", "127.0.0.1:0", &tls.Config{Certificates: []tls.Certificate{tlsCert}, MinVersion: tls.VersionTLS12})
+	require.NoError(t, err)
+	addr = ln.Addr().String()
+	return ln, addr
+}
+
+// ListenWithExistingAddr starts a TLS listener bound to the provided address using the provided cert/key.
+// Useful to rebind to the same address after a previous listener was shutdown.
+func ListenWithExistingAddr(t TestingT, addr string, certPEM, keyPEM []byte) (ln net.Listener, actualAddr string) {
+	tlsCert, err := tls.X509KeyPair(certPEM, keyPEM)
+	require.NoError(t, err)
+	ln, err = tls.Listen("tcp", addr, &tls.Config{Certificates: []tls.Certificate{tlsCert}, MinVersion: tls.VersionTLS12})
+	require.NoError(t, err)
+	actualAddr = ln.Addr().String()
+	return ln, actualAddr
+}
