@@ -50,6 +50,7 @@ import (
 	"os"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/ovh/kmip-go"
 	"github.com/ovh/kmip-go/payloads"
@@ -68,6 +69,8 @@ type opts struct {
 	tlsCfg            *tls.Config
 	tlsCiphers        []uint16
 	dialer            DialerFunc
+	// For pool dialer
+	retryTimeout *time.Duration
 	//TODO: Add KMIP Authentication / Credentials
 	//TODO: Overwrite default/preferred/supported key formats for register
 }
@@ -339,7 +342,7 @@ func WithTlsCipherSuites(ciphers ...uint16) Option {
 	}
 }
 
-type DialerFunc func(ctx context.Context, addr string, tlsCfg *tls.Config) (net.Conn, error)
+type DialerFunc func(ctx context.Context) (net.Conn, error)
 
 // WithDialerUnsafe customize the low-level network dialer used to establish the (secured) connection.
 //
@@ -355,13 +358,6 @@ func WithDialerUnsafe(dialer DialerFunc) Option {
 	}
 }
 
-func TlsDialer(ctx context.Context, addr string, tlsCfg *tls.Config) (net.Conn, error) {
-	tlsDialer := tls.Dialer{
-		Config: tlsCfg,
-	}
-	return tlsDialer.DialContext(ctx, "tcp", addr)
-}
-
 // Client represents a KMIP client that manages a connection to a KMIP server,
 // handles protocol version negotiation, and supports middleware for request/response
 // processing. It provides thread-safe access to the underlying connection and
@@ -371,7 +367,7 @@ type Client struct {
 	conn              *conn
 	version           *kmip.ProtocolVersion
 	supportedVersions []kmip.ProtocolVersion
-	dialer            func(context.Context) (*conn, error)
+	dialer            DialerFunc
 	middlewares       []Middleware
 	addr              string
 }
@@ -408,22 +404,19 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
 	}
 
-	netDial := opts.dialer
-	if netDial == nil {
-		netDial = TlsDialer
-	}
-
 	tlsCfg, err := opts.tlsConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	dialer := func(ctx context.Context) (*conn, error) {
-		conn, err := netDial(ctx, addr, tlsCfg)
-		if err != nil {
-			return nil, err
+	dialer := opts.dialer
+	if dialer == nil {
+		dialer = func(ctx context.Context) (net.Conn, error) {
+			tlsDialer := tls.Dialer{
+				Config: tlsCfg,
+			}
+			return tlsDialer.DialContext(ctx, "tcp", addr)
 		}
-		return newConn(conn), nil
 	}
 
 	stream, err := dialer(ctx)
@@ -433,7 +426,7 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 
 	c := &Client{
 		lock:              new(sync.Mutex),
-		conn:              stream,
+		conn:              newConn(stream),
 		dialer:            dialer,
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
@@ -473,7 +466,7 @@ func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
 		supportedVersions: slices.Clone(c.supportedVersions),
 		dialer:            c.dialer,
 		middlewares:       slices.Clone(c.middlewares),
-		conn:              stream,
+		conn:              newConn(stream),
 		addr:              c.addr,
 	}, nil
 }
@@ -504,7 +497,7 @@ func (c *Client) reconnect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	c.conn = stream
+	c.conn = newConn(stream)
 	return nil
 }
 
