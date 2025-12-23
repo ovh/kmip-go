@@ -22,11 +22,11 @@ func WithRetryTimeout(retryTimeout time.Duration) Option {
 	}
 }
 
-func DialPool(addrs []string, options ...Option) (*Client, error) {
-	return DialPoolContext(context.Background(), addrs, options...)
+func DialCluster(addrs []string, options ...Option) (*Client, error) {
+	return DialClusterContext(context.Background(), addrs, options...)
 }
 
-func DialPoolContext(ctx context.Context, addrs []string, options ...Option) (*Client, error) {
+func DialClusterContext(ctx context.Context, addrs []string, options ...Option) (*Client, error) {
 	opts := opts{}
 	for _, o := range options {
 		if err := o(&opts); err != nil {

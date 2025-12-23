@@ -31,7 +31,7 @@ func TestWithDialerPool(t *testing.T) {
 	router2 := kmipserver.NewBatchExecutor()
 	addr2, ca2 := kmiptest.NewServer(t, router2)
 
-	client, err := kmipclient.DialPool([]string{addr1, addr2},
+	client, err := kmipclient.DialCluster([]string{addr1, addr2},
 		kmipclient.WithRetryTimeout(1*time.Second),
 		kmipclient.WithRootCAPem([]byte(ca1)),
 		kmipclient.WithRootCAPem([]byte(ca2)),
@@ -112,7 +112,7 @@ func TestClientNetworkConnection_Fallback(t *testing.T) {
 	}
 
 	// create a client network connection with the three server addresses
-	client, err := kmipclient.DialPool(addrs,
+	client, err := kmipclient.DialCluster(addrs,
 		kmipclient.WithRootCAPem(combinedCA),
 		kmipclient.WithRetryTimeout(5*time.Second))
 	require.NoError(t, err)
@@ -157,7 +157,7 @@ func TestClientConnectionPool_PrimaryUpNoFallback(t *testing.T) {
 	addrs = append(addrs, addr)
 	combinedCA = append(combinedCA, []byte(ca)...)
 
-	exec, err := kmipclient.DialPool(addrs,
+	exec, err := kmipclient.DialCluster(addrs,
 		kmipclient.WithRootCAPem(combinedCA),
 		kmipclient.WithRetryTimeout(50*time.Millisecond))
 	require.NoError(t, err)
@@ -176,9 +176,9 @@ func TestClientConnectionPool_AllDownError(t *testing.T) {
 	// stop immediately
 	require.NoError(t, srv.Shutdown())
 
-	// Now that the client does version negotiation on dial, we expect the DialPool to fail
+	// Now that the client does version negotiation on dial, we expect the DialCluster to fail
 	// since the server is already shut down
-	_, err := kmipclient.DialPool([]string{addr},
+	_, err := kmipclient.DialCluster([]string{addr},
 		kmipclient.WithRootCAPem([]byte(ca)),
 		kmipclient.WithRetryTimeout(10*time.Millisecond))
 	require.Error(t, err)
@@ -198,7 +198,7 @@ func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 	srv := kmipserver.NewServer(l, h)
 	go srv.Serve()
 
-	exec, err := kmipclient.DialPool([]string{addr},
+	exec, err := kmipclient.DialCluster([]string{addr},
 		kmipclient.WithRootCAPem(certPEM),
 		kmipclient.WithRetryTimeout(40*time.Millisecond))
 	require.NoError(t, err)
