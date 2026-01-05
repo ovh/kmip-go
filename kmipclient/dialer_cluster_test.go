@@ -222,11 +222,16 @@ func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 	h2 := &simpleHandler{id: addr}
 	srv2 := kmipserver.NewServer(l2, h2)
 	go srv2.Serve()
-	// give some time for client to consider endpoint retriable
-	time.Sleep(60 * time.Millisecond)
-
+	// Retry before the timeout pass
 	resp2, err := exec.Roundtrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addr, resp2.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
+
+	// give some time for client to consider endpoint retriable
+	time.Sleep(60 * time.Millisecond)
+
+	resp3, err := exec.Roundtrip(context.Background(), &req)
+	require.NoError(t, err)
+	require.Equal(t, addr, resp3.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 	_ = srv2.Shutdown()
 }

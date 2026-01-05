@@ -81,7 +81,7 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 			conn, err := tlsDialer.DialContext(ctx, "tcp", servers[0].url)
 			if err == nil {
 				// reset lastError since we had a success
-				servers[0].lastError = time.Date(0, 0, 0, 0, 0, 0, 0, nil)
+				servers[0].lastError = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
 				return conn, nil
 			}
 			servers[0].lastError = time.Now()
