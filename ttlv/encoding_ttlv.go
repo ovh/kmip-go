@@ -272,6 +272,9 @@ func (dec *ttlvReader) Bool(tag int) (bool, error) {
 	if err := dec.assertType(TypeBoolean, tag); err != nil {
 		return false, err
 	}
+	if dec.len() < 8 {
+		return false, Errorf("invalid TTLV Boolean value length: got %d bytes, expected 8", dec.len())
+	}
 	v := dec.value()[7] != 0
 	return v, dec.Next()
 }
