@@ -444,7 +444,7 @@ func test_register_rsa(client *kmipclient.Client) {
 		panic(err)
 	}
 	if !priv.Equal(rsaKey) {
-		panic("EC key not equal")
+		panic("RSA key not equal")
 	}
 }
 
