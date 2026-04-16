@@ -130,8 +130,11 @@ func (srv *Server) WithTerminateHook(hook TerminateHook) *Server {
 
 // WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
 // received by the server. Messages exceeding this limit are rejected with an error.
-// A value <= 0 disables the limit. The default is 1 MB.
+// A value of 0 uses the default ([ttlv.DefaultMaxMessageSize], 1 MB). A negative value disables the limit.
 func (srv *Server) WithMaxMessageSize(size int) *Server {
+	if size == 0 {
+		size = ttlv.DefaultMaxMessageSize
+	}
 	srv.maxMessageSize = size
 	return srv
 }

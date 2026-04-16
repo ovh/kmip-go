@@ -68,8 +68,8 @@ type opts struct {
 	serverName        string
 	tlsCfg            *tls.Config
 	tlsCiphers        []uint16
-	dialer         DialerFunc
-	maxMessageSize int
+	dialer            DialerFunc
+	maxMessageSize    int
 	// For pool dialer
 	retryTimeout *time.Duration
 	//TODO: Add KMIP Authentication / Credentials
@@ -361,7 +361,7 @@ func WithDialerUnsafe(dialer DialerFunc) Option {
 
 // WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
 // received by the client. Messages exceeding this limit are rejected with an error.
-// A value <= 0 disables the limit. The default is 1 MB.
+// A value of 0 (or unset) uses the default (1 MB). A negative value disables the limit.
 func WithMaxMessageSize(size int) Option {
 	return func(o *opts) error {
 		o.maxMessageSize = size

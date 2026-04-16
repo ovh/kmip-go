@@ -118,7 +118,7 @@ client, err := kmipclient.Dial(
 	kmipclient.WithKmipVersions(kmip.V1_4, kmip.V1_3),     // Supported versions
 	kmipclient.EnforceVersion(kmip.V1_4),                   // Enforce specific version
 
-	// Message size limit (default: 1 MB, <= 0 disables)
+	// Message size limit (default: 1 MB, < 0 disables)
 	kmipclient.WithMaxMessageSize(2 * 1024 * 1024),         // 2 MB limit
 
 	// Middleware
@@ -470,7 +470,7 @@ func main() {
 	// Create and start server
 	handler := &MyKMIPHandler{}
 	server := kmipserver.NewServer(listener, handler).
-		WithMaxMessageSize(2 * 1024 * 1024) // 2 MB limit (default: 1 MB, <= 0 disables)
+		WithMaxMessageSize(2 * 1024 * 1024) // 2 MB limit (default: 1 MB, < 0 disables limit)
 
 	log.Println("Starting KMIP server on :5696")
 	if err := server.Serve(); err != nil {

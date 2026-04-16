@@ -11,10 +11,10 @@ import (
 	"github.com/ovh/kmip-go/ttlv"
 )
 
-const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
-
 // NewHTTPHandler creates a new HTTP handler that wraps the provided RequestHandler.
-// It returns an http.Handler that can be used to serve HTTP requests using the given handler logic.
+// It returns an *HTTPHandler that implements http.Handler and can be used to serve
+// HTTP requests using the given handler logic. The default max message size is
+// ttlv.DefaultMaxMessageSize (1 MB). Use WithMaxMessageSize to override.
 //
 // The method ServeHTTP handles incoming HTTP requests for the KMIP server. It supports POST requests with
 // Content-Type headers of "text/xml", "application/json", or "application/octet-stream", and
@@ -24,12 +24,25 @@ const DEFAULT_MAX_BODY_SIZE = 1 * 1024 * 1024 // Max body size is 1 MB
 // back. Only POST requests are allowed; other methods receive a 405 Method Not Allowed response.
 // Unsupported Content-Type headers result in a 406 Not Acceptable response, and requests with
 // invalid or missing Content-Length headers receive a 411 Length Required response.
-func NewHTTPHandler(hdl RequestHandler) http.Handler {
-	return httpHandler{inner: hdl}
+func NewHTTPHandler(hdl RequestHandler) *HTTPHandler {
+	return &HTTPHandler{inner: hdl, maxMessageSize: ttlv.DefaultMaxMessageSize}
 }
 
-type httpHandler struct {
-	inner RequestHandler
+// HTTPHandler is an http.Handler that serves KMIP requests over HTTP.
+type HTTPHandler struct {
+	inner          RequestHandler
+	maxMessageSize int
+}
+
+// WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
+// received by the HTTP handler. Messages exceeding this limit are rejected with HTTP 400.
+// A value of 0 uses the default ([ttlv.DefaultMaxMessageSize], 1 MB). A negative value disables the limit.
+func (hdl *HTTPHandler) WithMaxMessageSize(size int) *HTTPHandler {
+	if size == 0 {
+		size = ttlv.DefaultMaxMessageSize
+	}
+	hdl.maxMessageSize = size
+	return hdl
 }
 
 // ServeHTTP handles incoming HTTP requests for the KMIP server. It supports POST requests with
@@ -40,7 +53,7 @@ type httpHandler struct {
 // back. Only POST requests are allowed; other methods receive a 405 Method Not Allowed response.
 // Unsupported Content-Type headers result in a 406 Not Acceptable response, and requests with
 // invalid or missing Content-Length headers receive a 411 Length Required response.
-func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (hdl HTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if body := req.Body; body != nil {
 		defer body.Close()
 	}
@@ -75,14 +88,19 @@ func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusLengthRequired)
 		return
 	}
-	if contentLen > DEFAULT_MAX_BODY_SIZE {
+	if hdl.maxMessageSize > 0 && contentLen > hdl.maxMessageSize {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "The request is too large")
 		return
 	}
 
+	body := io.Reader(req.Body)
+	if hdl.maxMessageSize > 0 {
+		body = io.LimitReader(body, int64(hdl.maxMessageSize)+1)
+	}
+
 	buf := make([]byte, contentLen)
-	if _, err := io.ReadFull(req.Body, buf); err != nil {
+	if _, err := io.ReadFull(body, buf); err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "Amount of data is lower than Content-Length")
 		return
@@ -105,6 +123,6 @@ func (hdl httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (hdl httpHandler) handleError(ctx context.Context, err error, req *kmip.RequestMessage) *kmip.ResponseMessage {
+func (hdl HTTPHandler) handleError(ctx context.Context, err error, req *kmip.RequestMessage) *kmip.ResponseMessage {
 	return handleMessageError(ctx, req, err)
 }

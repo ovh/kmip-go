@@ -414,11 +414,25 @@ func TestWithMaxMessageSize(t *testing.T) {
 		require.Equal(t, "foobar", resp.UniqueIdentifier)
 	})
 
-	t.Run("no limit when set to zero", func(t *testing.T) {
+	t.Run("uses default when set to zero", func(t *testing.T) {
 		addr, ca := kmiptest.NewServer(t, mux)
 		client, err := kmipclient.Dial(addr,
 			kmipclient.WithRootCAPem([]byte(ca)),
 			kmipclient.WithMaxMessageSize(0),
+		)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = client.Close() })
+
+		resp, err := client.Activate("foobar").Exec()
+		require.NoError(t, err)
+		require.Equal(t, "foobar", resp.UniqueIdentifier)
+	})
+
+	t.Run("no limit when set to negative", func(t *testing.T) {
+		addr, ca := kmiptest.NewServer(t, mux)
+		client, err := kmipclient.Dial(addr,
+			kmipclient.WithRootCAPem([]byte(ca)),
+			kmipclient.WithMaxMessageSize(-1),
 		)
 		require.NoError(t, err)
 		t.Cleanup(func() { _ = client.Close() })

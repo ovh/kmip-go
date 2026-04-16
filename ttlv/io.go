@@ -36,7 +36,7 @@ func NewStream(inner io.ReadWriteCloser, maxSize int) Stream {
 	}
 }
 
-// Close wloses the inner stream.
+// Close closes the inner stream.
 func (s *Stream) Close() error {
 	if s.inner == nil {
 		return nil
