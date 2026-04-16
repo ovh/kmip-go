@@ -38,6 +38,9 @@ func bigIntToBytes(value *big.Int, padding int) (b []byte, padVal byte, padLen i
 }
 
 func bytesToBigInt(v []byte) *big.Int {
+	if len(v) == 0 {
+		return nil
+	}
 	if bits.LeadingZeros8(v[0]) > 0 {
 		// Positive integer
 		bv := big.NewInt(0).SetBytes(v)

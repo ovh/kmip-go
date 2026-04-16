@@ -52,7 +52,8 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 	}
 
 	if opts.retryTimeout == nil {
-		*opts.retryTimeout = 5 * time.Second
+		timeout := 5 * time.Second
+		opts.retryTimeout = &timeout
 	}
 
 	dialer := opts.dialer

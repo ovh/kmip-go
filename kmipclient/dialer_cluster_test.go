@@ -184,6 +184,21 @@ func TestClientConnectionPool_AllDownError(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestDialCluster_DefaultRetryTimeout(t *testing.T) {
+	// Verify DialCluster does not panic when WithRetryTimeout is not provided.
+	h := &simpleHandler{}
+	addr, ca := kmiptest.NewServer(t, h)
+	h.id = addr
+
+	client, err := kmipclient.DialCluster([]string{addr},
+		kmipclient.WithRootCAPem([]byte(ca)),
+		// No WithRetryTimeout — exercises the default path
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	defer client.Close()
+}
+
 func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 	// Start server with a reusable TLS listener (generate cert here so we can restart on same addr)
 	// generate cert

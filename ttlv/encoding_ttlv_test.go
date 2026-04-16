@@ -181,6 +181,13 @@ func (s *TtlvDecodingSuite) TestDecodeBigInteger() {
 	})
 }
 
+func TestBytesToBigInt_EmptySlice(t *testing.T) {
+	result := bytesToBigInt([]byte{})
+	if result != nil {
+		t.Errorf("expected nil for empty slice, got %v", result)
+	}
+}
+
 func (s *TtlvDecodingSuite) TestDecodeEnum() {
 	dec := decodeHex("42 00 20 | 05 | 00 00 00 04 | 00 00 00 FF 00 00 00 00")
 	v, err := dec.Enum(0, 0x420020)

@@ -343,6 +343,46 @@ func TestPrivateKey_RSA(t *testing.T) {
 	})
 }
 
+func TestUsageLimits_Equals(t *testing.T) {
+	count1 := int64(100)
+	count2 := int64(200)
+
+	t.Run("both nil counts", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10, UsageLimitsUnit: UsageLimitsUnitByte}
+		b := UsageLimits{UsageLimitsTotal: 10, UsageLimitsUnit: UsageLimitsUnitByte}
+		require.True(t, a.Equals(&b))
+	})
+
+	t.Run("both non-nil equal counts", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count1}
+		b := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count1}
+		require.True(t, a.Equals(&b))
+	})
+
+	t.Run("both non-nil different counts", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count1}
+		b := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count2}
+		require.False(t, a.Equals(&b))
+	})
+
+	t.Run("receiver nil count other non-nil", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10}
+		b := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count1}
+		require.False(t, a.Equals(&b))
+	})
+
+	t.Run("receiver non-nil count other nil", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10, UsageLimitsCount: &count1}
+		b := UsageLimits{UsageLimitsTotal: 10}
+		require.False(t, a.Equals(&b))
+	})
+
+	t.Run("other is nil", func(t *testing.T) {
+		a := UsageLimits{UsageLimitsTotal: 10}
+		require.False(t, a.Equals(nil))
+	})
+}
+
 func TestPrivateKey_ECDSA(t *testing.T) {
 	ecKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	t.Run("pkcs8", func(t *testing.T) {
