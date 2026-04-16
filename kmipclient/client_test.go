@@ -381,6 +381,54 @@ func TestBatchResult_MustUnwrap_PanicsOnError(t *testing.T) {
 	})
 }
 
+func TestWithMaxMessageSize(t *testing.T) {
+	mux := kmipserver.NewBatchExecutor()
+	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
+	}))
+
+	t.Run("rejects response exceeding max size", func(t *testing.T) {
+		addr, ca := kmiptest.NewServer(t, mux)
+		// 16 bytes is too small for even the version negotiation response,
+		// so Dial itself should fail.
+		client, err := kmipclient.Dial(addr,
+			kmipclient.WithRootCAPem([]byte(ca)),
+			kmipclient.WithMaxMessageSize(16),
+		)
+		require.Error(t, err)
+		assert.Nil(t, client)
+		assert.True(t, ttlv.IsErrEncoding(err))
+	})
+
+	t.Run("accepts response within max size", func(t *testing.T) {
+		addr, ca := kmiptest.NewServer(t, mux)
+		client, err := kmipclient.Dial(addr,
+			kmipclient.WithRootCAPem([]byte(ca)),
+			kmipclient.WithMaxMessageSize(ttlv.DefaultMaxMessageSize),
+		)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = client.Close() })
+
+		resp, err := client.Activate("foobar").Exec()
+		require.NoError(t, err)
+		require.Equal(t, "foobar", resp.UniqueIdentifier)
+	})
+
+	t.Run("no limit when set to zero", func(t *testing.T) {
+		addr, ca := kmiptest.NewServer(t, mux)
+		client, err := kmipclient.Dial(addr,
+			kmipclient.WithRootCAPem([]byte(ca)),
+			kmipclient.WithMaxMessageSize(0),
+		)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = client.Close() })
+
+		resp, err := client.Activate("foobar").Exec()
+		require.NoError(t, err)
+		require.Equal(t, "foobar", resp.UniqueIdentifier)
+	})
+}
+
 func TestWithDialerUnsafe(t *testing.T) {
 	called := false
 	retErr := errors.New("not implemented")
