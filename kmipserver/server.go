@@ -42,16 +42,17 @@ type TerminateHook func(context.Context)
 // hooks for connect and terminate events, allowing customization of behavior when a client
 // connects or disconnects.
 type Server struct {
-	listener   net.Listener
-	handler    RequestHandler
-	logger     *slog.Logger
-	ctx        context.Context
-	cancel     func()
-	recvCtx    context.Context
-	recvCancel func()
-	wg         *sync.WaitGroup
-	onConnect  ConnectHook
-	onClose    TerminateHook
+	listener       net.Listener
+	handler        RequestHandler
+	logger         *slog.Logger
+	ctx            context.Context
+	cancel         func()
+	recvCtx        context.Context
+	recvCancel     func()
+	wg             *sync.WaitGroup
+	onConnect      ConnectHook
+	onClose        TerminateHook
+	maxMessageSize int
 }
 
 // ConnectHook wraps the configured connectHook function, calling it with the provided context.
@@ -89,16 +90,15 @@ func NewServer(listener net.Listener, handler RequestHandler) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
 	recvCtx, recvCancel := context.WithCancel(context.Background())
 	return &Server{
-		listener,
-		handler,
-		slog.Default(),
-		ctx,
-		cancel,
-		recvCtx,
-		recvCancel,
-		new(sync.WaitGroup),
-		nil,
-		nil,
+		listener:       listener,
+		handler:        handler,
+		logger:         slog.Default(),
+		ctx:            ctx,
+		cancel:         cancel,
+		recvCtx:        recvCtx,
+		recvCancel:     recvCancel,
+		wg:             new(sync.WaitGroup),
+		maxMessageSize: ttlv.DefaultMaxMessageSize,
 	}
 }
 
@@ -125,6 +125,17 @@ func (srv *Server) WithConnectHook(hook ConnectHook) *Server {
 //   - The Server instance with the terminate hook set.
 func (srv *Server) WithTerminateHook(hook TerminateHook) *Server {
 	srv.onClose = hook
+	return srv
+}
+
+// WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
+// received by the server. Messages exceeding this limit are rejected with an error.
+// A value of 0 uses the default ([ttlv.DefaultMaxMessageSize], 1 MB). A negative value disables the limit.
+func (srv *Server) WithMaxMessageSize(size int) *Server {
+	if size == 0 {
+		size = ttlv.DefaultMaxMessageSize
+	}
+	srv.maxMessageSize = size
 	return srv
 }
 
@@ -188,7 +199,7 @@ func (srv *Server) handleConn(conn net.Conn) {
 		tlsState = new(tls.ConnectionState)
 		*tlsState = tcon.ConnectionState()
 	}
-	stream := newConn(conn, srv.ctx, logger)
+	stream := newConn(conn, srv.ctx, logger, srv.maxMessageSize)
 	// TODO: Save ref in server
 	// TODO: Remove ref on connection termination
 	defer stream.Close()

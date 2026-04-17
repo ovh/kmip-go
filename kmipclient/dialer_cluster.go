@@ -8,6 +8,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/ovh/kmip-go/ttlv"
 )
 
 type connectionEntry struct {
@@ -36,6 +38,9 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 
 	if len(opts.supportedVersions) == 0 {
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
+	}
+	if opts.maxMessageSize == 0 {
+		opts.maxMessageSize = ttlv.DefaultMaxMessageSize
 	}
 
 	tlsCfg, err := opts.tlsConfig()
@@ -98,12 +103,13 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 
 	c := &Client{
 		lock:              new(sync.Mutex),
-		conn:              newConn(stream),
+		conn:              newConn(stream, opts.maxMessageSize),
 		dialer:            dialer,
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
 		middlewares:       opts.middlewares,
 		addr:              addrs[0],
+		maxMessageSize:    opts.maxMessageSize,
 	}
 
 	// Negotiate protocol version

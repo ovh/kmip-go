@@ -60,10 +60,10 @@ type conn struct {
 // Errors:
 //   - This function does not return errors directly. Errors may be encountered asynchronously
 //     in the readloop or writeloop goroutines if the network connection fails.
-func newConn(netCon net.Conn) *conn {
+func newConn(netCon net.Conn, maxMessageSize int) *conn {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	c := &conn{
-		stream: ttlv.NewStream(netCon, -1),
+		stream: ttlv.NewStream(netCon, maxMessageSize),
 		tx:     atomic.Value{},
 		rx:     make(chan rxMsg),
 		ctx:    ctx,

@@ -5,6 +5,9 @@ import (
 	"slices"
 )
 
+// DefaultMaxMessageSize is the default maximum allowed size in bytes for a single KMIP message.
+const DefaultMaxMessageSize = 1 * 1024 * 1024 // 1 MB
+
 // computeNeededBytes calculates the number of bytes needed to process a TTLV-encoded buffer.
 // If the buffer length is less than 8 bytes, it returns 8 as the minimum required size.
 // Otherwise, it returns 8 plus the padded length of the TTLV value as determined by ttlvReader.
@@ -33,7 +36,7 @@ func NewStream(inner io.ReadWriteCloser, maxSize int) Stream {
 	}
 }
 
-// Close wloses the inner stream.
+// Close closes the inner stream.
 func (s *Stream) Close() error {
 	if s.inner == nil {
 		return nil

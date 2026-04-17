@@ -69,6 +69,7 @@ type opts struct {
 	tlsCfg            *tls.Config
 	tlsCiphers        []uint16
 	dialer            DialerFunc
+	maxMessageSize    int
 	// For pool dialer
 	retryTimeout *time.Duration
 	//TODO: Add KMIP Authentication / Credentials
@@ -358,6 +359,16 @@ func WithDialerUnsafe(dialer DialerFunc) Option {
 	}
 }
 
+// WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
+// received by the client. Messages exceeding this limit are rejected with an error.
+// A value of 0 (or unset) uses the default (1 MB). A negative value disables the limit.
+func WithMaxMessageSize(size int) Option {
+	return func(o *opts) error {
+		o.maxMessageSize = size
+		return nil
+	}
+}
+
 // Client represents a KMIP client that manages a connection to a KMIP server,
 // handles protocol version negotiation, and supports middleware for request/response
 // processing. It provides thread-safe access to the underlying connection and
@@ -370,6 +381,7 @@ type Client struct {
 	dialer            DialerFunc
 	middlewares       []Middleware
 	addr              string
+	maxMessageSize    int
 }
 
 // Dial establishes a connection to the KMIP server at the specified address using the provided options.
@@ -403,6 +415,9 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 	if len(opts.supportedVersions) == 0 {
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
 	}
+	if opts.maxMessageSize == 0 {
+		opts.maxMessageSize = ttlv.DefaultMaxMessageSize
+	}
 
 	tlsCfg, err := opts.tlsConfig()
 	if err != nil {
@@ -426,12 +441,13 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 
 	c := &Client{
 		lock:              new(sync.Mutex),
-		conn:              newConn(stream),
+		conn:              newConn(stream, opts.maxMessageSize),
 		dialer:            dialer,
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
 		middlewares:       opts.middlewares,
 		addr:              addr,
+		maxMessageSize:    opts.maxMessageSize,
 	}
 
 	// Negotiate protocol version
@@ -466,8 +482,9 @@ func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
 		supportedVersions: slices.Clone(c.supportedVersions),
 		dialer:            c.dialer,
 		middlewares:       slices.Clone(c.middlewares),
-		conn:              newConn(stream),
+		conn:              newConn(stream, c.maxMessageSize),
 		addr:              c.addr,
+		maxMessageSize:    c.maxMessageSize,
 	}, nil
 }
 
@@ -497,7 +514,7 @@ func (c *Client) reconnect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	c.conn = newConn(stream)
+	c.conn = newConn(stream, c.maxMessageSize)
 	return nil
 }
 

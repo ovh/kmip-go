@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ovh/kmip-go"
+	"github.com/ovh/kmip-go/kmipclient"
 	"github.com/ovh/kmip-go/kmipserver"
 	"github.com/ovh/kmip-go/kmiptest"
 	"github.com/ovh/kmip-go/payloads"
@@ -126,6 +127,56 @@ func TestServerRequest_BadRequest(t *testing.T) {
 	require.Len(t, resp.BatchItem, 1)
 	require.Equal(t, kmip.ResultStatusOperationFailed, resp.BatchItem[0].ResultStatus)
 	require.Equal(t, kmip.ResultReasonInvalidMessage, resp.BatchItem[0].ResultReason)
+}
+
+func TestServerWithMaxMessageSize(t *testing.T) {
+	mux := kmipserver.NewBatchExecutor()
+	mux.Route(kmip.OperationActivate, kmipserver.HandleFunc(func(ctx context.Context, pl *payloads.ActivateRequestPayload) (*payloads.ActivateResponsePayload, error) {
+		return &payloads.ActivateResponsePayload{UniqueIdentifier: pl.UniqueIdentifier}, nil
+	}))
+
+	t.Run("rejects request exceeding max size", func(t *testing.T) {
+		certPEM, keyPEM, err := kmiptest.GenerateSelfSignedCertPEM()
+		require.NoError(t, err)
+
+		ln, srvAddr := kmiptest.ListenWithCert(t, certPEM, keyPEM)
+		srv := kmipserver.NewServer(ln, mux).
+			WithMaxMessageSize(16) // too small for any real request
+
+		go func() { _ = srv.Serve() }()
+		t.Cleanup(func() { _ = srv.Shutdown() })
+
+		caPool := x509.NewCertPool()
+		caPool.AppendCertsFromPEM(certPEM)
+		conn, err := tls.Dial("tcp", srvAddr, &tls.Config{RootCAs: caPool})
+		require.NoError(t, err)
+		defer conn.Close()
+
+		// Send a valid KMIP request that exceeds 16 bytes
+		stream := ttlv.NewStream(conn, -1)
+		msg := kmip.NewRequestMessage(kmip.V1_4, &payloads.ActivateRequestPayload{UniqueIdentifier: "foobar"})
+		err = stream.Send(&msg)
+		require.NoError(t, err)
+
+		// Server rejects the oversized message and returns an error response
+		resp := &kmip.ResponseMessage{}
+		err = stream.Recv(resp)
+		require.NoError(t, err)
+		require.Len(t, resp.BatchItem, 1)
+		require.Equal(t, kmip.ResultStatusOperationFailed, resp.BatchItem[0].ResultStatus)
+		require.Contains(t, resp.BatchItem[0].ResultMessage, "too big")
+	})
+
+	t.Run("accepts request within max size", func(t *testing.T) {
+		addr, ca := kmiptest.NewServer(t, mux) // default 1 MB
+		client, err := kmipclient.Dial(addr, kmipclient.WithRootCAPem([]byte(ca)))
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = client.Close() })
+
+		resp, err := client.Activate("foobar").Exec()
+		require.NoError(t, err)
+		require.Equal(t, "foobar", resp.UniqueIdentifier)
+	})
 }
 
 func TestServerRequest_BadRequestMessageContent(t *testing.T) {
