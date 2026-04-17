@@ -220,7 +220,7 @@ func (pl *GetResponsePayload) PublicKey() (crypto.PublicKey, error) {
 		CryptoPublicKey() (crypto.PublicKey, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Object does not implement ECDSA() method")
+		return nil, fmt.Errorf("Object does not implement CryptoPublicKey() method")
 	}
 	return key.CryptoPublicKey()
 }
