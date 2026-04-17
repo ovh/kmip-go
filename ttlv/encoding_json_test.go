@@ -368,6 +368,15 @@ func (s *JsonDecodingSuite) TestDecodeDateTime() {
 	s.EqualValues(time.Date(2008, time.March, 14, 11, 56, 40, 0, time.UTC), n.UTC())
 }
 
+func (s *JsonDecodingSuite) TestDecodeDateTimeHex() {
+	// 0x47DA67F8 == 1205495800 == 2008-03-14T11:56:40Z
+	data := `{"tag": "0x420020", "type": "DateTime", "value": "0x47DA67F8"}`
+	r := s.newReader(data)
+	n, err := r.DateTime(0x420020)
+	s.NoError(err)
+	s.EqualValues(time.Date(2008, time.March, 14, 11, 56, 40, 0, time.UTC), n.UTC())
+}
+
 func (s *JsonDecodingSuite) TestDecodeInterval() {
 	data := `{"tag": "0x420020", "type": "Interval", "value": 864000}`
 	r := s.newReader(data)
