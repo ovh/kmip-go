@@ -311,8 +311,8 @@ func register_split_key(client *kmipclient.Client) {
 		SplitKeyMethod:    kmip.SplitKeyMethodXOR,
 		KeyBlock: kmip.KeyBlock{
 			KeyFormatType:          kmip.KeyFormatTypeRaw,
-			CryptographicAlgorithm: alg,  // FIXME: If alg is null, Internal server error
-			CryptographicLength:    clen, // FIXME: Same here
+			CryptographicAlgorithm: alg,
+			CryptographicLength:    clen,
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: kmip.KeyMaterial{Bytes: &[]byte{1, 2, 3, 4}},

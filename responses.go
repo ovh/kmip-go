@@ -62,7 +62,9 @@ func (pv *ResponseBatchItem) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 		if len(pv.AsynchronousCorrelationValue) > 0 {
 			e.ByteString(TagAsynchronousCorrelationValue, pv.AsynchronousCorrelationValue)
 		}
-		e.TagAny(TagResponsePayload, pv.ResponsePayload)
+		if pv.ResponsePayload != nil {
+			e.TagAny(TagResponsePayload, pv.ResponsePayload)
+		}
 		if pv.MessageExtension != nil {
 			e.Any(pv.MessageExtension)
 		}
