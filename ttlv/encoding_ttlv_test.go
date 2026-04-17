@@ -210,6 +210,30 @@ func (s *TtlvDecodingSuite) TestDecodeBoolean() {
 	})
 }
 
+func (s *TtlvDecodingSuite) TestDecodeBooleanMalformedShortValue() {
+	// Boolean type (06) with declared length of 2 instead of 8
+	bytes, err := hex.DecodeString(strings.NewReplacer(" ", "", "|", "").Replace(
+		"42 00 20 | 06 | 00 00 00 02 | 00 01 00 00 00 00 00 00"))
+	s.Require().NoError(err)
+	reader, err := newTTLVReader(bytes)
+	s.Require().NoError(err)
+	_, err = reader.Bool(0x420020)
+	s.Error(err)
+	s.Contains(err.Error(), "invalid TTLV Boolean value length")
+}
+
+func (s *TtlvDecodingSuite) TestDecodeBooleanMalformedZeroLength() {
+	// Boolean type (06) with declared length of 0
+	bytes, err := hex.DecodeString(strings.NewReplacer(" ", "", "|", "").Replace(
+		"42 00 20 | 06 | 00 00 00 00 | 00 00 00 00 00 00 00 00"))
+	s.Require().NoError(err)
+	reader, err := newTTLVReader(bytes)
+	s.Require().NoError(err)
+	_, err = reader.Bool(0x420020)
+	s.Error(err)
+	s.Contains(err.Error(), "invalid TTLV Boolean value length")
+}
+
 func (s *TtlvDecodingSuite) TestDecodeTextString() {
 	dec := decodeHex("42 00 20 | 07 | 00 00 00 0B | 48 65 6C 6C 6F 20 57 6F 72 6C 64 00 00 00 00 00")
 	v, err := dec.TextString(0x420020)
