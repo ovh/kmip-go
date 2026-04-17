@@ -180,7 +180,8 @@ func (ul UsageLimits) Equals(other *UsageLimits) bool {
 		other.UsageLimitsTotal == ul.UsageLimitsTotal &&
 		other.UsageLimitsUnit == ul.UsageLimitsUnit &&
 		(other.UsageLimitsCount == nil && ul.UsageLimitsCount == nil ||
-			*other.UsageLimitsCount == *ul.UsageLimitsCount)
+			other.UsageLimitsCount != nil && ul.UsageLimitsCount != nil &&
+				*other.UsageLimitsCount == *ul.UsageLimitsCount)
 }
 
 // KMIP 1.1.
