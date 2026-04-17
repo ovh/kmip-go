@@ -48,7 +48,7 @@ func (pl *ImportRequestPayload) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 			return err
 		}
 
-		if err := d.Opt(kmip.TagKeyWrapType, &pl.ReplaceExisting); err != nil {
+		if err := d.Opt(kmip.TagKeyWrapType, &pl.KeyWrapType); err != nil {
 			return err
 		}
 
