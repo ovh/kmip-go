@@ -493,7 +493,7 @@ func (j *jsonReader) DateTime(tag int) (time.Time, error) {
 	switch val := j.getValue().(type) {
 	case string:
 		if strings.HasPrefix(val, "0x") {
-			parsed, err := strconv.ParseUint(val[2:], 10, 64)
+			parsed, err := strconv.ParseUint(val[2:], 16, 64)
 			if err != nil {
 				return time.Time{}, err
 			}
