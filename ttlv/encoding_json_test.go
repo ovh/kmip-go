@@ -47,7 +47,7 @@ func (s *JsonEncodingSuite) TestEncodeLongInteger() {
 		expected := `{"tag": "0x420020", "type": "LongInteger", "value": "0x01b69b4ba5749200"}`
 		s.Equal(expected, string(s.enc.Bytes()))
 	})
-	s.Run("large-negactive", func() {
+	s.Run("large-negative", func() {
 		s.enc.Clear()
 		s.enc.LongInteger(0x420020, -123456789000000000)
 		expected := `{"tag": "0x420020", "type": "LongInteger", "value": "0xfe4964b45a8b6e00"}`
@@ -262,7 +262,7 @@ func (s *JsonDecodingSuite) TestDecodeLongInteger() {
 		s.NoError(err)
 		s.EqualValues(123456789000000000, n)
 	})
-	s.Run("large-negactive", func() {
+	s.Run("large-negative", func() {
 		data := `{"tag": "0x420020", "type": "LongInteger", "value": "0xfe4964b45a8b6e00"}`
 		r := s.newReader(data)
 		n, err := r.LongInteger(0x420020)
