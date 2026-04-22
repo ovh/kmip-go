@@ -3,6 +3,7 @@ package kmipclient_test
 import (
 	"context"
 	"log/slog"
+	"sync"
 	"testing"
 	"time"
 
@@ -197,6 +198,65 @@ func TestDialCluster_DefaultRetryTimeout(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, client)
 	defer client.Close()
+}
+
+// TestClientConnectionPool_ConcurrentDial exercises the dialer closure from many
+// goroutines at once to catch data races on the shared servers slice. The first
+// server is shut down so that error-path writes to lastError happen in parallel
+// with skip-check reads from the other goroutines. Run with -race to catch regressions.
+func TestClientConnectionPool_ConcurrentDial(t *testing.T) {
+	addrs := make([]string, 0, 3)
+	var combinedCA []byte
+	servers := make([]*kmipserver.Server, 3)
+	for i := 0; i < 3; i++ {
+		h := &simpleHandler{}
+		addr, ca, srv := kmiptest.NewServerWithHandle(t, h)
+		h.id = addr
+		addrs = append(addrs, addr)
+		combinedCA = append(combinedCA, []byte(ca)...)
+		servers[i] = srv
+	}
+
+	client, err := kmipclient.DialCluster(addrs,
+		kmipclient.WithRootCAPem(combinedCA),
+		kmipclient.WithRetryTimeout(50*time.Millisecond))
+	require.NoError(t, err)
+	defer client.Close()
+
+	// Shut the first server so every clone's initial dial attempt fails on it,
+	// forcing concurrent writes to servers[0].lastError.
+	require.NoError(t, servers[0].Shutdown())
+	time.Sleep(20 * time.Millisecond)
+
+	const N = 32
+	var wg sync.WaitGroup
+	errCh := make(chan error, N)
+	for i := 0; i < N; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			c, err := client.Clone()
+			if err != nil {
+				errCh <- err
+				return
+			}
+			_ = c.Close()
+		}()
+	}
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		require.NoError(t, err)
+	}
+}
+
+// TestDialCluster_EmptyAddrs verifies DialCluster rejects an empty address list
+// instead of panicking later on servers[0] access.
+func TestDialCluster_EmptyAddrs(t *testing.T) {
+	_, err := kmipclient.DialCluster(nil)
+	require.Error(t, err)
+	_, err = kmipclient.DialCluster([]string{})
+	require.Error(t, err)
 }
 
 func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
