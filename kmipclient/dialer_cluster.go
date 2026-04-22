@@ -15,6 +15,8 @@ import (
 type connectionEntry struct {
 	url       string
 	lastError time.Time
+	// mu protects concurrent access to lastError only
+	mu sync.Mutex
 }
 
 func WithRetryTimeout(retryTimeout time.Duration) Option {
@@ -29,6 +31,10 @@ func DialCluster(addrs []string, options ...Option) (*Client, error) {
 }
 
 func DialClusterContext(ctx context.Context, addrs []string, options ...Option) (*Client, error) {
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("at least one server address is required")
+	}
+
 	opts := opts{}
 	for _, o := range options {
 		if err := o(&opts); err != nil {
@@ -48,10 +54,10 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 		return nil, err
 	}
 
-	servers := make([]connectionEntry, 0, len(addrs))
+	servers := make([]*connectionEntry, 0, len(addrs))
 	for _, url := range addrs {
 		slog.Info("Add server to pool", "url", url)
-		servers = append(servers, connectionEntry{
+		servers = append(servers, &connectionEntry{
 			url: url,
 		})
 	}
@@ -68,31 +74,49 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 				Config: tlsCfg,
 			}
 			for _, s := range servers {
-				if !time.Now().After(s.lastError.Add(*opts.retryTimeout)) {
-					slog.Info("Skipping server because of recent last error", "url", s.url, "last error", s.lastError)
+				// TOCTOU: the lastError snapshot is released before DialContext and
+				// re-acquired only for the error write. Two goroutines can therefore
+				// dial the same server concurrently. This is intentional, holding the
+				// lock across I/O would serialize reconnections across cloned clients,
+				// and benign because the write is an idempotent time.Now() and the
+				// skip check is advisory.
+				s.mu.Lock()
+				if time.Since(s.lastError) < *opts.retryTimeout {
+					lastErr := s.lastError
+					s.mu.Unlock()
+					slog.Info("Skipping server because of recent last error", "url", s.url, "last_error", lastErr)
 					continue
 				}
+				s.mu.Unlock()
 
 				conn, err := tlsDialer.DialContext(ctx, "tcp", s.url)
 				if err != nil {
-					s.lastError = time.Now()
+					now := time.Now()
+					s.mu.Lock()
+					s.lastError = now
+					s.mu.Unlock()
 					slog.Warn("TLS session initialization failed", "url", s.url, "error", err)
 				} else {
 					return conn, nil
 				}
 			}
 
-			// All server had an error since retryTimeout
+			// All servers have had an error within retryTimeout
 			// Call the first server to check if it went back up
-			conn, err := tlsDialer.DialContext(ctx, "tcp", servers[0].url)
+			first := servers[0]
+			conn, err := tlsDialer.DialContext(ctx, "tcp", first.url)
+			first.mu.Lock()
+
 			if err == nil {
 				// reset lastError since we had a success
-				servers[0].lastError = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
+				first.lastError = time.Time{}
+				first.mu.Unlock()
 				return conn, nil
 			}
-			servers[0].lastError = time.Now()
-			slog.Warn("TLS session initialization failed", "url", servers[0].url, "error", err)
-			return nil, fmt.Errorf("Failed to connect to servers in the connection pool")
+			first.lastError = time.Now()
+			first.mu.Unlock()
+			slog.Warn("TLS session initialization failed", "url", first.url, "error", err)
+			return nil, fmt.Errorf("failed to connect to servers in the connection pool (last attempt %q): %w", first.url, err)
 		}
 	}
 
