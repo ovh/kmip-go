@@ -46,14 +46,14 @@ func (s *XmlEncodingSuite) TestEncodeBigInteger() {
 		b := big.NewInt(0)
 		b.SetString("1234567890000000000000000000", 10)
 		s.enc.BigInteger(0x420020, b)
-		expected := `<TTLV tag="0x420020" type="BigInteger" value="03FD35EB6BC2DF4618080000"/>`
+		expected := `<TTLV tag="0x420020" type="BigInteger" value="0000000003FD35EB6BC2DF4618080000"/>`
 		s.Equal(expected, string(s.enc.Bytes()))
 	})
 	s.Run("zero", func() {
 		s.enc.Clear()
 		b := big.NewInt(0)
 		s.enc.BigInteger(0x420020, b)
-		expected := `<TTLV tag="0x420020" type="BigInteger" value="00"/>`
+		expected := `<TTLV tag="0x420020" type="BigInteger" value="0000000000000000"/>`
 		s.Equal(expected, string(s.enc.Bytes()))
 	})
 	s.Run("negative", func() {
@@ -61,7 +61,7 @@ func (s *XmlEncodingSuite) TestEncodeBigInteger() {
 		b := big.NewInt(0)
 		b.SetString("-1234567890000000000000000000", 10)
 		s.enc.BigInteger(0x420020, b)
-		expected := `<TTLV tag="0x420020" type="BigInteger" value="FC02CA14943D20B9E7F80000"/>`
+		expected := `<TTLV tag="0x420020" type="BigInteger" value="FFFFFFFFFC02CA14943D20B9E7F80000"/>`
 		s.Equal(expected, string(s.enc.Bytes()))
 	})
 }
@@ -206,21 +206,21 @@ func (s *XmlDecodingSuite) TestDecodeLongInteger() {
 
 func (s *XmlDecodingSuite) TestDecodeBigInteger() {
 	s.Run("positive", func() {
-		data := `<TTLV tag="0x420020" type="BigInteger" value="03FD35EB6BC2DF4618080000"/>`
+		data := `<TTLV tag="0x420020" type="BigInteger" value="0000000003FD35EB6BC2DF4618080000"/>`
 		r := s.newReader(data)
 		n, err := r.BigInteger(0x420020)
 		s.NoError(err)
 		s.EqualValues("1234567890000000000000000000", n.String())
 	})
 	s.Run("zero", func() {
-		data := `<TTLV tag="0x420020" type="BigInteger" value="00"/>`
+		data := `<TTLV tag="0x420020" type="BigInteger" value="0000000000000000"/>`
 		r := s.newReader(data)
 		n, err := r.BigInteger(0x420020)
 		s.NoError(err)
 		s.EqualValues(0, n.Int64())
 	})
 	s.Run("negative", func() {
-		data := `<TTLV tag="0x420020" type="BigInteger" value="FC02CA14943D20B9E7F80000"/>`
+		data := `<TTLV tag="0x420020" type="BigInteger" value="FFFFFFFFFC02CA14943D20B9E7F80000"/>`
 		r := s.newReader(data)
 		n, err := r.BigInteger(0x420020)
 		s.NoError(err)
