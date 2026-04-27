@@ -205,15 +205,11 @@ func (s *JsonDecodingSuite) newReader(data string) *jsonReader {
 
 func (s *JsonDecodingSuite) TestDecodeNamedTag() {
 	RegisterTag("NamedTag", 0x42FFFF)
-	// data := `<NamedTag type="Integer" value="8"/><NamedTag type="Integer" value="8"/>`
 	data := `{"tag": "NamedTag", "type": "Integer", "value": 8}`
 	r := s.newReader(data)
 	n, err := r.Integer(0x42FFFF)
 	s.NoError(err)
 	s.EqualValues(8, n)
-	// n, err = r.Integer(0x42FFFF)
-	// s.NoError(err)
-	// s.EqualValues(8, n)
 }
 
 func (s *JsonDecodingSuite) TestDecodeEOF() {
@@ -398,8 +394,6 @@ func (s *JsonDecodingSuite) TestDecodeStruct() {
 		return r.Struct(0x420006, func(r reader) error { return nil })
 	})
 	s.NoError(err)
-	// _, err = r.Integer(0x420006)
-	// s.NoError(err)
 }
 
 func (s *JsonDecodingSuite) TestDecodeBitmask() {
