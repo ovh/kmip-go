@@ -48,6 +48,41 @@ func TestObject(t *testing.T) {
 	})
 }
 
+func TestKeyBlock_NilKeyValue(t *testing.T) {
+	t.Run("nil-KeyValue", func(t *testing.T) {
+		kb := KeyBlock{KeyFormatType: KeyFormatTypeRaw}
+		require.NotPanics(t, func() {
+			mat, err := kb.GetMaterial()
+			require.Error(t, err)
+			require.Zero(t, mat)
+		})
+		require.NotPanics(t, func() {
+			b, err := kb.GetBytes()
+			require.Error(t, err)
+			require.Nil(t, b)
+		})
+		require.NotPanics(t, func() {
+			require.Nil(t, kb.GetAttributes())
+		})
+	})
+	t.Run("nil-Plain", func(t *testing.T) {
+		kb := KeyBlock{KeyFormatType: KeyFormatTypeRaw, KeyValue: &KeyValue{}}
+		require.NotPanics(t, func() {
+			mat, err := kb.GetMaterial()
+			require.Error(t, err)
+			require.Zero(t, mat)
+		})
+		require.NotPanics(t, func() {
+			b, err := kb.GetBytes()
+			require.Error(t, err)
+			require.Nil(t, b)
+		})
+		require.NotPanics(t, func() {
+			require.Nil(t, kb.GetAttributes())
+		})
+	})
+}
+
 func TestSecretData_Data(t *testing.T) {
 	t.Run("raw", func(t *testing.T) {
 		data := []byte("foobar")

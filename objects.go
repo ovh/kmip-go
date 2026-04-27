@@ -519,7 +519,7 @@ func (kb *KeyBlock) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 }
 
 func (kb *KeyBlock) GetMaterial() (KeyMaterial, error) {
-	if kb.KeyValue.Plain == nil {
+	if kb.KeyValue == nil || kb.KeyValue.Plain == nil {
 		return KeyMaterial{}, errors.New("Empty key value")
 	}
 	return kb.KeyValue.Plain.KeyMaterial, nil
@@ -537,7 +537,7 @@ func (kb *KeyBlock) GetBytes() ([]byte, error) {
 }
 
 func (kb *KeyBlock) GetAttributes() []Attribute {
-	if kb.KeyValue.Plain == nil {
+	if kb.KeyValue == nil || kb.KeyValue.Plain == nil {
 		return nil
 	}
 	return kb.KeyValue.Plain.Attribute
