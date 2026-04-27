@@ -84,7 +84,7 @@ func (enc *xmlWriter) LongInteger(tag int, value int64) {
 }
 
 func (enc *xmlWriter) BigInteger(tag int, value *big.Int) {
-	bytes, pad, padLen := bigIntToBytes(value, 1)
+	bytes, pad, padLen := bigIntToBytes(value, 8)
 	val := bytes
 	if padLen > 0 {
 		val = make([]byte, padLen, len(bytes)+padLen)
