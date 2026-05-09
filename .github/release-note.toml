@@ -18,13 +18,15 @@ body = """
             {% if commit.breaking %}[**breaking**] {% endif %}\
             {{ commit.message | upper_first }}\
     {% endfor %}
-  {% endfor %}
-{% set breaking = (commits | filter(attribute="breaking", value=true) | map(attribute="breaking_description")) -%}
+{% endfor %}
+{% set breaking = (commits | filter(attribute="breaking", value=true)
+                           | filter(attribute="breaking_description")
+                           | map(attribute="breaking_description")) -%}
 {% if breaking -%}
-  ### ⚠️ BREAKING CHANGES:
-  {% for bk in breaking %}
-    - {{ bk -}} 
-  {% endfor %}
+    ### ⚠️ BREAKING CHANGES:
+    {% for bk in breaking %}
+        - {{ bk | replace(from="\n", to=" ") -}}
+    {% endfor %}
 {% endif %}
 """
 # template for the changelog footer
