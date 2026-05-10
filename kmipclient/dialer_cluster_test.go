@@ -123,7 +123,7 @@ func TestClientNetworkConnection_Fallback(t *testing.T) {
 	req := kmip.NewRequestMessage(kmip.V1_4, &payloads.QueryRequestPayload{})
 
 	// first call should hit the first server
-	resp, err := client.Roundtrip(context.Background(), &req)
+	resp, err := client.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addrs[0], resp.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 
@@ -134,7 +134,7 @@ func TestClientNetworkConnection_Fallback(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 
 	// next call should fallback to one of the remaining servers (addr[1] most likely)
-	resp2, err := client.Roundtrip(context.Background(), &req)
+	resp2, err := client.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addrs[1], resp2.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 
@@ -144,7 +144,7 @@ func TestClientNetworkConnection_Fallback(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 
 	// next call should fallback to the last remaining server (addrs[2])
-	resp3, err := client.Roundtrip(context.Background(), &req)
+	resp3, err := client.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addrs[2], resp3.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 }
@@ -164,7 +164,7 @@ func TestClientConnectionPool_PrimaryUpNoFallback(t *testing.T) {
 	require.NoError(t, err)
 
 	req := kmip.NewRequestMessage(kmip.V1_4, &payloads.QueryRequestPayload{})
-	resp, err := exec.Roundtrip(context.Background(), &req)
+	resp, err := exec.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addrs[0], resp.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 }
@@ -280,7 +280,7 @@ func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 
 	req := kmip.NewRequestMessage(kmip.V1_4, &payloads.QueryRequestPayload{})
 	// initial call should work
-	resp, err := exec.Roundtrip(context.Background(), &req)
+	resp, err := exec.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addr, resp.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 
@@ -289,7 +289,7 @@ func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 
 	// attempt should fail (single endpoint)
-	_, err = exec.Roundtrip(context.Background(), &req)
+	_, err = exec.RoundTrip(context.Background(), &req)
 	require.Error(t, err)
 
 	// restart server on same addr using same cert
@@ -298,14 +298,14 @@ func TestClientConnectionPool_IntermittentRecovery(t *testing.T) {
 	srv2 := kmipserver.NewServer(l2, h2)
 	go srv2.Serve()
 	// Retry before the timeout pass
-	resp2, err := exec.Roundtrip(context.Background(), &req)
+	resp2, err := exec.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addr, resp2.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 
 	// give some time for client to consider endpoint retriable
 	time.Sleep(60 * time.Millisecond)
 
-	resp3, err := exec.Roundtrip(context.Background(), &req)
+	resp3, err := exec.RoundTrip(context.Background(), &req)
 	require.NoError(t, err)
 	require.Equal(t, addr, resp3.BatchItem[0].ResponsePayload.(*payloads.QueryResponsePayload).VendorIdentification)
 	_ = srv2.Shutdown()

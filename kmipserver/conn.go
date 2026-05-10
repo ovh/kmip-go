@@ -120,7 +120,7 @@ func (c *conn) checkAvailable() error {
 // or errors to the rx channel. If a terminal error occurs or the context is done, it terminates
 // the loop and closes the rx channel. This function is intended to run as a goroutine.
 func (c *conn) readloop() {
-	defer c.logger.Debug("Exittig readloop")
+	defer c.logger.Debug("Exiting readloop")
 	defer close(c.rx)
 	for !c.closed.Load() {
 		msg := recvMsg{}
@@ -158,7 +158,7 @@ func (c *conn) readloop() {
 // the connection on failure. The loop exits when the connection is closed or the context is done.
 // Any remaining messages in the tx channel are not drained when the context is canceled (see TODO).
 func (c *conn) writeloop() {
-	defer c.logger.Debug("Exittig writeloop")
+	defer c.logger.Debug("Exiting writeloop")
 	tx := c.tx.Load().(chan txMsg)
 	for !c.closed.Load() {
 		select {

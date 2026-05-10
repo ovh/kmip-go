@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+// panicOnErr panics on error. Safe here because xmlWriter always writes to a
+// bytes.Buffer, which never returns I/O errors, making these panics unreachable.
 func panicOnErr(err error) {
 	if err != nil {
 		panic(err)

@@ -2,6 +2,7 @@ package ttlv
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"testing"
 
@@ -27,8 +28,10 @@ func TestStream_Recv_MaxMessageSize(t *testing.T) {
 		var out any
 		err := stream.Recv(&out)
 		require.Error(t, err)
+		assert.True(t, errors.Is(err, ErrMessageTooLarge))
+		// Stream.Recv wraps the sentinel in ErrEncoding so that kmipserver's
+		// IsErrEncoding routing still produces a structured KMIP error response.
 		assert.True(t, IsErrEncoding(err))
-		assert.Contains(t, err.Error(), "too big")
 	})
 
 	t.Run("accepted when message fits max size", func(t *testing.T) {

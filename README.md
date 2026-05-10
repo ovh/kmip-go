@@ -14,6 +14,7 @@ See [KMIP v1.4 protocol specification](https://docs.oasis-open.org/kmip/spec/v1.
 - **Comprehensive Cryptographic Operations**: Key generation, encryption, decryption, signing, verification
 - **Flexible Authentication**: Mutual TLS, username/password, device, and attestation-based authentication
 - **TLS Security**: Built-in TLS support with client certificate authentication
+- **HTTPS Transport**: Optional KMIP-over-HTTPS with TTLV, XML, or JSON wire formats (opt-in sub-package)
 - **Batch Operations**: Support for batching multiple operations in a single request
 - **Middleware System**: Extensible middleware for logging, debugging, and custom functionality
 - **Go standard crypto compatible**: Implements crypto.Signer interface and support cryptographic key types from the standard library
@@ -129,6 +130,41 @@ client, err := kmipclient.Dial(
 	),
 )
 ```
+
+### HTTP Transport
+
+By default the client speaks KMIP's native TTLV-over-TLS stream protocol. For servers that expose KMIP over HTTPS, opt into the HTTP transport via the `kmipclient/kmiphttp` sub-package. Importing `kmipclient` alone does **not** link `net/http`; only callers that use `kmiphttp` pay that cost.
+
+```go
+import (
+	"github.com/ovh/kmip-go/kmipclient"
+	"github.com/ovh/kmip-go/kmipclient/kmiphttp"
+)
+```
+
+Requests are POSTed to `https://<addr><path>`; the standard TLS options apply unchanged. The scheme is hard-coded to `https`: pass a bare `host:port` (no `http://` or `https://` prefix), since HTTPS is implicit and a scheme prefix is rejected at `Dial` time.
+
+```go
+client, err := kmipclient.Dial(
+	"kms.example.com:5696",
+	kmiphttp.WithTransport("/kmip"),
+	kmipclient.WithClientCertFiles("cert.pem", "key.pem"),
+)
+```
+
+The default wire format is binary TTLV; pick XML or JSON with `kmiphttp.WithWireFormat`:
+
+```go
+client, err := kmipclient.Dial(
+	"kms.example.com:5696",
+	kmiphttp.WithTransport("/kmip",
+		kmiphttp.WithWireFormat(kmiphttp.WireJSON),
+	),
+	kmipclient.WithClientCertFiles("cert.pem", "key.pem"),
+)
+```
+
+Non-2xx responses are returned as a typed [`*kmiphttp.Error`](https://pkg.go.dev/github.com/ovh/kmip-go/kmipclient/kmiphttp#Error) carrying `StatusCode` and a bounded `Body` excerpt — use `errors.As` rather than matching on the error string. See the API docs for [`kmiphttp.WithHeader`](https://pkg.go.dev/github.com/ovh/kmip-go/kmipclient/kmiphttp#WithHeader) (custom headers) and [`kmiphttp.WithClient`](https://pkg.go.dev/github.com/ovh/kmip-go/kmipclient/kmiphttp#WithClient) (supplying your own `*http.Client`).
 
 ### Key Creation and Management
 

@@ -164,7 +164,7 @@ func TestServerWithMaxMessageSize(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, resp.BatchItem, 1)
 		require.Equal(t, kmip.ResultStatusOperationFailed, resp.BatchItem[0].ResultStatus)
-		require.Contains(t, resp.BatchItem[0].ResultMessage, "too big")
+		require.Contains(t, resp.BatchItem[0].ResultMessage, "exceeds max size")
 	})
 
 	t.Run("accepts request within max size", func(t *testing.T) {
