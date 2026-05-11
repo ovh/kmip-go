@@ -126,13 +126,11 @@ func (c *conn) checkAvailable(ctx context.Context) error {
 // If an error occurs during reading, the connection is terminated and the loop exits.
 // The rx channel is closed when the loop exits.
 func (c *conn) readloop() {
-	// defer println("Exittig readloop")
 	defer close(c.rx)
 	for !c.closed.Load() {
 		msg := recvMsg{}
 		resp := rxMsg{}
 		if err := c.stream.Recv(&msg); err != nil {
-			// println("read fail:", resp.err.Error())
 			if errors.Is(err, net.ErrClosed) {
 				err = io.ErrClosedPipe
 			}
@@ -159,7 +157,6 @@ func (c *conn) readloop() {
 // It handles errors during sending, propagates them back to the requester, and terminates the connection if necessary.
 // The loop exits if the connection is closed, the context is done, or the transmission channel is closed.
 func (c *conn) writeloop() {
-	// defer println("Exittig writeloop")
 	tx := c.tx.Load().(chan txMsg)
 	for !c.closed.Load() {
 		select {
@@ -168,7 +165,6 @@ func (c *conn) writeloop() {
 				return
 			}
 			if err := c.stream.Send(req.msg); err != nil {
-				// println("write fail:", err.Error())
 				if errors.Is(err, net.ErrClosed) {
 					err = io.ErrClosedPipe
 				}

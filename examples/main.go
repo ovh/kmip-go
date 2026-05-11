@@ -163,7 +163,7 @@ func discover(client *kmipclient.Client) {
 			ProtocolVersion: []kmip.ProtocolVersion{},
 		},
 	)
-	if _, err := client.Roundtrip(context.Background(), &msg); err != nil {
+	if _, err := client.RoundTrip(context.Background(), &msg); err != nil {
 		panic(err)
 	}
 }

@@ -261,20 +261,12 @@ func buildDurationEncodeFunc() func(*Encoder, int, reflect.Value) {
 
 func buildTimeEncodeFunc() func(*Encoder, int, reflect.Value) {
 	return func(e *Encoder, tag int, v reflect.Value) {
-		// if v.CanAddr() {
-		// 	e.DateTime(tag, *v.Addr().Interface().(*time.Time))
-		// 	return
-		// }
 		e.DateTime(tag, v.Interface().(time.Time))
 	}
 }
 
 func buildBigIntEncodeFunc() func(*Encoder, int, reflect.Value) {
 	return func(e *Encoder, tag int, v reflect.Value) {
-		// if v.CanAddr() {
-		// 	e.BigInteger(tag, v.Addr().Interface().(*big.Int))
-		// 	return
-		// }
 		n := v.Interface().(big.Int)
 		e.BigInteger(tag, &n)
 	}
@@ -302,8 +294,6 @@ func buildSliceEncodeFunc(ty reflect.Type) func(*Encoder, int, reflect.Value) {
 			e.ByteString(tag, v.Bytes())
 		}
 	}
-	// 	fallthrough
-	// case reflect.Array:
 	ff := encodeFuncFor(ty.Elem())
 	return func(e *Encoder, tag int, v reflect.Value) {
 		for i := range v.Len() {

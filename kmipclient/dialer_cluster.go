@@ -2,7 +2,7 @@ package kmipclient
 
 import (
 	"context"
-	"crypto/tls"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -32,14 +32,18 @@ func DialCluster(addrs []string, options ...Option) (*Client, error) {
 
 func DialClusterContext(ctx context.Context, addrs []string, options ...Option) (*Client, error) {
 	if len(addrs) == 0 {
-		return nil, fmt.Errorf("at least one server address is required")
+		return nil, errors.New("at least one server address is required")
 	}
 
 	opts := opts{}
-	for _, o := range options {
-		if err := o(&opts); err != nil {
-			return nil, err
-		}
+	if err := applyOptions(&opts, options); err != nil {
+		return nil, err
+	}
+
+	// Custom transports have no cluster failover semantics; DialCluster relies
+	// on the stream transport's per-address dial loop.
+	if opts.transportBuilder != nil {
+		return nil, errors.New("custom transports are not supported with DialCluster; use Dial against a single endpoint instead")
 	}
 
 	if len(opts.supportedVersions) == 0 {
@@ -67,73 +71,66 @@ func DialClusterContext(ctx context.Context, addrs []string, options ...Option) 
 		opts.retryTimeout = &timeout
 	}
 
-	dialer := opts.dialer
-	if dialer == nil {
-		dialer = func(ctx context.Context) (net.Conn, error) {
-			tlsDialer := tls.Dialer{
-				Config: tlsCfg,
-			}
-			for _, s := range servers {
-				// TOCTOU: the lastError snapshot is released before DialContext and
-				// re-acquired only for the error write. Two goroutines can therefore
-				// dial the same server concurrently. This is intentional, holding the
-				// lock across I/O would serialize reconnections across cloned clients,
-				// and benign because the write is an idempotent time.Now() and the
-				// skip check is advisory.
-				s.mu.Lock()
-				if time.Since(s.lastError) < *opts.retryTimeout {
-					lastErr := s.lastError
-					s.mu.Unlock()
-					slog.Info("Skipping server because of recent last error", "url", s.url, "last_error", lastErr)
-					continue
-				}
+	dialOne := perAddrStreamDialer(opts.dialer, tlsCfg)
+
+	dialer := func(ctx context.Context) (net.Conn, error) {
+		for _, s := range servers {
+			// TOCTOU: the lastError snapshot is released before DialContext and
+			// re-acquired only for the error write. Two goroutines can therefore
+			// dial the same server concurrently. This is intentional, holding the
+			// lock across I/O would serialize reconnections across cloned clients,
+			// and benign because the write is an idempotent time.Now() and the
+			// skip check is advisory.
+			s.mu.Lock()
+			if time.Since(s.lastError) < *opts.retryTimeout {
+				lastErr := s.lastError
 				s.mu.Unlock()
-
-				conn, err := tlsDialer.DialContext(ctx, "tcp", s.url)
-				if err != nil {
-					now := time.Now()
-					s.mu.Lock()
-					s.lastError = now
-					s.mu.Unlock()
-					slog.Warn("TLS session initialization failed", "url", s.url, "error", err)
-				} else {
-					return conn, nil
-				}
+				slog.Info("Skipping server because of recent last error", "url", s.url, "last_error", lastErr)
+				continue
 			}
+			s.mu.Unlock()
 
-			// All servers have had an error within retryTimeout
-			// Call the first server to check if it went back up
-			first := servers[0]
-			conn, err := tlsDialer.DialContext(ctx, "tcp", first.url)
-			first.mu.Lock()
-
-			if err == nil {
-				// reset lastError since we had a success
-				first.lastError = time.Time{}
-				first.mu.Unlock()
+			conn, err := dialOne(ctx, s.url)
+			if err != nil {
+				now := time.Now()
+				s.mu.Lock()
+				s.lastError = now
+				s.mu.Unlock()
+				slog.Warn("Failed to dial server", "url", s.url, "error", err)
+			} else {
 				return conn, nil
 			}
-			first.lastError = time.Now()
-			first.mu.Unlock()
-			slog.Warn("TLS session initialization failed", "url", first.url, "error", err)
-			return nil, fmt.Errorf("failed to connect to servers in the connection pool (last attempt %q): %w", first.url, err)
 		}
+
+		// All servers have had an error within retryTimeout
+		// Call the first server to check if it went back up
+		first := servers[0]
+		conn, err := dialOne(ctx, first.url)
+		first.mu.Lock()
+
+		if err == nil {
+			// reset lastError since we had a success
+			first.lastError = time.Time{}
+			first.mu.Unlock()
+			return conn, nil
+		}
+		first.lastError = time.Now()
+		first.mu.Unlock()
+		slog.Warn("Failed to dial server", "url", first.url, "error", err)
+		return nil, fmt.Errorf("failed to connect to servers in the connection pool (last attempt %q): %w", first.url, err)
 	}
 
-	stream, err := dialer(ctx)
+	tr, err := newStreamTransport(ctx, dialer, opts.maxMessageSize)
 	if err != nil {
 		return nil, err
 	}
 
 	c := &Client{
-		lock:              new(sync.Mutex),
-		conn:              newConn(stream, opts.maxMessageSize),
-		dialer:            dialer,
+		tr:                tr,
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
 		middlewares:       opts.middlewares,
 		addr:              addrs[0],
-		maxMessageSize:    opts.maxMessageSize,
 	}
 
 	// Negotiate protocol version
