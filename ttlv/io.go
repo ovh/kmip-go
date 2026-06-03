@@ -1,12 +1,17 @@
 package ttlv
 
 import (
+	"errors"
 	"io"
 	"slices"
 )
 
 // DefaultMaxMessageSize is the default maximum allowed size in bytes for a single KMIP message.
 const DefaultMaxMessageSize = 1 * 1024 * 1024 // 1 MB
+
+// ErrMessageTooLarge is returned (wrapped) by Stream.Recv when the incoming
+// message would exceed the configured max size. Use errors.Is to detect it.
+var ErrMessageTooLarge = errors.New("ttlv: message exceeds max size")
 
 // computeNeededBytes calculates the number of bytes needed to process a TTLV-encoded buffer.
 // If the buffer length is less than 8 bytes, it returns 8 as the minimum required size.
@@ -74,7 +79,10 @@ func (s *Stream) Recv(msg any) error {
 		read += n
 		need = computeNeededBytes(buf[:read])
 		if s.max > 0 && need > s.max {
-			return Errorf("Message is too big. Max allowed size is %d bytes", s.max)
+			// Errorf wraps in ErrEncoding (so kmipserver's IsErrEncoding check
+			// still routes this to a structured KMIP error response); %w embeds
+			// the sentinel for callers who use errors.Is.
+			return Errorf("%w: max allowed is %d bytes", ErrMessageTooLarge, s.max)
 		}
 		if read >= need {
 			return UnmarshalTTLV(buf[:need], msg)
@@ -82,9 +90,9 @@ func (s *Stream) Recv(msg any) error {
 	}
 }
 
-// Roundtrip simply perform a Send() followed by a Recv(),
+// RoundTrip simply performs a Send() followed by a Recv(),
 // sending `req` then receiving `resp`.
-func (s *Stream) Roundtrip(req, resp any) error {
+func (s *Stream) RoundTrip(req, resp any) error {
 	if err := s.Send(req); err != nil {
 		return err
 	}

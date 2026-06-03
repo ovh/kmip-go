@@ -143,7 +143,7 @@ type Link struct {
 type Digest struct {
 	HashingAlgorithm HashingAlgorithm
 	DigestValue      []byte
-	KeyFormatType    KeyFormatType `ttlv:",omitempty,version=1.1.."`
+	KeyFormatType    KeyFormatType `ttlv:",omitempty,version=v1.1.."`
 }
 
 // Deprecated: deprecated as of kmip 1.1.

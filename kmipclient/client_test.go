@@ -397,7 +397,7 @@ func TestWithMaxMessageSize(t *testing.T) {
 		)
 		require.Error(t, err)
 		assert.Nil(t, client)
-		assert.True(t, ttlv.IsErrEncoding(err))
+		assert.ErrorIs(t, err, kmipclient.ErrResponseTooLarge)
 	})
 
 	t.Run("accepts response within max size", func(t *testing.T) {
@@ -447,7 +447,7 @@ func TestWithDialerUnsafe(t *testing.T) {
 	called := false
 	retErr := errors.New("not implemented")
 	_, err := kmipclient.Dial("1.2.3.4", kmipclient.WithDialerUnsafe(
-		func(ctx context.Context) (net.Conn, error) {
+		func(ctx context.Context, _ string) (net.Conn, error) {
 			called = true
 			return nil, retErr
 		},

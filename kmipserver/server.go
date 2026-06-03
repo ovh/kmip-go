@@ -151,7 +151,6 @@ func (srv *Server) Serve() error {
 			if errors.Is(err, net.ErrClosed) {
 				return ErrShutdown
 			}
-			//TODO: Return a shutdown error if shutdown has been requested
 			return err
 		}
 		srv.wg.Add(1)

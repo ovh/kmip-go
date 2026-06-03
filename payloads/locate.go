@@ -63,12 +63,12 @@ type LocateRequestPayload struct {
 	// An Integer object that indicates the maximum number of object identifiers the server MAY return.
 	MaximumItems int32 `ttlv:",omitempty"`
 	// An Integer object that indicates the number of object identifiers to skip that satisfy the identification criteria specified in the request.
-	OffsetItems int32 `ttlv:",omitempty,version=1.3.."`
+	OffsetItems int32 `ttlv:",omitempty,version=v1.3.."`
 	// An Integer object (used as a bit mask) that indicates whether only on-line objects, only archived objects,
 	// or both on-line and archived objects are to be searched. If omitted, then on-line only is assumed.
 	StorageStatusMask kmip.StorageStatusMask `ttlv:",omitempty"`
 	// An Enumeration object that indicates the object group member type.
-	ObjectGroupMember kmip.ObjectGroupMember `ttlv:",omitempty,version=1.1.."`
+	ObjectGroupMember kmip.ObjectGroupMember `ttlv:",omitempty,version=v1.1.."`
 	// Specifies an attribute and its value(s) that are REQUIRED to match those in a candidate object (according to the matching rules defined above).
 	Attribute []kmip.Attribute
 }
@@ -82,7 +82,7 @@ type LocateResponsePayload struct {
 	// A server MAY elect to omit this value from the Response if it is unable or unwilling to determine the total count of matched items.
 	//
 	// A server MAY elect to return the Located Items value even if Offset Items is not present in the Request.
-	LocatedItems *int32 `ttlv:",version=1.3.."`
+	LocatedItems *int32 `ttlv:",version=v1.3.."`
 	// The Unique Identifier of the located objects.
 	UniqueIdentifier []string
 }

@@ -45,11 +45,9 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"slices"
-	"sync"
 	"time"
 
 	"github.com/ovh/kmip-go"
@@ -70,6 +68,7 @@ type opts struct {
 	tlsCiphers        []uint16
 	dialer            DialerFunc
 	maxMessageSize    int
+	transportBuilder  TransportBuilder
 	// For pool dialer
 	retryTimeout *time.Duration
 	//TODO: Add KMIP Authentication / Credentials
@@ -81,22 +80,6 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 	if cfg == nil {
 		cfg = &tls.Config{
 			MinVersion: tls.VersionTLS12, // As required by KMIP 1.4 spec
-
-			// CipherSuites: []uint16{
-			// 	// Mandatory support as per KMIP 1.4 spec
-			// 	// tls.TLS_RSA_WITH_AES_256_CBC_SHA256, // Not supported in Go
-			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA256, // insecure
-
-			// 	// Optional support as per KMIP 1.4 spec
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			// 	tls.TLS_RSA_WITH_AES_128_CBC_SHA,            // insecure
-			// 	tls.TLS_RSA_WITH_AES_256_CBC_SHA,            // insecure
-			// 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, // insecure
-			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,      // insecure
-			// 	tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,   // insecure
-			// },
 		}
 	}
 	if cfg.RootCAs == nil {
@@ -126,7 +109,31 @@ func (o *opts) tlsConfig() (*tls.Config, error) {
 	return cfg, nil
 }
 
+// hasTLSOptions reports whether any of the standard TLS-related options have
+// been set. Exposed to transport builders via [DialInfo.TLSConfigured] for
+// mutual-exclusivity checks against fully-custom clients.
+func (o *opts) hasTLSOptions() bool {
+	return o.tlsCfg != nil ||
+		len(o.rootCAs) > 0 ||
+		len(o.certs) > 0 ||
+		o.serverName != "" ||
+		len(o.tlsCiphers) > 0
+}
+
 type Option func(*opts) error
+
+// applyOptions runs every option and joins any errors so the caller sees all
+// configuration mistakes at once instead of having to fix them one Dial at a
+// time.
+func applyOptions(o *opts, options []Option) error {
+	var errs []error
+	for _, opt := range options {
+		if err := opt(o); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
 
 // WithMiddlewares returns an Option that appends the provided Middleware(s) to the client's middleware chain.
 // This allows customization of the client's behavior by injecting additional processing steps.
@@ -343,12 +350,25 @@ func WithTlsCipherSuites(ciphers ...uint16) Option {
 	}
 }
 
-type DialerFunc func(ctx context.Context) (net.Conn, error)
+// DialerFunc establishes a (secured) network connection to addr. The same
+// DialerFunc may be invoked with different addresses across the lifetime of a
+// Client: DialCluster calls it once per cluster member, and the HTTP transport
+// calls it via http.Transport.DialTLSContext with the host:port resolved from
+// the request URL. Implementations must therefore honor the addr argument
+// rather than hard-coding a target.
+type DialerFunc func(ctx context.Context, addr string) (net.Conn, error)
 
 // WithDialerUnsafe customize the low-level network dialer used to establish the (secured) connection.
 //
-// When this option is provided, every other TLS related options are be ignored, and it's
-// the dialer responsibility to setup the secured channel using TLS or any other security mechanism.
+// When this option is provided, the standard kmipclient TLS options have no
+// effect on the established connection — it's the dialer's responsibility to
+// set up the secured channel using TLS or any other security mechanism. The
+// TLS options are still validated when applied (e.g. WithRootCAFile still
+// reads the file and may error at Dial time), they just don't shape the
+// connection.
+//
+// The dialer receives the per-call target address, so a single DialerFunc can
+// serve a cluster (DialCluster) or be wired into the HTTP transport's TLS dial.
 //
 // This option is a low-level escape hatch mainly used for testing or to provide alternative secured
 // channel implementation. Use at your own risks.
@@ -359,9 +379,19 @@ func WithDialerUnsafe(dialer DialerFunc) Option {
 	}
 }
 
-// WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP message
-// received by the client. Messages exceeding this limit are rejected with an error.
-// A value of 0 (or unset) uses the default (1 MB). A negative value disables the limit.
+// WithMaxMessageSize sets the maximum allowed size in bytes for a single KMIP
+// response received from the server. Both transports surface oversized
+// responses as [ErrResponseTooLarge] (use errors.Is to detect).
+//
+// Outbound requests are not capped on the client side — the caller is
+// responsible for sending sane payloads. The server may enforce its own
+// inbound cap, in which case an oversized request surfaces as a server-side
+// OperationFailed response, not as ErrResponseTooLarge.
+//
+// Values:
+//
+//   - 0 (or unset): use the default (1 MB).
+//   - Negative: disables the limit on both transports.
 func WithMaxMessageSize(size int) Option {
 	return func(o *opts) error {
 		o.maxMessageSize = size
@@ -369,19 +399,39 @@ func WithMaxMessageSize(size int) Option {
 	}
 }
 
+// WithTransportBuilder overrides the default TLS-stream transport. The builder
+// is invoked once during [DialContext] with the resolved [DialInfo] and its
+// result becomes the client's transport. Not compatible with [DialCluster],
+// which relies on the stream transport's per-address failover.
+//
+// This is the low-level integration hook used by transport sub-packages such
+// as [github.com/ovh/kmip-go/kmipclient/kmiphttp]; reach for it directly only
+// when implementing a brand-new transport.
+//
+// Implementations must satisfy the [Transport] contract — concurrency-safe
+// RoundTrip, independent Clone, idempotent Close — since [Client] relies on
+// those invariants.
+func WithTransportBuilder(b TransportBuilder) Option {
+	return func(o *opts) error {
+		if b == nil {
+			return errors.New("kmipclient: nil TransportBuilder")
+		}
+		o.transportBuilder = b
+		return nil
+	}
+}
+
 // Client represents a KMIP client that manages a connection to a KMIP server,
 // handles protocol version negotiation, and supports middleware for request/response
-// processing. It provides thread-safe access to the underlying connection and
-// configuration options such as supported protocol versions and custom dialers.
+// processing. The Client itself is read-only after construction; concurrency
+// safety (and serialization where needed, e.g. for the single-flight TTLV
+// stream protocol) is delegated to the underlying transport.
 type Client struct {
-	lock              *sync.Mutex
-	conn              *conn
+	tr                Transport
 	version           *kmip.ProtocolVersion
 	supportedVersions []kmip.ProtocolVersion
-	dialer            DialerFunc
 	middlewares       []Middleware
 	addr              string
-	maxMessageSize    int
 }
 
 // Dial establishes a connection to the KMIP server at the specified address using the provided options.
@@ -407,10 +457,8 @@ func Dial(addr string, options ...Option) (*Client, error) {
 //   - error   - An error if the connection or protocol negotiation fails.
 func DialContext(ctx context.Context, addr string, options ...Option) (*Client, error) {
 	opts := opts{}
-	for _, o := range options {
-		if err := o(&opts); err != nil {
-			return nil, err
-		}
+	if err := applyOptions(&opts, options); err != nil {
+		return nil, err
 	}
 	if len(opts.supportedVersions) == 0 {
 		opts.supportedVersions = append(opts.supportedVersions, supportedVersions...)
@@ -424,30 +472,17 @@ func DialContext(ctx context.Context, addr string, options ...Option) (*Client, 
 		return nil, err
 	}
 
-	dialer := opts.dialer
-	if dialer == nil {
-		dialer = func(ctx context.Context) (net.Conn, error) {
-			tlsDialer := tls.Dialer{
-				Config: tlsCfg,
-			}
-			return tlsDialer.DialContext(ctx, "tcp", addr)
-		}
-	}
-
-	stream, err := dialer(ctx)
+	tr, err := buildTransport(ctx, &opts, tlsCfg, addr)
 	if err != nil {
 		return nil, err
 	}
 
 	c := &Client{
-		lock:              new(sync.Mutex),
-		conn:              newConn(stream, opts.maxMessageSize),
-		dialer:            dialer,
+		tr:                tr,
 		supportedVersions: opts.supportedVersions,
 		version:           opts.enforceVersion,
 		middlewares:       opts.middlewares,
 		addr:              addr,
-		maxMessageSize:    opts.maxMessageSize,
 	}
 
 	// Negotiate protocol version
@@ -471,20 +506,17 @@ func (c *Client) Clone() (*Client, error) {
 //
 // Cloning a closed client is valid and will create a new connected client.
 func (c *Client) CloneCtx(ctx context.Context) (*Client, error) {
-	stream, err := c.dialer(ctx)
+	tr, err := c.tr.Clone(ctx)
 	if err != nil {
 		return nil, err
 	}
 	version := *c.version
 	return &Client{
-		lock:              new(sync.Mutex),
 		version:           &version,
 		supportedVersions: slices.Clone(c.supportedVersions),
-		dialer:            c.dialer,
 		middlewares:       slices.Clone(c.middlewares),
-		conn:              newConn(stream, c.maxMessageSize),
+		tr:                tr,
 		addr:              c.addr,
-		maxMessageSize:    c.maxMessageSize,
 	}, nil
 }
 
@@ -498,60 +530,18 @@ func (c *Client) Addr() string {
 	return c.addr
 }
 
-// Close terminates the client's connection and releases any associated resources.
-// It returns an error if the connection could not be closed.
+// Close releases the client's resources by delegating to the underlying
+// [Transport]'s Close. The default stream transport blocks until any in-flight
+// RoundTrip returns; cancel its context to abort sooner. Custom transports
+// (e.g. kmipclient/kmiphttp) may not cancel in-flight requests on Close —
+// see their own Close documentation.
 func (c *Client) Close() error {
-	return c.conn.Close()
+	return c.tr.Close()
 }
 
-func (c *Client) reconnect(ctx context.Context) error {
-	// fmt.Println("Reconnecting")
-	if c.conn != nil {
-		_ = c.conn.Close()
-		c.conn = nil
-	}
-	stream, err := c.dialer(ctx)
-	if err != nil {
-		return err
-	}
-	c.conn = newConn(stream, c.maxMessageSize)
-	return nil
-}
-
-// doRountrip sends a KMIP request message to the server and returns the corresponding response message.
-// It ensures thread safety by locking the client during the operation. If the connection is not established,
-// it attempts to reconnect. The method includes a retry mechanism for transient connection errors such as
-// io.EOF and io.ErrClosedPipe, attempting to reconnect and resend the request up to three times before failing.
-// Returns the response message on success, or an error if the operation ultimately fails.
-func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if c.conn == nil {
-		if err := c.reconnect(ctx); err != nil {
-			return nil, err
-		}
-	}
-
-	//TODO: Better reconnection loop. Do we really need a retry counter here ?
-	retry := 3
-	for {
-		resp, err := c.conn.roundtrip(ctx, msg)
-		if err == nil {
-			return resp, nil
-		}
-		if retry <= 0 || (!errors.Is(err, io.EOF) && !errors.Is(err, io.ErrClosedPipe)) {
-			return nil, err
-		}
-		if err := c.reconnect(ctx); err != nil {
-			return nil, err
-		}
-		retry--
-	}
-}
-
-// Roundtrip sends a KMIP request message through the client's middleware chain and returns the response.
+// RoundTrip sends a KMIP request message through the client's middleware chain and returns the response.
 // Each middleware can process the request and response, or pass it along to the next middleware in the chain.
-// The final handler sends the request using the client's doRountrip method.
+// The final handler delegates to the underlying [Transport].
 //
 // Parameters:
 //
@@ -562,7 +552,7 @@ func (c *Client) doRountrip(ctx context.Context, msg *kmip.RequestMessage) (*kmi
 //
 //   - *kmip.ResponseMessage - The KMIP response message received.
 //   - error - Any error encountered during processing or sending the request.
-func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
+func (c *Client) RoundTrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
 	i := 0
 	var next func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error)
 	next = func(ctx context.Context, req *kmip.RequestMessage) (*kmip.ResponseMessage, error) {
@@ -571,7 +561,7 @@ func (c *Client) Roundtrip(ctx context.Context, msg *kmip.RequestMessage) (*kmip
 			i++
 			return mdl(next, ctx, req)
 		}
-		return c.doRountrip(ctx, req)
+		return c.tr.RoundTrip(ctx, req)
 	}
 	return next(ctx, msg)
 }
@@ -593,7 +583,7 @@ func (c *Client) negotiateVersion(ctx context.Context) error {
 		ProtocolVersion: c.supportedVersions,
 	})
 
-	resp, err := c.Roundtrip(ctx, &msg)
+	resp, err := c.RoundTrip(ctx, &msg)
 	if err != nil {
 		return err
 	}
@@ -663,7 +653,7 @@ func (c *Client) Batch(ctx context.Context, payloads ...kmip.OperationPayload) (
 
 // BatchOpt sends a batch of KMIP operation payloads to the server and applies optional batch options.
 // It constructs a KMIP request message with the provided payloads and applies any BatchOption functions.
-// The request is sent using the client's Roundtrip method. If the response's batch count does not match
+// The request is sent using the client's RoundTrip method. If the response's batch count does not match
 // the number of payloads, an error is returned. On success, it returns the batch result items.
 //
 // Parameters:
@@ -679,7 +669,7 @@ func (c *Client) BatchOpt(ctx context.Context, payloads []kmip.OperationPayload,
 	for _, opt := range opts {
 		opt(&msg)
 	}
-	resp, err := c.Roundtrip(ctx, &msg)
+	resp, err := c.RoundTrip(ctx, &msg)
 	if err != nil {
 		return nil, err
 	}
