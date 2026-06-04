@@ -31,19 +31,25 @@ func RemoteAddr(ctx context.Context) string {
 	return v.remoteAddr
 }
 
+// TLSConnectionState retrieves the TLS connection state associated with the given context.
+// If no TLS connection state is present (e.g. the connection is not using TLS),
+// it returns nil.
+//
+// The returned value is shared across all requests on the same connection and must be
+// treated as read-only; callers must not mutate it.
+func TLSConnectionState(ctx context.Context) *tls.ConnectionState {
+	v, _ := ctx.Value(ctxConn{}).(connData)
+	return v.tlsConnState
+}
+
 // PeerCertificates retrieves the peer certificates from the TLS connection state
 // stored in the provided context. If no TLS connection state is present, it returns nil.
-//
-// Parameters:
-//   - ctx: The context containing connection data.
-//
-// Returns a slice of x509.Certificate pointers representing the peer certificates, or nil if unavailable.
 func PeerCertificates(ctx context.Context) []*x509.Certificate {
-	v, _ := ctx.Value(ctxConn{}).(connData)
-	if v.tlsConnState == nil {
+	tlsConnState := TLSConnectionState(ctx)
+	if tlsConnState == nil {
 		return nil
 	}
-	return v.tlsConnState.PeerCertificates
+	return tlsConnState.PeerCertificates
 }
 
 type ctxBatch struct{}
