@@ -227,6 +227,22 @@ func TestPayloads_Encode_Decode(t *testing.T) {
 			CorrelationValue:  []byte("corr-4"),
 		}},
 
+		// Hash
+		{"HashRequest", &payloads.HashRequestPayload{
+			CryptographicParameters: kmip.CryptographicParameters{HashingAlgorithm: kmip.HashingAlgorithmSHA_256},
+			Data:                    []byte("data to hash"),
+			CorrelationValue:        []byte("corr-5"),
+			InitIndicator:           boolPtr(true),
+			FinalIndicator:          boolPtr(true),
+		}},
+		{"HashResponse", &payloads.HashResponsePayload{
+			Data:             []byte("hashed-data"),
+			CorrelationValue: []byte("corr-5"),
+		}},
+		{"HashResponse_EmptyData", &payloads.HashResponsePayload{
+			CorrelationValue: []byte("corr-6"),
+		}},
+
 		// Locate
 		{"LocateRequest", &payloads.LocateRequestPayload{
 			MaximumItems:      10,
