@@ -778,8 +778,8 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | Decrypt              |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Sign                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Signature Verify     |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
-| MAC                  |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
-| MAC Verify           |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| MAC                  |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
+| MAC Verify           |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | RNG Retrieve         |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | RNG Seed             |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Hash                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
@@ -816,7 +816,7 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | Data                                     |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Data Length                              |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Signature Data                           |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
-| MAC Data                                 |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| MAC Data                                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Nonce                                    |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Correlation Value                        |  N/A |  N/A |  N/A |  ✅  |  ✅  |
 | Init Indicator                           |  N/A |  N/A |  N/A |  ✅  |  ✅  |
