@@ -243,6 +243,39 @@ func TestPayloads_Encode_Decode(t *testing.T) {
 			CorrelationValue: []byte("corr-6"),
 		}},
 
+		// MAC
+		{"MACRequest", &payloads.MACRequestPayload{
+			UniqueIdentifier:         "key-mac",
+			CryptographicParameters: &kmip.CryptographicParameters{},
+			Data:                    []byte("data to MAC"),
+			CorrelationValue:        []byte("corr-7"),
+			InitIndicator:           boolPtr(true),
+			FinalIndicator:          boolPtr(true),
+		}},
+		{"MACResponse", &payloads.MACResponsePayload{
+			UniqueIdentifier: "key-mac",
+			MACData:          []byte("mac-value"),
+			CorrelationValue: []byte("corr-7"),
+		}},
+		{"MACResponse_EmptyMACData", &payloads.MACResponsePayload{
+			UniqueIdentifier: "key-mac",
+		}},
+
+		// MACVerify
+		{"MACVerifyRequest", &payloads.MACVerifyRequestPayload{
+			UniqueIdentifier:         "key-mac-verify",
+			CryptographicParameters: &kmip.CryptographicParameters{},
+			Data:                    []byte("data to verify"),
+			MACData:                 []byte("mac-to-verify"),
+			CorrelationValue:        []byte("corr-8"),
+			InitIndicator:          boolPtr(true),
+			FinalIndicator:         boolPtr(true),
+		}},
+		{"MACVerifyResponse", &payloads.MACVerifyResponsePayload{
+			UniqueIdentifier:  "key-mac-verify",
+			ValidityIndicator: kmip.ValidityIndicatorValid,
+		}},
+
 		// Locate
 		{"LocateRequest", &payloads.LocateRequestPayload{
 			MaximumItems:      10,
