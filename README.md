@@ -782,7 +782,7 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | MAC Verify           |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | RNG Retrieve         |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | RNG Seed             |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
-| Hash                 |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| Hash                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Create Split Key     |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Join Split Key       |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Export               |  N/A |  N/A |  N/A |  N/A |  ✅  |
