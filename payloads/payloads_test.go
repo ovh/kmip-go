@@ -76,6 +76,7 @@ func TestPayloads_Encode_Decode(t *testing.T) {
 
 	boolPtr := func(b bool) *bool { return &b }
 	int32Ptr := func(i int32) *int32 { return &i }
+	int64Ptr := func(i int64) *int64 { return &i }
 	durationPtr := func(d time.Duration) *time.Duration { return &d }
 	compromiseDate := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
 
@@ -245,7 +246,7 @@ func TestPayloads_Encode_Decode(t *testing.T) {
 
 		// MAC
 		{"MACRequest", &payloads.MACRequestPayload{
-			UniqueIdentifier:         "key-mac",
+			UniqueIdentifier:        "key-mac",
 			CryptographicParameters: &kmip.CryptographicParameters{},
 			Data:                    []byte("data to MAC"),
 			CorrelationValue:        []byte("corr-7"),
@@ -263,18 +264,56 @@ func TestPayloads_Encode_Decode(t *testing.T) {
 
 		// MACVerify
 		{"MACVerifyRequest", &payloads.MACVerifyRequestPayload{
-			UniqueIdentifier:         "key-mac-verify",
+			UniqueIdentifier:        "key-mac-verify",
 			CryptographicParameters: &kmip.CryptographicParameters{},
 			Data:                    []byte("data to verify"),
 			MACData:                 []byte("mac-to-verify"),
 			CorrelationValue:        []byte("corr-8"),
-			InitIndicator:          boolPtr(true),
-			FinalIndicator:         boolPtr(true),
+			InitIndicator:           boolPtr(true),
+			FinalIndicator:          boolPtr(true),
 		}},
 		{"MACVerifyResponse", &payloads.MACVerifyResponsePayload{
 			UniqueIdentifier:  "key-mac-verify",
 			ValidityIndicator: kmip.ValidityIndicatorValid,
 		}},
+
+		// Check
+		{"CheckRequest", &payloads.CheckRequestPayload{
+			UniqueIdentifier:       "key-check",
+			UsageLimitsCount:       int64Ptr(1000),
+			CryptographicUsageMask: kmip.CryptographicUsageEncrypt,
+			LeaseTime:              durationPtr(24 * time.Hour),
+		}},
+		{"CheckResponse", &payloads.CheckResponsePayload{
+			UniqueIdentifier: "key-check",
+		}},
+
+		// DeriveKey
+		{"DeriveKeyRequest", &payloads.DeriveKeyRequestPayload{
+			ObjectType:       kmip.ObjectTypeSymmetricKey,
+			UniqueIdentifier: []string{"base-key-1"},
+			DerivationMethod: kmip.DerivationMethodPBKDF2,
+			DerivationParameters: kmip.DerivationParameters{
+				CryptographicParameters: &kmip.CryptographicParameters{HashingAlgorithm: kmip.HashingAlgorithmSHA_256},
+				DerivationData:          []byte("password"),
+				Salt:                    []byte("salt"),
+				IterationCount:          1000,
+			},
+			TemplateAttribute: *newTemplateAttr(),
+		}},
+		{"DeriveKeyResponse", &payloads.DeriveKeyResponsePayload{
+			UniqueIdentifier: "derived-key-1",
+		}},
+
+		// RNGRetrieve
+		{"RNGRetrieveRequest", &payloads.RNGRetrieveRequestPayload{
+			DataLength: 32,
+		}},
+		{"RNGRetrieveResponse", &payloads.RNGRetrieveResponsePayload{
+			Data: []byte("random-data-32-bytes-long!!!!"),
+		}},
+
+		// RNGSeed - not implemented
 
 		// Locate
 		{"LocateRequest", &payloads.LocateRequestPayload{

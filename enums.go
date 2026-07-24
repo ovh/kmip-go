@@ -700,6 +700,14 @@ func init() {
 	ttlv.RegisterEnum(TagKeyWrapType, map[KeyWrapType]string{
 		NotWrapped:   "NotWrapped",
 		AsRegistered: "AsRegistered"})
+	ttlv.RegisterEnum(TagDerivationMethod, map[DerivationMethod]string{
+		DerivationMethodPBKDF2:      "PBKDF2",
+		DerivationMethodHASH:        "HASH",
+		DerivationMethodHMAC:        "HMAC",
+		DerivationMethodENCRYPT:     "ENCRYPT",
+		DerivationMethodNIST800_108: "NIST800-108",
+		DerivationMethodAsymmetric:  "AsymmetricKey",
+	})
 }
 
 // ResultStatus represents the status of a KMIP operation result as defined by the KMIP specification.
@@ -1631,6 +1639,19 @@ const (
 	AsRegistered KeyWrapType = 0x00000002
 )
 
+// KMIP 1.1.
+
+type DerivationMethod uint32
+
+const (
+	DerivationMethodPBKDF2      DerivationMethod = 0x00000001
+	DerivationMethodHASH        DerivationMethod = 0x00000002
+	DerivationMethodHMAC        DerivationMethod = 0x00000003
+	DerivationMethodENCRYPT     DerivationMethod = 0x00000004
+	DerivationMethodNIST800_108 DerivationMethod = 0x00000005
+	DerivationMethodAsymmetric  DerivationMethod = 0x00000008
+)
+
 // Text Marshaling for better display in json outputs.
 // Test UnmarshalText for return enums from json intputs.
 
@@ -1915,6 +1936,12 @@ func (enum KeyWrapType) MarshalText() ([]byte, error) {
 }
 func (enum *KeyWrapType) UnmarshalText(text []byte) error {
 	return unmarshalText(enum, int(TagKeyWrapType), string(text))
+}
+func (enum DerivationMethod) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *DerivationMethod) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagDerivationMethod, string(text))
 }
 
 func marshalText[T ~uint32](enum T) ([]byte, error) {

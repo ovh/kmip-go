@@ -268,3 +268,20 @@ type CapabilityInformation struct {
 	ShreddingAlgorithm      ShreddingAlgorithm `ttlv:",omitempty"`
 	RNGMode                 RNGMode            `ttlv:",omitempty"`
 }
+
+// DerivationParameters contains the parameters needed by the specified derivation method.
+type DerivationParameters struct {
+	// The Cryptographic Parameters corresponding to the particular cryptographic method requested.
+	// Optional, depends on the derivation method.
+	CryptographicParameters *CryptographicParameters `ttlv:",omitempty"`
+	// The initialization vector, counter or nonce to be used.
+	// Depends on PRF and mode of operation: empty IV is assumed if not provided.
+	InitializationVector []byte `ttlv:",omitempty"`
+	// The data to be used as the input to the key derivation function.
+	// Required unless the Unique Identifier of a Secret Data object is provided.
+	DerivationData []byte `ttlv:",omitempty"`
+	// The Salt to be used in key derivation functions that support salt (e.g., PBKDF2).
+	Salt []byte `ttlv:",omitempty"`
+	// The number of iterations to be performed for key derivation functions that support iteration count.
+	IterationCount int32 `ttlv:",omitempty"`
+}
