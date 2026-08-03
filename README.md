@@ -748,11 +748,11 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | Create Key Pair      |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Register             |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Re-key               |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
-| DeriveKey            |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
+| DeriveKey            |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Certify              |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 | Re-certify           |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 | Locate               |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
-| Check                |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
+| Check                |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Get                  |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Get Attributes       |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
 | Get Attribute List   |  ✅  |  ✅  |  ✅  |  ✅  |  ✅  |
@@ -780,7 +780,7 @@ This library implements the OASIS KMIP (Key Management Interoperability Protocol
 | Signature Verify     |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | MAC                  |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | MAC Verify           |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
-| RNG Retrieve         |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
+| RNG Retrieve         |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | RNG Seed             |  N/A |  N/A |  ❌  |  ❌  |  ❌  |
 | Hash                 |  N/A |  N/A |  ✅  |  ✅  |  ✅  |
 | Create Split Key     |  N/A |  N/A |  ❌  |  ❌  |  ❌  |

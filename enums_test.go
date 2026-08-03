@@ -104,6 +104,8 @@ func TestEnums(t *testing.T) {
 	t.Run("ClientRegistrationMethod", func(t *testing.T) { testEnum[ClientRegistrationMethod](t) })
 
 	t.Run("MaskGenerator", func(t *testing.T) { testEnum[MaskGenerator](t) })
+
+	t.Run("DerivationMethod", func(t *testing.T) { testEnum[DerivationMethod](t) })
 }
 
 func testEnum[T ~uint32](t *testing.T) {
