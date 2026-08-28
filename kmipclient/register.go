@@ -184,8 +184,7 @@ func (ex ExecRegisterWantType) SymmetricKey(alg kmip.CryptographicAlgorithm, usa
 		KeyBlock: kmip.KeyBlock{
 			KeyFormatType:          keyFmt,
 			CryptographicAlgorithm: alg,
-			//nolint:gosec // integer bounds are checked above
-			CryptographicLength: int32(bitLen),
+			CryptographicLength:    int32(bitLen),
 			KeyValue: &kmip.KeyValue{
 				Plain: &kmip.PlainKeyValue{
 					KeyMaterial: material,
@@ -521,12 +520,14 @@ func (ex ExecRegisterWantType) EcdsaPrivateKey(key *ecdsa.PrivateKey, usage kmip
 			// TransparentECDSAPrivateKey is deprecated since KMIP 1.3
 			keyFormat = kmip.KeyFormatTypeTransparentECPrivateKey
 			keyMaterial.TransparentECPrivateKey = &kmip.TransparentECPrivateKey{
+				//nolint:staticcheck // We need the big integer here.
 				D:                *key.D,
 				RecommendedCurve: crv,
 			}
 		} else {
 			//nolint:staticcheck // for backward compatibility
 			keyMaterial.TransparentECDSAPrivateKey = &kmip.TransparentECDSAPrivateKey{
+				//nolint:staticcheck // We need the big integer here.
 				D:                *key.D,
 				RecommendedCurve: crv,
 			}

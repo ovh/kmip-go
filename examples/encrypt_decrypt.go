@@ -53,7 +53,7 @@ func test_encrypt_decrypt_aes_default(client *kmipclient.Client) {
 		WithAttribute(kmip.AttributeNameCryptographicParameters, kmip.CryptographicParameters{
 			CryptographicAlgorithm: kmip.CryptographicAlgorithmAES,
 			BlockCipherMode:        kmip.BlockCipherModeGCM,
-			RandomIV:               ptrTo(true),
+			RandomIV:               new(true),
 		}).
 		MustExec().
 		UniqueIdentifier

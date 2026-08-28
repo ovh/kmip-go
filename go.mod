@@ -1,6 +1,6 @@
 module github.com/ovh/kmip-go
 
-go 1.25.5
+go 1.26.0
 
 require github.com/stretchr/testify v1.12.1
 
