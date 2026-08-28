@@ -318,6 +318,7 @@ const (
 	TagReplaceExisting                       = 0x420124
 )
 
+//nolint:gosec // No hardcoded credential here, just a tag name.
 var tagNames = map[int]string{
 	// KMIP 1.0
 	TagActivationDate:                      "ActivationDate",

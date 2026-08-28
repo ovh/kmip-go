@@ -251,13 +251,14 @@ func (key *PublicKey) ECDSA() (*ecdsa.PublicKey, error) {
 
 		switch compressionType {
 		case KeyCompressionTypeECPublicKeyTypeUncompressed:
-			//nolint:staticcheck // We need this function compute ECDSA public key
-			rkey.X, rkey.Y = elliptic.Unmarshal(curve, tkey.QString)
-			if rkey.X == nil {
-				return nil, errors.New("Invalid public key")
+			rkey, err = ecdsa.ParseUncompressedPublicKey(curve, tkey.QString)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to parse uncompressed public key: %w", err)
 			}
 		case KeyCompressionTypeECPublicKeyTypeX9_62CompressedPrime:
+			//nolint:staticcheck // We need X and Y to compute ECDSA public key from compressed form
 			rkey.X, rkey.Y = elliptic.UnmarshalCompressed(curve, tkey.QString)
+			//nolint:staticcheck // We need X to verify if key was successfully parsed
 			if rkey.X == nil {
 				return nil, errors.New("Invalid public key")
 			}
@@ -368,10 +369,9 @@ func (key *PrivateKey) RSA() (*rsa.PrivateKey, error) {
 			D:      tkey.PrivateExponent,
 			Primes: []*big.Int{tkey.P, tkey.Q},
 			Precomputed: rsa.PrecomputedValues{
-				Dp:        tkey.PrimeExponentP,
-				Dq:        tkey.PrimeExponentQ,
-				Qinv:      tkey.CRTCoefficient,
-				CRTValues: []rsa.CRTValue{},
+				Dp:   tkey.PrimeExponentP,
+				Dq:   tkey.PrimeExponentQ,
+				Qinv: tkey.CRTCoefficient,
 			},
 		}
 		rkey.Precompute()
@@ -436,14 +436,10 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 			return nil, fmt.Errorf("Unsupported elliptic curve %s", ttlv.EnumStr(tkey.RecommendedCurve))
 		}
 
-		rkey := &ecdsa.PrivateKey{
-			PublicKey: ecdsa.PublicKey{
-				Curve: curve,
-			},
-			D: &tkey.D,
+		rkey, err := ecdsa.ParseRawPrivateKey(curve, tkey.D.Bytes())
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse raw private key: %w", err)
 		}
-		// We need this function compute ECDSA public key.
-		rkey.X, rkey.Y = curve.ScalarBaseMult(rkey.D.Bytes())
 		return rkey, nil
 	default:
 		return nil, fmt.Errorf("Unsupported key format type %s", ttlv.EnumStr(key.KeyBlock.KeyFormatType))

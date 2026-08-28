@@ -510,7 +510,7 @@ func test_usage_limits(client *kmipclient.Client) {
 	if !limits.Equals(&kmip.UsageLimits{
 		UsageLimitsUnit:  kmip.UsageLimitsUnitObject,
 		UsageLimitsTotal: 10,
-		UsageLimitsCount: ptrTo(int64(10)),
+		UsageLimitsCount: new(int64(10)),
 	}) {
 		panic("Unexpected limits")
 	}
@@ -522,7 +522,7 @@ func test_usage_limits(client *kmipclient.Client) {
 	if !limits.Equals(&kmip.UsageLimits{
 		UsageLimitsUnit:  kmip.UsageLimitsUnitObject,
 		UsageLimitsTotal: 10,
-		UsageLimitsCount: ptrTo(int64(7)),
+		UsageLimitsCount: new(int64(7)),
 	}) {
 		panic("Unexpected limits")
 	}
@@ -537,7 +537,7 @@ func test_usage_limits(client *kmipclient.Client) {
 	if !limits.Equals(&kmip.UsageLimits{
 		UsageLimitsUnit:  kmip.UsageLimitsUnitObject,
 		UsageLimitsTotal: 10,
-		UsageLimitsCount: ptrTo(int64(7)),
+		UsageLimitsCount: new(int64(7)),
 	}) {
 		panic("Unexpected limits")
 	}
@@ -551,7 +551,7 @@ func test_usage_limits(client *kmipclient.Client) {
 	if !limits.Equals(&kmip.UsageLimits{
 		UsageLimitsUnit:  kmip.UsageLimitsUnitObject,
 		UsageLimitsTotal: 10,
-		UsageLimitsCount: ptrTo(int64(0)),
+		UsageLimitsCount: new(int64(0)),
 	}) {
 		panic("Unexpected limits")
 	}
@@ -759,8 +759,4 @@ func test_locate_by_range(client *kmipclient.Client) {
 	if slices.Contains(lresp.UniqueIdentifier, k3) {
 		panic("Found an unexpected keys")
 	}
-}
-
-func ptrTo[T any](v T) *T {
-	return &v
 }

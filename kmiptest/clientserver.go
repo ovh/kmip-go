@@ -84,12 +84,12 @@ func NewServer(t TestingT, hdl kmipserver.RequestHandler) (addr, ca string) {
 	srv := kmipserver.NewServer(list, hdl)
 	go func() {
 		if err := srv.Serve(); err != nil && !errors.Is(err, kmipserver.ErrShutdown) {
-			t.Errorf("server error: %w", err)
+			t.Errorf("server error: %v", err)
 		}
 	}()
 	t.Cleanup(func() {
 		if err := srv.Shutdown(); err != nil {
-			t.Errorf("server failed to shutdown: %w", err)
+			t.Errorf("server failed to shutdown: %v", err)
 		}
 	})
 
@@ -155,7 +155,7 @@ func NewServerWithHandle(t TestingT, hdl kmipserver.RequestHandler) (addr, ca st
 	srv = kmipserver.NewServer(list, hdl)
 	go func() {
 		if err := srv.Serve(); err != nil && !errors.Is(err, kmipserver.ErrShutdown) {
-			t.Errorf("server error: %w", err)
+			t.Errorf("server error: %v", err)
 		}
 	}()
 	t.Cleanup(func() {
@@ -163,7 +163,7 @@ func NewServerWithHandle(t TestingT, hdl kmipserver.RequestHandler) (addr, ca st
 			if errors.Is(err, kmipserver.ErrShutdown) || errors.Is(err, net.ErrClosed) {
 				return
 			}
-			t.Errorf("server failed to shutdown: %w", err)
+			t.Errorf("server failed to shutdown: %v", err)
 		}
 	})
 
