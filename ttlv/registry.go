@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"iter"
 	"reflect"
+	"sync"
 )
 
 var (
@@ -18,6 +19,13 @@ var (
 	bitmasks      = map[reflect.Type]int{}
 	bitmaskNames  = map[int][]string{}
 	bitmaskByName = map[int]map[string]int32{}
+)
+
+// tagForTypeCache caches the tag lookup results for reflect.Type
+// to avoid repeated map lookups and type processing.
+var (
+	tagForTypeCache     = make(map[reflect.Type]int)
+	tagForTypeCacheMu   sync.RWMutex
 )
 
 func getTagByName(name string) (int, error) {
@@ -44,36 +52,70 @@ func TagString(tag int) string {
 }
 
 func getTagForType(ty reflect.Type) (int, error) {
+	// Dereference pointer types first
 	for ty.Kind() == reflect.Pointer {
 		ty = ty.Elem()
 	}
-	if ty.Kind() == reflect.Array || ty.Kind() == reflect.Slice {
-		return getTagForType(ty.Elem())
+
+	// Check cache first (read lock)
+	tagForTypeCacheMu.RLock()
+	cachedTag, cached := tagForTypeCache[ty]
+	tagForTypeCacheMu.RUnlock()
+	if cached {
+		return cachedTag, nil
 	}
-	if tag, ok := tagByType[ty]; ok {
-		return tag, nil
+
+	// Lookup the tag
+	var tag int
+	var ok bool
+
+	switch ty.Kind() {
+	case reflect.Array, reflect.Slice:
+		// For arrays/slices, look up element type
+		var err error
+		tag, err = getTagForType(ty.Elem())
+		if err != nil {
+			return 0, err
+		}
+		ok = true
+
+	default:
+		// Try by type first, then by name
+		if tag, ok = tagByType[ty]; !ok {
+			tag, ok = tagByName[ty.Name()]
+		}
 	}
-	if tag, ok := tagByName[ty.Name()]; ok {
-		return tag, nil
+
+	if !ok {
+		return 0, fmt.Errorf("No default tag found for type %q", ty.Name())
 	}
-	return 0, fmt.Errorf("No default tag found for type %q", ty.Name())
+
+	// Cache successful lookup
+	tagForTypeCacheMu.Lock()
+	tagForTypeCache[ty] = tag
+	tagForTypeCacheMu.Unlock()
+	return tag, nil
 }
 
-// getTagForValue attempts to retrieve a tag integer associated with the type of the provided reflect.Value.
-// It first tries to get the tag for the value's type directly. If that fails and the value is a pointer,
-// it dereferences the pointer(s) until it reaches a non-pointer type. If the resulting value is an interface,
-// it attempts to get the tag for the underlying concrete type. Returns the tag and any error encountered.
-func getTagForValue(val reflect.Value) (int, error) {
-	tag, err := getTagForType(val.Type())
-	if err != nil {
-		for val.Kind() == reflect.Pointer {
-			val = val.Elem()
-		}
-		if val.Kind() == reflect.Interface {
-			tag, err = getTagForType(val.Elem().Type())
-		}
+// getTagForValue attempts to retrieve a tag integer associated with the type of the provided value.
+// For pointer types, it dereferences to get the element type.
+// For interface types, it extracts the concrete type from the value.
+// Returns the tag and any error encountered.
+func getTagForValue(val any) (int, error) {
+	ty := reflect.TypeOf(val)
+	rv := reflect.ValueOf(val)
+	// Dereference pointers
+	for ty.Kind() == reflect.Pointer {
+		ty = ty.Elem()
+		rv = rv.Elem()
 	}
-	return tag, err
+	if ty.Kind() == reflect.Interface {
+		if rv.IsNil() {
+			return 0, fmt.Errorf("no default tag found for nil interface")
+		}
+		ty = rv.Type()
+	}
+	return getTagForType(ty)
 }
 
 // RegisterTag registers a new named tag and save the mapping between name and interger value for later usage
@@ -86,6 +128,10 @@ func RegisterTag(name string, value int, ty ...reflect.Type) {
 	for _, t := range ty {
 		tagByType[t] = value
 	}
+	// Invalidate cache since registrations may change tag mappings
+	tagForTypeCacheMu.Lock()
+	clear(tagForTypeCache)
+	tagForTypeCacheMu.Unlock()
 }
 
 // RegisterEnum registers an enum tag with its tag and all its string values.
@@ -109,6 +155,10 @@ func RegisterEnum[T ~uint32](tag int, names map[T]string) {
 		enumNames[tag][uint32(enum)] = name
 		enumsByName[tag][name] = uint32(enum)
 	}
+	// Invalidate cache since registrations may change tag mappings
+	tagForTypeCacheMu.Lock()
+	clear(tagForTypeCache)
+	tagForTypeCacheMu.Unlock()
 }
 
 // EnumValues returns an iterator over registered enum values and names
@@ -195,6 +245,10 @@ func RegisterBitmask[T ~int32](tag int, names ...string) {
 	for i, name := range names {
 		bitmaskByName[tag][name] = 1 << i
 	}
+	// Invalidate cache since registrations may change tag mappings
+	tagForTypeCacheMu.Lock()
+	clear(tagForTypeCache)
+	tagForTypeCacheMu.Unlock()
 }
 
 // BitmaskStr returns the string representation of a bitmask value, consisting of

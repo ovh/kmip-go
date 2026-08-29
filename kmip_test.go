@@ -163,3 +163,174 @@ func TestParseAndMarshalOasisTests(t *testing.T) {
 		}
 	}
 }
+
+// RequestHeader Benchmarks
+
+func makeRequestHeader() kmip.RequestHeader {
+	batchOrder := true
+	async := true
+	return kmip.RequestHeader{
+		ProtocolVersion:             kmip.V1_4,
+		MaximumResponseSize:         1048576,
+		ClientCorrelationValue:      "client-12345",
+		ServerCorrelationValue:      "server-67890",
+		AsynchronousIndicator:       &async,
+		AttestationCapableIndicator: &async,
+		AttestationType: []kmip.AttestationType{
+			kmip.AttestationTypeTPMQuote,
+			kmip.AttestationTypeTCGIntegrityReport,
+		},
+		Authentication: &kmip.Authentication{
+			Credential: kmip.Credential{
+				CredentialType: kmip.CredentialTypeUsernameAndPassword,
+			},
+		},
+		BatchErrorContinuationOption: kmip.BatchErrorContinuationOptionUndo,
+		BatchOrderOption:             &batchOrder,
+		TimeStamp:                    func() *time.Time { t := time.Now().Truncate(time.Second); return &t }(),
+		BatchCount:                   1,
+	}
+}
+
+// BenchmarkRequestHeaderEncode_TTLV_Pooled benchmarks encoding RequestHeader using pooled MarshalTTLV
+func BenchmarkRequestHeaderEncode_TTLV_Pooled(b *testing.B) {
+	header := makeRequestHeader()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		_ = ttlv.MarshalTTLV(header)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_TTLV_PoolReuse benchmarks encoding using pooled encoder with per-iteration reuse
+// This simulates the ideal pooling pattern: get from pool, reuse, return
+func BenchmarkRequestHeaderEncode_TTLV_PoolReuse(b *testing.B) {
+	header := makeRequestHeader()
+
+	// Simulate pooling pattern: get encoder once, reuse across all iterations
+	enc := ttlv.NewTTLVEncoder()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		enc.Clear()
+		enc.Any(header)
+		// 模拟池化：编码后准备归还（实际不归还以便复用）
+	}
+}
+
+// BenchmarkRequestHeaderEncode_TTLV_NonPooled benchmarks encoding RequestHeader creating a new encoder per call
+func BenchmarkRequestHeaderEncode_TTLV_NonPooled(b *testing.B) {
+	header := makeRequestHeader()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		enc := ttlv.NewTTLVEncoder()
+		enc.Any(header)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_TTLV_Reuse benchmarks encoding RequestHeader reusing the same encoder instance
+func BenchmarkRequestHeaderEncode_TTLV_Reuse(b *testing.B) {
+	header := makeRequestHeader()
+	enc := ttlv.NewTTLVEncoder()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		enc.Clear()
+		enc.Any(header)
+	}
+}
+
+// BenchmarkRequestHeaderDecode_TTLV_Pooled benchmarks decoding RequestHeader using pooled UnmarshalTTLV
+func BenchmarkRequestHeaderDecode_TTLV_Pooled(b *testing.B) {
+	header := makeRequestHeader()
+	data := ttlv.MarshalTTLV(header)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		var h kmip.RequestHeader
+		_ = ttlv.UnmarshalTTLV(data, &h)
+	}
+}
+
+// BenchmarkRequestHeaderDecode_TTLV_NonPooled benchmarks decoding RequestHeader using non-pooled NewTTLVDecoder
+func BenchmarkRequestHeaderDecode_TTLV_NonPooled(b *testing.B) {
+	header := makeRequestHeader()
+	data := ttlv.MarshalTTLV(header)
+
+	b.ReportAllocs()
+	for b.Loop() {
+		dec, _ := ttlv.NewTTLVDecoder(data)
+		var h kmip.RequestHeader
+		_ = dec.Any(&h)
+	}
+}
+
+// BenchmarkRequestHeaderEncodeDecode_TTLV benchmarks full encode/decode cycle using pooled functions
+func BenchmarkRequestHeaderEncodeDecode_TTLV(b *testing.B) {
+	header := makeRequestHeader()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		data := ttlv.MarshalTTLV(header)
+		var h kmip.RequestHeader
+		_ = ttlv.UnmarshalTTLV(data, &h)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_XML benchmarks encoding RequestHeader to XML format
+func BenchmarkRequestHeaderEncode_XML(b *testing.B) {
+	header := makeRequestHeader()
+	enc := ttlv.NewXMLEncoder()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		enc.Clear()
+		enc.Any(header)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_JSON benchmarks encoding RequestHeader to JSON format
+func BenchmarkRequestHeaderEncode_JSON(b *testing.B) {
+	header := makeRequestHeader()
+	enc := ttlv.NewJSONEncoder()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		enc.Clear()
+		enc.Any(header)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_Text benchmarks encoding RequestHeader to text format
+func BenchmarkRequestHeaderEncode_Text(b *testing.B) {
+	header := makeRequestHeader()
+	enc := ttlv.NewTextEncoder()
+
+	b.ReportAllocs()
+	for b.Loop() {
+		enc.Clear()
+		enc.Any(header)
+	}
+}
+
+// BenchmarkRequestHeaderEncode_Size reports the encoded size of RequestHeader in different formats
+func BenchmarkRequestHeaderEncode_Size(b *testing.B) {
+	header := makeRequestHeader()
+
+	// Run once to get sizes
+	ttlvData := ttlv.MarshalTTLV(header)
+	b.ReportMetric(float64(len(ttlvData)), "bytes/ttlv")
+
+	xmlData := ttlv.MarshalXML(header)
+	b.ReportMetric(float64(len(xmlData)), "bytes/xml")
+
+	jsonData := ttlv.MarshalJSON(header)
+	b.ReportMetric(float64(len(jsonData)), "bytes/json")
+
+	textData := ttlv.MarshalText(header)
+	b.ReportMetric(float64(len(textData)), "bytes/text")
+}
