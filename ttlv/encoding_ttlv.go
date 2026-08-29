@@ -165,6 +165,11 @@ func newTTLVReader(buf []byte) (*ttlvReader, error) {
 	return dec, nil
 }
 
+func (dec *ttlvReader) resetBuffer(buf []byte) error {
+	dec.buf = buf
+	return dec.validate()
+}
+
 func (dec *ttlvReader) Next() error {
 	dec.buf = dec.buf[8+dec.paddedLen():]
 	return dec.validate()
