@@ -38,7 +38,6 @@ func NewRequestMessage(version ProtocolVersion, payloads ...OperationPayload) Re
 			RequestPayload: pl,
 		}
 		if len(payloads) > 1 {
-			//nolint:gosec // this cast is safe as we just want to append a number to a byte slice
 			item.UniqueBatchItemID = binary.BigEndian.AppendUint64(item.UniqueBatchItemID, uint64(i))
 		}
 		msg.BatchItem = append(msg.BatchItem, item)

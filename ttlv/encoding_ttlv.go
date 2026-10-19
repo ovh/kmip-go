@@ -34,6 +34,7 @@ func (enc *ttlvWriter) pad(n int, v byte) {
 }
 
 func (enc *ttlvWriter) writeTag(tag int) {
+	//nolint:gosec // those casts are safe as we are extracting bytes.
 	enc.buf = append(enc.buf, byte(tag>>16), byte(tag>>8), byte(tag))
 }
 

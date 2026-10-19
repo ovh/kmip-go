@@ -310,7 +310,7 @@ func (j *jsonReader) assertType(ty Type, tag int) error {
 	}
 	if j.Tag() != tag {
 		//TODO: Add details
-		return Errorf("Unexpected TTLV tag. Got %q but expected %s", j.Tag(), TagString(tag))
+		return Errorf("Unexpected TTLV tag. Got %q but expected %q", TagString(j.Tag()), TagString(tag))
 	}
 	if j.Type() != ty {
 		//TODO: Add details

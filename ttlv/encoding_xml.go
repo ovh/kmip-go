@@ -49,7 +49,6 @@ func (enc *xmlWriter) startElement(ty Type, tag int) xml.StartElement {
 	if tagName := getTagName(tag); tagName != "" {
 		start.Name.Local = tagName
 	} else {
-		//nolint:gosec // this cast is safe as we are appending a hex value
 		start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "tag"}, Value: fmt.Sprintf("0x%06X", uint(tag))})
 	}
 	if ty != TypeStructure {

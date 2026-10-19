@@ -39,7 +39,6 @@ func TagString(tag int) string {
 	if name, ok := tagNames[tag]; ok {
 		return name
 	}
-	//nolint:gosec // this cast is safe as we are appending a hex value
 	return fmt.Sprintf("0x%06X", uint(tag))
 }
 
