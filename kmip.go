@@ -23,6 +23,26 @@ func (pv ProtocolVersion) String() string {
 	return fmt.Sprintf("%d.%d", pv.ProtocolVersionMajor, pv.ProtocolVersionMinor)
 }
 
+// TagEncodeTTLV implements TagEncodable for ProtocolVersion.
+// This avoids reflection-based encoding, significantly improving performance.
+func (pv ProtocolVersion) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
+	e.Struct(tag, func(e *ttlv.Encoder) {
+		e.Integer(TagProtocolVersionMajor, pv.ProtocolVersionMajor)
+		e.Integer(TagProtocolVersionMinor, pv.ProtocolVersionMinor)
+	})
+}
+
+// TagDecodeTTLV implements TagDecodable for ProtocolVersion.
+// This avoids reflection-based decoding, significantly improving performance.
+func (pv *ProtocolVersion) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
+	return d.Struct(tag, func(d *ttlv.Decoder) error {
+		if err := d.TagAny(TagProtocolVersionMajor, &pv.ProtocolVersionMajor); err != nil {
+			return err
+		}
+		return d.TagAny(TagProtocolVersionMinor, &pv.ProtocolVersionMinor)
+	})
+}
+
 type CredentialValue struct {
 	UserPassword *CredentialValueUserPassword
 	Device       *CredentialValueDevice
@@ -85,7 +105,7 @@ func (kb *Credential) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 type Authentication struct {
 	Credential Credential
 	// Starting from KMIP 1.2, Credential can be repeated
-	AdditionalCredential []Credential `ttlv:",version=v1.2.."`
+	AdditionalCredential []Credential `ttlv:"Credential,version=v1.2.."`
 }
 
 type RevocationReason struct {

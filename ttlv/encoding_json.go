@@ -232,6 +232,21 @@ func newJSONReader(data []byte) (*jsonReader, error) {
 	return r, nil
 }
 
+func (j *jsonReader) reset(data []byte) error {
+	// Clear backing array to release references for GC
+	clear(j.value[:cap(j.value)])
+	j.value = j.value[:0]
+	j.current = nil
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	var v any
+	if err := dec.Decode(&v); err != nil {
+		return err
+	}
+	j.value = append(j.value, v)
+	return nil
+}
+
 // Next implements reader.
 func (j *jsonReader) Next() error {
 	if len(j.value) == 0 {
@@ -602,4 +617,8 @@ func (j *jsonReader) Bitmask(realtag, tag int) (int32, error) {
 	default:
 		return 0, Errorf("Invalid bitmask value %q", val)
 	}
+}
+
+func (j *jsonReader) resetBuffer(data []byte) error {
+	return j.reset(data)
 }

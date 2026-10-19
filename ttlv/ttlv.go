@@ -20,6 +20,8 @@ package ttlv
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"sync"
 )
 
 // ErrEncoding is the error type returned when decoding data fails.
@@ -52,44 +54,110 @@ func IsErrEncoding(err error) bool {
 	return errors.As(err, &e)
 }
 
+// Encoder is pooled to reduce per-call allocations.
+// The pool is automatically cleared when encoders are no longer in use.
+var ttlvEncoderPool = sync.Pool{
+	New: func() any {
+		return NewTTLVEncoder()
+	},
+}
+
+var xmlEncoderPool = sync.Pool{
+	New: func() any {
+		return NewXMLEncoder()
+	},
+}
+
+var jsonEncoderPool = sync.Pool{
+	New: func() any {
+		return NewJSONEncoder()
+	},
+}
+
+var textEncoderPool = sync.Pool{
+	New: func() any {
+		return NewTextEncoder()
+	},
+}
+
+// decoderWrapper holds a pointer to a Decoder for pooling purposes.
+// Decoder is a value type internally, so we need a pointer to pool it correctly.
+type decoderWrapper struct {
+	dec Decoder
+}
+
+var ttlvDecoderPool = sync.Pool{
+	New: func() any {
+		dec, _ := NewTTLVDecoder(nil)
+		w := &decoderWrapper{}
+		w.dec = dec
+		return w
+	},
+}
+
 // MarshalTTLV serializes `data` into a binary TTLV encoded byte array.
 func MarshalTTLV(data any) []byte {
-	enc := NewTTLVEncoder()
+	enc := ttlvEncoderPool.Get().(Encoder)
+	enc.Clear()
 	enc.Any(data)
-	return enc.Bytes()
+	result := enc.Bytes()
+	ttlvEncoderPool.Put(enc)
+	return slices.Clone(result)
 }
 
 // MarshalXML serializes `data` into an xml TTLV encoded byte string.
 func MarshalXML(data any) []byte {
-	enc := NewXMLEncoder()
+	enc := xmlEncoderPool.Get().(Encoder)
+	enc.Clear()
 	enc.Any(data)
-	return enc.Bytes()
+	result := slices.Clone(enc.Bytes())
+	xmlEncoderPool.Put(enc)
+	return result
 }
 
 // MarshalJSON serializes `data` into a json TTLV encoded byte string.
 func MarshalJSON(data any) []byte {
-	enc := NewJSONEncoder()
+	enc := jsonEncoderPool.Get().(Encoder)
+	enc.Clear()
 	enc.Any(data)
-	return enc.Bytes()
+	result := slices.Clone(enc.Bytes())
+	jsonEncoderPool.Put(enc)
+	return result
 }
 
 // MarshalText serializes `data` into a textual and human-friendly form
 // of TTLV. Useful mainly for debugging.
 func MarshalText(data any, hide ...bool) []byte {
-	enc := NewTextEncoder(hide...)
+	var enc Encoder
+	if len(hide) > 0 && hide[0] {
+		// Create new encoder when redaction is enabled
+		enc = NewTextEncoder(true)
+	} else {
+		enc = textEncoderPool.Get().(Encoder)
+	}
+	enc.Clear()
 	enc.Any(data)
-	return enc.Bytes()
+	result := slices.Clone(enc.Bytes())
+	if len(hide) == 0 || !hide[0] {
+		textEncoderPool.Put(enc)
+	}
+	return result
 }
 
 // UnmarshalTTLV deserializes the binary TTLV byte string into the object pointed by `ptr`.
 //
 // `ptr` must be a pointer.
 func UnmarshalTTLV(data []byte, ptr any) error {
-	dec, err := NewTTLVDecoder(data)
-	if err != nil {
+	wrapper := ttlvDecoderPool.Get().(*decoderWrapper)
+	if err := wrapper.dec.SetBuffer(data); err != nil {
+		wrapper.dec.Reset()
+		ttlvDecoderPool.Put(wrapper)
 		return err
 	}
-	return dec.Any(ptr)
+	err := wrapper.dec.Any(ptr)
+	wrapper.dec.Reset()
+	ttlvDecoderPool.Put(wrapper)
+	return err
 }
 
 // UnmarshalXML deserializes the xml TTLV byte string into the object pointed by `ptr`.

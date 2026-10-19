@@ -192,7 +192,22 @@ func (enc *Encoder) Any(value any) {
 	case Encodable:
 		v.EncodeTTLV(enc)
 	default:
-		tag, err := getTagForValue(reflect.ValueOf(value))
+		// Fast path for TagEncodable types with registered tags (like ProtocolVersion)
+		// This bypasses reflection-based struct encoding
+		if v, ok := value.(TagEncodable); ok {
+			tag, err := getTagForValue(value)
+			if err == nil {
+				v.TagEncodeTTLV(enc, tag)
+				return
+			}
+			// Fallback: use EncodeTTLV for TagEncodable types without registered tags (like Value)
+			if encodable, ok := any(v).(Encodable); ok {
+				encodable.EncodeTTLV(enc)
+				return
+			}
+			panic(err)
+		}
+		tag, err := getTagForValue(value)
 		if err != nil {
 			panic(err)
 		}

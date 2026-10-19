@@ -25,6 +25,7 @@ type reader interface {
 	DateTime(tag int) (time.Time, error)
 	Interval(tag int) (time.Duration, error)
 	Bitmask(realtag, tag int) (int32, error)
+	resetBuffer([]byte) error
 }
 
 // Decoder exposes methods to read TTLV tagged values to an internal buffer.
@@ -160,6 +161,20 @@ func (dec *Decoder) Bitmask(realtag, tag int) (int32, error) {
 	return dec.r.Bitmask(realtag, tag)
 }
 
+// SetBuffer resets the decoder with a new byte buffer.
+// The previous buffer is discarded. Returns an error if the buffer is invalid.
+func (dec *Decoder) SetBuffer(buf []byte) error {
+	dec.extension.version = nil
+	return dec.r.resetBuffer(buf)
+}
+
+// Reset clears the decoder's internal buffer, releasing references to the
+// caller's data. Should be called before returning the decoder to a pool.
+func (dec *Decoder) Reset() {
+	dec.extension.version = nil
+	dec.r.resetBuffer(nil)
+}
+
 // TagAny decodes `value` by deserializing it from the buffer with the given tag instead of value's type default one.
 // It panics if value's type cannot be encoded or if it's not a pointer.
 func (dec *Decoder) TagAny(tag int, value any) (err error) {
@@ -219,7 +234,17 @@ func (dec *Decoder) Any(value any) error {
 	case Decodable:
 		return v.DecodeTTLV(dec)
 	default:
-		tag, err := getTagForValue(reflect.ValueOf(value))
+		// Fast path for TagDecodable types with registered tags (like ProtocolVersion)
+		// This bypasses reflection-based struct decoding
+		if v, ok := value.(TagDecodable); ok {
+			tag, err := getTagForValue(value)
+			if err == nil {
+				return v.TagDecodeTTLV(dec, tag)
+			}
+			// For TagDecodable types without registered tags (like Value),
+			// fall through to let TagAny handle it correctly
+		}
+		tag, err := getTagForValue(value)
 		if err != nil {
 			panic(err)
 		}
@@ -456,13 +481,51 @@ func buildSliceDecodeFunc(ty reflect.Type) func(*Decoder, int, reflect.Value) er
 	// case reflect.Array:
 	elemTy := ty.Elem()
 	ff := decodeFuncFor(reflect.PointerTo(elemTy))
+
+	// Check if element type is simple (no pointers/interfaces) for fast path
+	isSimple := elemTy.Kind() != reflect.Struct &&
+		elemTy.Kind() != reflect.Interface &&
+		elemTy.Kind() != reflect.Pointer &&
+		elemTy.Kind() != reflect.Slice
+
+	if isSimple {
+		// Fast path: use non-pointer decode func and wrap it
+		ffVal := decodeFuncFor(elemTy)
+		return func(d *Decoder, tag int, value reflect.Value) error {
+			// Check if first tag matches before allocating
+			if d.Tag() != tag {
+				return nil
+			}
+			// Reuse a single addressable element for all iterations
+			elem := reflect.New(elemTy)
+			for d.Tag() == tag {
+				// Decode into the addressable element (wrap non-pointer func)
+				if err := ffVal(d, tag, elem.Elem()); err != nil {
+					return err
+				}
+				// Append a copy of the decoded value to existing slice
+				value.Set(reflect.Append(value, elem.Elem()))
+			}
+			return nil
+		}
+	}
+
+	// Slow path: keep original behavior for complex types
 	return func(d *Decoder, tag int, value reflect.Value) error {
+		// Check if first tag matches before allocating
+		if d.Tag() != tag {
+			return nil
+		}
+		result := reflect.MakeSlice(ty, 0, 4)
 		for d.Tag() == tag {
 			elem := reflect.New(elemTy)
 			if err := ff(d, tag, elem); err != nil {
 				return err
 			}
-			value.Set(reflect.Append(value, elem.Elem()))
+			result = reflect.Append(result, elem.Elem())
+		}
+		if result.Len() > 0 {
+			value.Set(result)
 		}
 		return nil
 	}
