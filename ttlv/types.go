@@ -19,6 +19,8 @@ const (
 	TypeByteString
 	TypeDateTime
 	TypeInterval
+	// KMIP 2.0. POSIX time in microseconds, encoded as a 64 bits signed integer.
+	TypeDateTimeExtended
 )
 
 func (ty Type) String() string {
@@ -41,16 +43,17 @@ func typeFromName(name string) (Type, bool) {
 
 var (
 	typesName = map[Type]string{
-		TypeStructure:   "Structure",
-		TypeInteger:     "Integer",
-		TypeLongInteger: "LongInteger",
-		TypeBigInteger:  "BigInteger",
-		TypeEnumeration: "Enumeration",
-		TypeBoolean:     "Boolean",
-		TypeTextString:  "TextString",
-		TypeByteString:  "ByteString",
-		TypeDateTime:    "DateTime",
-		TypeInterval:    "Interval",
+		TypeStructure:        "Structure",
+		TypeInteger:          "Integer",
+		TypeLongInteger:      "LongInteger",
+		TypeBigInteger:       "BigInteger",
+		TypeEnumeration:      "Enumeration",
+		TypeBoolean:          "Boolean",
+		TypeTextString:       "TextString",
+		TypeByteString:       "ByteString",
+		TypeDateTime:         "DateTime",
+		TypeInterval:         "Interval",
+		TypeDateTimeExtended: "DateTimeExtended",
 	}
 	nameTypes = revMap(typesName)
 )

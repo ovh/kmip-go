@@ -83,6 +83,13 @@ func (enc *ttlvWriter) LongInteger(tag int, value int64) {
 	})
 }
 
+func (enc *ttlvWriter) DateTimeExtended(tag int, micros int64) {
+	enc.encodeAppend(tag, TypeDateTimeExtended, 8, func(b []byte) []byte {
+		//nolint:gosec // this cast is safe as we are appending a number to a byte slice.
+		return binary.BigEndian.AppendUint64(b, uint64(micros))
+	})
+}
+
 func (enc *ttlvWriter) BigInteger(tag int, value *big.Int) {
 	//TODO: Optimize by appending the bytes directly into the buffer
 	bytes, padVal, padLen := bigIntToBytes(value, 8)
@@ -187,7 +194,7 @@ func (dec *ttlvReader) validate() error {
 	if len(dec.buf[8:]) < dec.paddedLen() {
 		return Errorf("TTLV value too short. Got %d bytes, expected %d", len(dec.buf[8:]), dec.paddedLen())
 	}
-	if ty := dec.Type(); ty > TypeInterval || ty == 0 {
+	if ty := dec.Type(); ty > TypeDateTimeExtended || ty == 0 {
 		return Errorf("invalid TTLV type %s", ty)
 	}
 	// if th := (dec.Tag() >> 16) & 0xFF; th != 0x42 && th != 0x54 {
@@ -250,6 +257,18 @@ func (dec *ttlvReader) Integer(tag int) (int32, error) {
 func (dec *ttlvReader) LongInteger(tag int) (int64, error) {
 	if err := dec.assertType(TypeLongInteger, tag); err != nil {
 		return 0, err
+	}
+	//nolint:gosec // this cast is safe as we are parsing raw bytes.
+	v := int64(binary.BigEndian.Uint64(dec.value()))
+	return v, dec.Next()
+}
+
+func (dec *ttlvReader) DateTimeExtended(tag int) (int64, error) {
+	if err := dec.assertType(TypeDateTimeExtended, tag); err != nil {
+		return 0, err
+	}
+	if dec.len() != 8 {
+		return 0, Errorf("invalid TTLV Date Time Extended value length: got %d bytes, expected 8", dec.len())
 	}
 	//nolint:gosec // this cast is safe as we are parsing raw bytes.
 	v := int64(binary.BigEndian.Uint64(dec.value()))

@@ -55,6 +55,22 @@ func (s *JsonEncodingSuite) TestEncodeLongInteger() {
 	})
 }
 
+// Examples from the KMIP Profiles v2.0 specification, section 5.5.1.6.13.
+func (s *JsonEncodingSuite) TestEncodeDateTimeExtended() {
+	s.Run("small", func() {
+		s.enc.Clear()
+		s.enc.DateTimeExtended(0x540001, 2)
+		expected := `{"tag": "0x540001", "type": "DateTimeExtended", "value": 2}`
+		s.Equal(expected, string(s.enc.Bytes()))
+	})
+	s.Run("large", func() {
+		s.enc.Clear()
+		s.enc.DateTimeExtended(0x540001, 1<<60)
+		expected := `{"tag": "0x540001", "type": "DateTimeExtended", "value": "0x1000000000000000"}`
+		s.Equal(expected, string(s.enc.Bytes()))
+	})
+}
+
 func (s *JsonEncodingSuite) TestEncodeBigInteger() {
 	s.Run("large-positive", func() {
 		s.enc.Clear()
@@ -265,6 +281,22 @@ func (s *JsonDecodingSuite) TestDecodeLongInteger() {
 		s.NoError(err)
 		s.EqualValues(-123456789000000000, n)
 	})
+}
+
+// Examples from the KMIP Profiles v2.0 specification, section 5.5.1.6.13.
+func (s *JsonDecodingSuite) TestDecodeDateTimeExtended() {
+	for _, tc := range []struct {
+		data string
+		want int64
+	}{
+		{`{"tag": "0x540001", "type": "DateTimeExtended", "value": 2}`, 2},
+		{`{"tag": "0x540001", "type": "DateTimeExtended", "value": "0xfffffffffffffffe"}`, -2},
+	} {
+		r := s.newReader(tc.data)
+		n, err := r.DateTimeExtended(0x540001)
+		s.NoError(err)
+		s.Equal(tc.want, n)
+	}
 }
 
 func (s *JsonDecodingSuite) TestDecodeBigInteger() {

@@ -84,6 +84,11 @@ func (enc *xmlWriter) LongInteger(tag int, value int64) {
 	enc.encode(TypeLongInteger, tag, strconv.Itoa(int(value)))
 }
 
+// DateTimeExtended is encoded as a xsd:long number of microseconds.
+func (enc *xmlWriter) DateTimeExtended(tag int, micros int64) {
+	enc.encode(TypeDateTimeExtended, tag, strconv.FormatInt(micros, 10))
+}
+
 func (enc *xmlWriter) BigInteger(tag int, value *big.Int) {
 	bytes, pad, padLen := bigIntToBytes(value, 8)
 	val := bytes
@@ -285,6 +290,17 @@ func (dec *xmlReader) Integer(tag int) (int32, error) {
 
 func (dec *xmlReader) LongInteger(tag int) (int64, error) {
 	if err := dec.assertType(TypeLongInteger, tag); err != nil {
+		return 0, err
+	}
+	parsed, err := parseInt(dec.value(), 64)
+	if err != nil {
+		return 0, err
+	}
+	return parsed, dec.Next()
+}
+
+func (dec *xmlReader) DateTimeExtended(tag int) (int64, error) {
+	if err := dec.assertType(TypeDateTimeExtended, tag); err != nil {
 		return 0, err
 	}
 	parsed, err := parseInt(dec.value(), 64)

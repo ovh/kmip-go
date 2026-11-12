@@ -19,6 +19,34 @@ func TestBitmasks(t *testing.T) {
 		testBitmaskUnmarshal(t, `"Sign"`, CryptographicUsageSign)
 		testBitmaskUnmarshal(t, `""`, CryptographicUsageMask(0))
 		testBitmaskUnmarshal(t, `" "`, CryptographicUsageMask(0))
+
+		// KMIP 2.0
+		testBitmaskMarshal(t, `"Authenticate | FPEDecrypt"`, CryptographicUsageAuthenticate|CryptographicUsageFPEDecrypt)
+		testBitmaskUnmarshal(t, `"Unrestricted | FPEEncrypt"`, CryptographicUsageUnrestricted|CryptographicUsageFPEEncrypt)
+		testBitmaskUnmarshal(t, `"0x00100000 | 0x00800000"`, CryptographicUsageAuthenticate|CryptographicUsageFPEDecrypt)
+	})
+
+	t.Run("StorageStatusMask", func(t *testing.T) {
+		if StorageStatusDestroyedStorage != 0x00000004 {
+			t.Errorf("Destroyed Storage is 0x%08X, want 0x00000004", int32(StorageStatusDestroyedStorage))
+		}
+		testBitmaskMarshal(t, `"OnLineStorage | DestroyedStorage"`, StorageStatusOnlineStorage|StorageStatusDestroyedStorage)
+		testBitmaskUnmarshal(t, `"DestroyedStorage"`, StorageStatusDestroyedStorage)
+	})
+
+	t.Run("ProtectionStorageMask", func(t *testing.T) {
+		testBitmaskMarshal(t, `"Software | Hardware"`, ProtectionStorageSoftware|ProtectionStorageHardware)
+		testBitmaskMarshal(t, `"SameJurisdiction"`, ProtectionStorageSameJurisdiction)
+		testBitmaskMarshal(t, `"0x01000000 | 0x02000000 | 0x04000000 | 0x08000000"`, ProtectionStorageMask(0x0F000000))
+
+		testBitmaskUnmarshal(t, `"Software | Hardware"`, ProtectionStorageSoftware|ProtectionStorageHardware)
+		testBitmaskUnmarshal(t, `"Software | | Hardware"`, ProtectionStorageSoftware|ProtectionStorageHardware)
+		testBitmaskUnmarshal(t, `"Software|Hardware"`, ProtectionStorageSoftware|ProtectionStorageHardware)
+		testBitmaskUnmarshal(t, `"1 | 2"`, ProtectionStorageSoftware|ProtectionStorageHardware)
+		testBitmaskUnmarshal(t, `"0x00000100 | 0x00002000"`, ProtectionStorageOnPremises|ProtectionStorageSameJurisdiction)
+		testBitmaskUnmarshal(t, `"OnPremises"`, ProtectionStorageOnPremises)
+		testBitmaskUnmarshal(t, `""`, ProtectionStorageMask(0))
+		testBitmaskUnmarshal(t, `" "`, ProtectionStorageMask(0))
 	})
 
 	t.Run("StorageStatusMask", func(t *testing.T) {

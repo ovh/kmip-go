@@ -40,6 +40,12 @@ func (s *XmlEncodingSuite) TestEncodeLongInteger() {
 	s.Equal(expected, string(s.enc.Bytes()))
 }
 
+func (s *XmlEncodingSuite) TestEncodeDateTimeExtended() {
+	s.enc.DateTimeExtended(0x540001, -2)
+	expected := `<TTLV tag="0x540001" type="DateTimeExtended" value="-2"/>`
+	s.Equal(expected, string(s.enc.Bytes()))
+}
+
 func (s *XmlEncodingSuite) TestEncodeBigInteger() {
 	s.Run("positive", func() {
 		s.enc.Clear()
@@ -202,6 +208,14 @@ func (s *XmlDecodingSuite) TestDecodeLongInteger() {
 	n, err := r.LongInteger(0x420020)
 	s.NoError(err)
 	s.EqualValues(123456789000000000, n)
+}
+
+func (s *XmlDecodingSuite) TestDecodeDateTimeExtended() {
+	data := `<TTLV tag="0x540001" type="DateTimeExtended" value="2"/>`
+	r := s.newReader(data)
+	n, err := r.DateTimeExtended(0x540001)
+	s.NoError(err)
+	s.EqualValues(2, n)
 }
 
 func (s *XmlDecodingSuite) TestDecodeBigInteger() {

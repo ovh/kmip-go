@@ -24,6 +24,7 @@ type reader interface {
 	ByteString(tag int) ([]byte, error)
 	DateTime(tag int) (time.Time, error)
 	Interval(tag int) (time.Duration, error)
+	DateTimeExtended(tag int) (int64, error)
 	Bitmask(realtag, tag int) (int32, error)
 }
 
@@ -150,6 +151,15 @@ func (dec *Decoder) DateTime(tag int) (time.Time, error) {
 // DateTime reads a duration and advance to the next value.
 func (dec *Decoder) Interval(tag int) (time.Duration, error) {
 	return dec.r.Interval(tag)
+}
+
+// DateTimeExtended reads a date-time with a microsecond precision and advance to the next value (KMIP 2.0).
+func (dec *Decoder) DateTimeExtended(tag int) (time.Time, error) {
+	micros, err := dec.r.DateTimeExtended(tag)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.UnixMicro(micros), nil
 }
 
 // Bitmaks reads a bitmask value from the internal buffer.
@@ -533,11 +543,15 @@ func applyOmitEmptyDecode(ffunc func(d *Decoder, i int, v reflect.Value) error) 
 	}
 }
 
-func applyVersionRangeDecode(rng versionRange, ffunc func(d *Decoder, i int, v reflect.Value) error) func(d *Decoder, i int, v reflect.Value) error {
+// applyVersionRangeDecode wraps a field decoding function with version range checking.
+// When `exclusive` is true, the field shares its tag with other fields of the same struct (twin fields
+// with different version ranges), so it's always skipped when the current version is not in its range,
+// letting its twin decode the value.
+func applyVersionRangeDecode(rng versionRange, exclusive bool, ffunc func(d *Decoder, i int, v reflect.Value) error) func(d *Decoder, i int, v reflect.Value) error {
 	return func(d *Decoder, i int, v reflect.Value) error {
 		// If the field is not for current version, consider it optional
 		// (but still accept and decode it if it's present)
-		if !d.versionIn(rng) && d.Tag() != i {
+		if !d.versionIn(rng) && (d.Tag() != i || exclusive) {
 			v.SetZero()
 			return nil
 		}
@@ -575,6 +589,7 @@ func applySetVersionDecode(fldT reflect.StructField, ffunc func(d *Decoder, i in
 //   - A function that takes a Decoder, a tag, and a reflect.Value, and decodes the struct fields accordingly.
 func buidStructDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value reflect.Value) error {
 	fieldsDecode := []func(d *Decoder, value reflect.Value) error{}
+	tagCount := countVersionedFieldTags(ty)
 
 	for i := range ty.NumField() {
 		fldT := ty.Field(i)
@@ -608,7 +623,7 @@ func buidStructDecodeFunc(ty reflect.Type) func(d *Decoder, tag int, value refle
 			ffunc = applyOmitEmptyDecode(ffunc)
 		}
 		if info.vrange != nil {
-			ffunc = applyVersionRangeDecode(*info.vrange, ffunc)
+			ffunc = applyVersionRangeDecode(*info.vrange, tagCount[numTag] > 1, ffunc)
 		}
 		if info.setVersion {
 			ffunc = applySetVersionDecode(fldT, ffunc)

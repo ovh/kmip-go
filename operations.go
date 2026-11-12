@@ -57,6 +57,18 @@ func init() {
 		// KMIP 1.4
 		OperationImport: "Import",
 		OperationExport: "Export",
+
+		// KMIP 2.0
+		OperationLog:             "Log",
+		OperationLogin:           "Login",
+		OperationLogout:          "Logout",
+		OperationDelegatedLogin:  "DelegatedLogin",
+		OperationAdjustAttribute: "AdjustAttribute",
+		OperationSetAttribute:    "SetAttribute",
+		OperationSetEndpointRole: "SetEndpointRole",
+		OperationPKCS_11:         "PKCS_11",
+		OperationInterop:         "Interop",
+		OperationReProvision:     "ReProvision",
 	})
 }
 
@@ -112,6 +124,18 @@ const (
 	// KMIP 1.4.
 	OperationImport Operation = 0x0000002A
 	OperationExport Operation = 0x0000002B
+
+	// KMIP 2.0.
+	OperationLog             Operation = 0x0000002C
+	OperationLogin           Operation = 0x0000002D
+	OperationLogout          Operation = 0x0000002E
+	OperationDelegatedLogin  Operation = 0x0000002F
+	OperationAdjustAttribute Operation = 0x00000030
+	OperationSetAttribute    Operation = 0x00000031
+	OperationSetEndpointRole Operation = 0x00000032
+	OperationPKCS_11         Operation = 0x00000033
+	OperationInterop         Operation = 0x00000034
+	OperationReProvision     Operation = 0x00000035
 )
 
 func (enum Operation) MarshalText() ([]byte, error) {

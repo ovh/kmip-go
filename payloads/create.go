@@ -37,7 +37,7 @@ type CreateResponsePayload struct {
 	//
 	// The Template Managed Object is deprecated as of version 1.3 of this specification and MAY be removed from subsequent versions of the specification.
 	// Individual Attributes SHOULD be used in operations which currently support use of a Name within a Template-Attribute to reference a Template.
-	Attributes *kmip.TemplateAttribute
+	Attributes *kmip.TemplateAttribute `ttlv:"TemplateAttribute"`
 }
 
 func (a *CreateResponsePayload) Operation() kmip.Operation {

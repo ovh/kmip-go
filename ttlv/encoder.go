@@ -21,6 +21,7 @@ type writer interface {
 	ByteString(tag int, str []byte)
 	DateTime(tag int, date time.Time)
 	Interval(tag int, interval time.Duration)
+	DateTimeExtended(tag int, micros int64)
 	Bitmask(realtag, tag int, value int32)
 }
 
@@ -126,6 +127,11 @@ func (enc *Encoder) DateTime(tag int, date time.Time) {
 // Interval writes a duration to the internal buffer.
 func (enc *Encoder) Interval(tag int, interval time.Duration) {
 	enc.w.Interval(tag, interval)
+}
+
+// DateTimeExtended writes a date-time value with a microsecond precision to the internal buffer (KMIP 2.0).
+func (enc *Encoder) DateTimeExtended(tag int, date time.Time) {
+	enc.w.DateTimeExtended(tag, date.UnixMicro())
 }
 
 // Bitmaks writes a bitmask value to the internal buffer.

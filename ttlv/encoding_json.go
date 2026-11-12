@@ -100,6 +100,21 @@ func (j *jsonWriter) LongInteger(tag int, value int64) {
 	})
 }
 
+// DateTimeExtended implements writer. It's encoded as a number of microseconds, like a long integer.
+func (j *jsonWriter) DateTimeExtended(tag int, micros int64) {
+	if micros >= maxJsonInt || micros <= minJsonInt {
+		// Any values >= 2^52 must be represented as hex strings
+		j.encodeAppend(TypeDateTimeExtended, tag, func(b []byte) []byte {
+			//nolint:gosec // this cast is safe as we are appending hex values
+			return fmt.Appendf(b, "\"0x%016x\"", uint64(micros))
+		})
+		return
+	}
+	j.encodeAppend(TypeDateTimeExtended, tag, func(b []byte) []byte {
+		return strconv.AppendInt(b, micros, 10)
+	})
+}
+
 // BigInteger implements writer.
 func (j *jsonWriter) BigInteger(tag int, value *big.Int) {
 	if value.Cmp(maxJsonBigInt) >= 0 || value.Cmp(minJsonBigInt) <= 0 {
@@ -370,6 +385,29 @@ func (j *jsonReader) LongInteger(tag int) (int64, error) {
 		return parsed, j.Next()
 	default:
 		return 0, Errorf("invalid long integer value %q", val)
+	}
+}
+
+// DateTimeExtended implements reader.
+func (j *jsonReader) DateTimeExtended(tag int) (int64, error) {
+	if err := j.assertType(TypeDateTimeExtended, tag); err != nil {
+		return 0, err
+	}
+	switch val := j.getValue().(type) {
+	case json.Number:
+		n, err := val.Int64()
+		if err != nil {
+			return 0, err
+		}
+		return n, j.Next()
+	case string:
+		parsed, err := parseInt(val, 64)
+		if err != nil {
+			return 0, err
+		}
+		return parsed, j.Next()
+	default:
+		return 0, Errorf("invalid date-time extended value %q", val)
 	}
 }
 
