@@ -407,10 +407,10 @@ func init() {
 	})
 	ttlv.RegisterEnum(TagSplitKeyMethod, map[SplitKeyMethod]string{
 		SplitKeyMethodXOR:                         "XOR",
-		SplitKeyMethodPolynomialSharingGF216:      "PolynomialSharingGF216",
+		SplitKeyMethodPolynomialSharingGF216:      "PolynomialSharingGF2_16",
 		SplitKeyMethodPolynomialSharingPrimeField: "PolynomialSharingPrimeField",
 		// KMIP 1.2.
-		SplitKeyMethodPolynomialSharingGF28: "PolynomialSharingGF28",
+		SplitKeyMethodPolynomialSharingGF28: "PolynomialSharingGF2_8",
 	})
 	ttlv.RegisterEnum(TagObjectGroupMember, map[ObjectGroupMember]string{
 		ObjectGroupMemberFresh:   "GroupMemberFresh",
