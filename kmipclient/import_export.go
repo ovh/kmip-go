@@ -23,6 +23,7 @@ func (c *Client) Import(id string, object kmip.Object) ExecImport {
 				client: c,
 				req: &payloads.ImportRequestPayload{
 					UniqueIdentifier: id,
+					Object:           object,
 				},
 			},
 			func(rrp **payloads.ImportRequestPayload) *[]kmip.Attribute {
