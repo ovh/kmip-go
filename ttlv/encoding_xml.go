@@ -164,6 +164,12 @@ func newXMLReaderFromDecoder(r *xml.Decoder) (*xmlReader, error) {
 	return dec, nil
 }
 
+func (dec *xmlReader) reset(data []byte) error {
+	dec.r = xml.NewDecoder(bytes.NewReader(data))
+	dec.elem = nil
+	return dec.Next()
+}
+
 func newXMLReader(data []byte) (*xmlReader, error) {
 	return newXMLReaderFromDecoder(xml.NewDecoder(bytes.NewReader(data)))
 }
@@ -433,4 +439,8 @@ func (dec *xmlReader) Bitmask(realtag, tag int) (int32, error) {
 		result |= int32(parsed)
 	}
 	return result, dec.Next()
+}
+
+func (dec *xmlReader) resetBuffer(data []byte) error {
+	return dec.reset(data)
 }
