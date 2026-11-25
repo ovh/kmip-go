@@ -436,7 +436,13 @@ func (key *PrivateKey) ECDSA() (*ecdsa.PrivateKey, error) {
 			return nil, fmt.Errorf("Unsupported elliptic curve %s", ttlv.EnumStr(tkey.RecommendedCurve))
 		}
 
-		rkey, err := ecdsa.ParseRawPrivateKey(curve, tkey.D.Bytes())
+		// The raw private key must have the exact byte size of the curve, so D is left-padded with zeros
+		// (big.Int.Bytes() strips the leading zeros of the value).
+		raw := make([]byte, (curve.Params().BitSize+7)/8)
+		if tkey.D.Sign() < 0 || tkey.D.BitLen() > len(raw)*8 {
+			return nil, errors.New("Failed to parse raw private key: invalid private scalar")
+		}
+		rkey, err := ecdsa.ParseRawPrivateKey(curve, tkey.D.FillBytes(raw))
 		if err != nil {
 			return nil, fmt.Errorf("Failed to parse raw private key: %w", err)
 		}
