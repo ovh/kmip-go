@@ -50,11 +50,14 @@ type RequestHeader struct {
 	ProtocolVersion     ProtocolVersion `ttlv:",set-version"`
 	MaximumResponseSize int32           `ttlv:",omitempty"`
 
-	ClientCorrelationValue       string `ttlv:",omitempty,version=v1.4.."`
-	ServerCorrelationValue       string `ttlv:",omitempty,version=v1.4.."`
-	AsynchronousIndicator        *bool
-	AttestationCapableIndicator  *bool             `ttlv:",version=v1.2.."`
-	AttestationType              []AttestationType `ttlv:",version=v1.2.."`
+	ClientCorrelationValue string `ttlv:",omitempty,version=v1.4.."`
+	ServerCorrelationValue string `ttlv:",omitempty,version=v1.4.."`
+	// Asynchronous Indicator is a boolean in KMIP 1.x.
+	AsynchronousIndicator *bool `ttlv:",version=..v1.4"`
+	// Asynchronous Indicator is an enumeration as of KMIP 2.0.
+	AsynchronousIndicatorV2      AsynchronousIndicator `ttlv:"AsynchronousIndicator,omitempty,version=v2.0.."`
+	AttestationCapableIndicator  *bool                 `ttlv:",version=v1.2.."`
+	AttestationType              []AttestationType     `ttlv:",version=v1.2.."`
 	Authentication               *Authentication
 	BatchErrorContinuationOption BatchErrorContinuationOption `ttlv:",omitempty"`
 	BatchOrderOption             *bool
@@ -63,7 +66,9 @@ type RequestHeader struct {
 }
 
 type RequestBatchItem struct {
-	Operation         Operation
+	Operation Operation
+	// KMIP 2.0. Indicates that the Data output of the operation should not be returned to the client.
+	Ephemeral         *bool
 	UniqueBatchItemID []byte `ttlv:",omitempty"`
 	RequestPayload    OperationPayload
 	MessageExtension  *MessageExtension
@@ -72,6 +77,9 @@ type RequestBatchItem struct {
 func (pv *RequestBatchItem) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 	e.Struct(tag, func(e *ttlv.Encoder) {
 		e.Any(pv.Operation)
+		if pv.Ephemeral != nil && e.VersionIn(V2_0, nil) {
+			e.Bool(TagEphemeral, *pv.Ephemeral)
+		}
 		if len(pv.UniqueBatchItemID) > 0 {
 			e.ByteString(TagUniqueBatchItemID, pv.UniqueBatchItemID)
 		}
@@ -83,6 +91,9 @@ func (pv *RequestBatchItem) TagEncodeTTLV(e *ttlv.Encoder, tag int) {
 func (pv *RequestBatchItem) TagDecodeTTLV(d *ttlv.Decoder, tag int) error {
 	return d.Struct(tag, func(d *ttlv.Decoder) error {
 		if err := d.Any(&pv.Operation); err != nil {
+			return err
+		}
+		if err := d.Opt(TagEphemeral, &pv.Ephemeral); err != nil {
 			return err
 		}
 		if err := d.Opt(TagUniqueBatchItemID, &pv.UniqueBatchItemID); err != nil {

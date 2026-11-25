@@ -60,6 +60,27 @@ func parseFieldInfo(s string) fieldInfo {
 	return ann
 }
 
+// countVersionedFieldTags counts, for each tag, the number of exported fields of the struct type `ty`
+// bound to a version range. A count greater than 1 means that several fields share the same tag
+// (twin fields with disjoint version ranges).
+func countVersionedFieldTags(ty reflect.Type) map[int]int {
+	counts := map[int]int{}
+	for i := range ty.NumField() {
+		fldT := ty.Field(i)
+		if !fldT.IsExported() {
+			continue
+		}
+		info := getFieldInfo(fldT)
+		if info.tag == "-" || info.vrange == nil {
+			continue
+		}
+		if numTag := getFieldTag(fldT, info.tag); numTag != 0 {
+			counts[numTag]++
+		}
+	}
+	return counts
+}
+
 // getFieldTag returns the integer tag value associated with a struct field based on the provided tagVal string.
 // If tagVal is empty, it attempts to resolve the tag by the field's name or type using getTagByName and getTagForType.
 // If tagVal starts with "0x", it parses the hexadecimal value as the tag, ensuring it is strictly positive and fits in 3 bytes.

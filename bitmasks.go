@@ -32,11 +32,35 @@ func init() {
 		"TranslateDecrypt",
 		"TranslateWrap",
 		"TranslateUnwrap",
+		// KMIP 2.0
+		"Authenticate",
+		"Unrestricted",
+		"FPEEncrypt",
+		"FPEDecrypt",
 	)
 	ttlv.RegisterBitmask[StorageStatusMask](
 		TagStorageStatusMask,
 		"OnLineStorage",
 		"ArchivalStorage",
+		// KMIP 2.0
+		"DestroyedStorage",
+	)
+	ttlv.RegisterBitmask[ProtectionStorageMask](
+		TagProtectionStorageMask,
+		"Software",
+		"Hardware",
+		"OnProcessor",
+		"OnSystem",
+		"OffSystem",
+		"Hypervisor",
+		"OperatingSystem",
+		"Container",
+		"OnPremises",
+		"OffPremises",
+		"SelfManaged",
+		"Outsourced",
+		"Validated",
+		"SameJurisdiction",
 	)
 }
 
@@ -87,6 +111,18 @@ const (
 	CryptographicUsageTranslateWrap
 	// CryptographicUsageTranslateUnwrap allows the object to be used for translation unwrapping.
 	CryptographicUsageTranslateUnwrap
+
+	// KMIP 2.0.
+	// Note: the Export, Content Commitment, Cryptogram and Translate usages are reserved as of KMIP 2.0.
+
+	// CryptographicUsageAuthenticate allows the object to be used for authentication.
+	CryptographicUsageAuthenticate
+	// CryptographicUsageUnrestricted allows the object to be used for any operation.
+	CryptographicUsageUnrestricted
+	// CryptographicUsageFPEEncrypt allows the object to be used for format preserving encryption.
+	CryptographicUsageFPEEncrypt
+	// CryptographicUsageFPEDecrypt allows the object to be used for format preserving decryption.
+	CryptographicUsageFPEDecrypt
 )
 
 // MarshalText returns a human-readable string representation of the CryptographicUsageMask.
@@ -110,6 +146,8 @@ const (
 	StorageStatusOnlineStorage StorageStatusMask = 1 << iota
 	// StorageStatusArchivalStorage indicates the object is in archival storage.
 	StorageStatusArchivalStorage
+	// StorageStatusDestroyedStorage indicates the object is destroyed. KMIP 2.0.
+	StorageStatusDestroyedStorage
 )
 
 // MarshalText returns a human-readable string representation of the StorageStatusMask.
@@ -121,6 +159,38 @@ func (mask StorageStatusMask) MarshalText() ([]byte, error) {
 
 func (mask *StorageStatusMask) UnmarshalText(text []byte) error {
 	return maskUnmarshalText(mask, TagStorageStatusMask, string(text))
+}
+
+// ProtectionStorageMask is a KMIP 2.0 bitmask describing the storage protections
+// of an object (ie: software, hardware, on-premises...).
+type ProtectionStorageMask int32
+
+const (
+	ProtectionStorageSoftware ProtectionStorageMask = 1 << iota
+	ProtectionStorageHardware
+	ProtectionStorageOnProcessor
+	ProtectionStorageOnSystem
+	ProtectionStorageOffSystem
+	ProtectionStorageHypervisor
+	ProtectionStorageOperatingSystem
+	ProtectionStorageContainer
+	ProtectionStorageOnPremises
+	ProtectionStorageOffPremises
+	ProtectionStorageSelfManaged
+	ProtectionStorageOutsourced
+	ProtectionStorageValidated
+	ProtectionStorageSameJurisdiction
+)
+
+// MarshalText returns a human-readable string representation of the ProtectionStorageMask.
+// The string is a bitwise OR ("|") separated list of enabled flags.
+// This method never returns an error.
+func (mask ProtectionStorageMask) MarshalText() ([]byte, error) {
+	return []byte(ttlv.BitmaskStr(mask, " | ")), nil
+}
+
+func (mask *ProtectionStorageMask) UnmarshalText(text []byte) error {
+	return maskUnmarshalText(mask, TagProtectionStorageMask, string(text))
 }
 
 func maskUnmarshalText[T ~int32](mask *T, tag int, text string) error {

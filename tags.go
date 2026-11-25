@@ -316,6 +316,70 @@ const (
 	TagExtractable                           = 0x420122
 	TagNeverExtractable                      = 0x420123
 	TagReplaceExisting                       = 0x420124
+
+	// KMIP 2.0.
+	TagAttributes                         = 0x420125
+	TagCommonAttributes                   = 0x420126
+	TagPrivateKeyAttributes               = 0x420127
+	TagPublicKeyAttributes                = 0x420128
+	TagExtensionEnumeration               = 0x420129
+	TagExtensionAttribute                 = 0x42012A
+	TagExtensionParentStructureTag        = 0x42012B
+	TagExtensionDescription               = 0x42012C
+	TagServerName                         = 0x42012D
+	TagServerSerialNumber                 = 0x42012E
+	TagServerVersion                      = 0x42012F
+	TagServerLoad                         = 0x420130
+	TagProductName                        = 0x420131
+	TagBuildLevel                         = 0x420132
+	TagBuildDate                          = 0x420133
+	TagClusterInfo                        = 0x420134
+	TagAlternateFailoverEndpoints         = 0x420135
+	TagShortUniqueIdentifier              = 0x420136
+	TagTag                                = 0x420138
+	TagCertificateRequestUniqueIdentifier = 0x420139
+	TagNISTKeyType                        = 0x42013A
+	TagAttributeReference                 = 0x42013B
+	TagCurrentAttribute                   = 0x42013C
+	TagNewAttribute                       = 0x42013D
+	TagCertificateRequestValue            = 0x420140
+	TagLogMessage                         = 0x420141
+	TagProfileVersion                     = 0x420142
+	TagProfileVersionMajor                = 0x420143
+	TagProfileVersionMinor                = 0x420144
+	TagProtectionLevel                    = 0x420145
+	TagProtectionPeriod                   = 0x420146
+	TagQuantumSafe                        = 0x420147
+	TagQuantumSafeCapability              = 0x420148
+	TagTicket                             = 0x420149
+	TagTicketType                         = 0x42014A
+	TagTicketValue                        = 0x42014B
+	TagRequestCount                       = 0x42014C
+	TagRights                             = 0x42014D
+	TagObjects                            = 0x42014E
+	TagOperations                         = 0x42014F
+	TagRight                              = 0x420150
+	TagEndpointRole                       = 0x420151
+	TagDefaultsInformation                = 0x420152
+	TagObjectDefaults                     = 0x420153
+	TagEphemeral                          = 0x420154
+	TagServerHashedPassword               = 0x420155
+	TagOneTimePassword                    = 0x420156
+	TagHashedPassword                     = 0x420157
+	TagAdjustmentType                     = 0x420158
+	TagPKCS_11Interface                   = 0x420159
+	TagPKCS_11Function                    = 0x42015A
+	TagPKCS_11InputParameters             = 0x42015B
+	TagPKCS_11OutputParameters            = 0x42015C
+	TagPKCS_11ReturnCode                  = 0x42015D
+	TagProtectionStorageMask              = 0x42015E
+	TagProtectionStorageMasks             = 0x42015F
+	TagInteropFunction                    = 0x420160
+	TagInteropIdentifier                  = 0x420161
+	TagAdjustmentValue                    = 0x420162
+	TagCommonProtectionStorageMasks       = 0x420163
+	TagPrivateProtectionStorageMasks      = 0x420164
+	TagPublicProtectionStorageMasks       = 0x420165
 )
 
 //nolint:gosec // No hardcoded credential here, just a tag name.
@@ -621,6 +685,70 @@ var tagNames = map[int]string{
 	TagExtractable:                           "Extractable",
 	TagNeverExtractable:                      "NeverExtractable",
 	TagReplaceExisting:                       "ReplaceExisting",
+
+	// KMIP 2.0
+	TagAttributes:                         "Attributes",
+	TagCommonAttributes:                   "CommonAttributes",
+	TagPrivateKeyAttributes:               "PrivateKeyAttributes",
+	TagPublicKeyAttributes:                "PublicKeyAttributes",
+	TagExtensionEnumeration:               "ExtensionEnumeration",
+	TagExtensionAttribute:                 "ExtensionAttribute",
+	TagExtensionParentStructureTag:        "ExtensionParentStructureTag",
+	TagExtensionDescription:               "ExtensionDescription",
+	TagServerName:                         "ServerName",
+	TagServerSerialNumber:                 "ServerSerialNumber",
+	TagServerVersion:                      "ServerVersion",
+	TagServerLoad:                         "ServerLoad",
+	TagProductName:                        "ProductName",
+	TagBuildLevel:                         "BuildLevel",
+	TagBuildDate:                          "BuildDate",
+	TagClusterInfo:                        "ClusterInfo",
+	TagAlternateFailoverEndpoints:         "AlternateFailoverEndpoints",
+	TagShortUniqueIdentifier:              "ShortUniqueIdentifier",
+	TagTag:                                "Tag",
+	TagCertificateRequestUniqueIdentifier: "CertificateRequestUniqueIdentifier",
+	TagNISTKeyType:                        "NISTKeyType",
+	TagAttributeReference:                 "AttributeReference",
+	TagCurrentAttribute:                   "CurrentAttribute",
+	TagNewAttribute:                       "NewAttribute",
+	TagCertificateRequestValue:            "CertificateRequestValue",
+	TagLogMessage:                         "LogMessage",
+	TagProfileVersion:                     "ProfileVersion",
+	TagProfileVersionMajor:                "ProfileVersionMajor",
+	TagProfileVersionMinor:                "ProfileVersionMinor",
+	TagProtectionLevel:                    "ProtectionLevel",
+	TagProtectionPeriod:                   "ProtectionPeriod",
+	TagQuantumSafe:                        "QuantumSafe",
+	TagQuantumSafeCapability:              "QuantumSafeCapability",
+	TagTicket:                             "Ticket",
+	TagTicketType:                         "TicketType",
+	TagTicketValue:                        "TicketValue",
+	TagRequestCount:                       "RequestCount",
+	TagRights:                             "Rights",
+	TagObjects:                            "Objects",
+	TagOperations:                         "Operations",
+	TagRight:                              "Right",
+	TagEndpointRole:                       "EndpointRole",
+	TagDefaultsInformation:                "DefaultsInformation",
+	TagObjectDefaults:                     "ObjectDefaults",
+	TagEphemeral:                          "Ephemeral",
+	TagServerHashedPassword:               "ServerHashedPassword",
+	TagOneTimePassword:                    "OneTimePassword",
+	TagHashedPassword:                     "HashedPassword",
+	TagAdjustmentType:                     "AdjustmentType",
+	TagPKCS_11Interface:                   "PKCS_11Interface",
+	TagPKCS_11Function:                    "PKCS_11Function",
+	TagPKCS_11InputParameters:             "PKCS_11InputParameters",
+	TagPKCS_11OutputParameters:            "PKCS_11OutputParameters",
+	TagPKCS_11ReturnCode:                  "PKCS_11ReturnCode",
+	TagProtectionStorageMask:              "ProtectionStorageMask",
+	TagProtectionStorageMasks:             "ProtectionStorageMasks",
+	TagInteropFunction:                    "InteropFunction",
+	TagInteropIdentifier:                  "InteropIdentifier",
+	TagAdjustmentValue:                    "AdjustmentValue",
+	TagCommonProtectionStorageMasks:       "CommonProtectionStorageMasks",
+	TagPrivateProtectionStorageMasks:      "PrivateProtectionStorageMasks",
+	TagPublicProtectionStorageMasks:       "PublicProtectionStorageMasks",
 }
 
 func init() {

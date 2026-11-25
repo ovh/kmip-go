@@ -32,6 +32,7 @@ func TestDecodeValue(t *testing.T) {
 				enc.DateTime(7, now)
 				enc.Interval(8, 8*time.Second)
 				enc.Enum(0, 9, 9)
+				enc.DateTimeExtended(10, now.Add(123456*time.Microsecond))
 			})
 
 			bytes := enc.Bytes()

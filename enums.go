@@ -46,6 +46,52 @@ func init() {
 		ResultReasonSensitive:           "Sensitive",
 		ResultReasonNotExtractable:      "NotExtractable",
 		ResultReasonObjectAlreadyExists: "ObjectAlreadyExists",
+		// KMIP 2.0.
+		ResultReasonInvalidTicket:                       "InvalidTicket",
+		ResultReasonUsageLimitExceeded:                  "UsageLimitExceeded",
+		ResultReasonNumericRange:                        "NumericRange",
+		ResultReasonInvalidDataType:                     "InvalidDataType",
+		ResultReasonReadOnlyAttribute:                   "ReadOnlyAttribute",
+		ResultReasonMultiValuedAttribute:                "MultiValuedAttribute",
+		ResultReasonUnsupportedAttribute:                "UnsupportedAttribute",
+		ResultReasonAttributeInstanceNotFound:           "AttributeInstanceNotFound",
+		ResultReasonAttributeNotFound:                   "AttributeNotFound",
+		ResultReasonAttributeReadOnly:                   "AttributeReadOnly",
+		ResultReasonAttributeSingleValued:               "AttributeSingleValued",
+		ResultReasonBadCryptographicParameters:          "BadCryptographicParameters",
+		ResultReasonBadPassword:                         "BadPassword",
+		ResultReasonCodecError:                          "CodecError",
+		ResultReasonIllegalObjectType:                   "IllegalObjectType",
+		ResultReasonIncompatibleCryptographicUsageMask:  "IncompatibleCryptographicUsageMask",
+		ResultReasonInternalServerError:                 "InternalServerError",
+		ResultReasonInvalidAsynchronousCorrelationValue: "InvalidAsynchronousCorrelationValue",
+		ResultReasonInvalidAttribute:                    "InvalidAttribute",
+		ResultReasonInvalidAttributeValue:               "InvalidAttributeValue",
+		ResultReasonInvalidCorrelationValue:             "InvalidCorrelationValue",
+		ResultReasonInvalidCSR:                          "InvalidCSR",
+		ResultReasonInvalidObjectType:                   "InvalidObjectType",
+		ResultReasonKeyWrapTypeNotSupported:             "KeyWrapTypeNotSupported",
+		ResultReasonMissingInitializationVector:         "MissingInitializationVector",
+		ResultReasonNonUniqueNameAttribute:              "NonUniqueNameAttribute",
+		ResultReasonObjectDestroyed:                     "ObjectDestroyed",
+		ResultReasonObjectNotFound:                      "ObjectNotFound",
+		ResultReasonNotAuthorized:                       "NotAuthorized",
+		ResultReasonServerLimitExceeded:                 "ServerLimitExceeded",
+		ResultReasonUnknownEnumeration:                  "UnknownEnumeration",
+		ResultReasonUnknownMessageExtension:             "UnknownMessageExtension",
+		ResultReasonUnknownTag:                          "UnknownTag",
+		ResultReasonUnsupportedCryptographicParameters:  "UnsupportedCryptographicParameters",
+		ResultReasonUnsupportedProtocolVersion:          "UnsupportedProtocolVersion",
+		ResultReasonWrappingObjectArchived:              "WrappingObjectArchived",
+		ResultReasonWrappingObjectDestroyed:             "WrappingObjectDestroyed",
+		ResultReasonWrappingObjectNotFound:              "WrappingObjectNotFound",
+		ResultReasonWrongKeyLifecycleState:              "WrongKeyLifecycleState",
+		ResultReasonProtectionStorageUnavailable:        "ProtectionStorageUnavailable",
+		ResultReasonPKCS_11CodecError:                   "PKCS_11CodecError",
+		ResultReasonPKCS_11InvalidFunction:              "PKCS_11InvalidFunction",
+		ResultReasonPKCS_11InvalidInterface:             "PKCS_11InvalidInterface",
+		ResultReasonPrivateProtectionStorageUnavailable: "PrivateProtectionStorageUnavailable",
+		ResultReasonPublicProtectionStorageUnavailable:  "PublicProtectionStorageUnavailable",
 	})
 	ttlv.RegisterEnum(TagCredentialType, map[CredentialType]string{
 		CredentialTypeUsernameAndPassword: "UsernameAndPassword",
@@ -53,6 +99,10 @@ func init() {
 		CredentialTypeDevice: "Device",
 		// KMIP 1.2.
 		CredentialTypeAttestation: "Attestation",
+		// KMIP 2.0.
+		CredentialTypeOneTimePassword: "OneTimePassword",
+		CredentialTypeHashedPassword:  "HashedPassword",
+		CredentialTypeTicket:          "Ticket",
 	})
 	ttlv.RegisterEnum(TagRevocationReasonCode, map[RevocationReasonCode]string{
 		RevocationReasonCodeUnspecified:          "Unspecified",
@@ -84,6 +134,9 @@ func init() {
 
 		// KMIP 1.2.
 		ObjectTypePGPKey: "PGPKey",
+
+		// KMIP 2.0.
+		ObjectTypeCertificateRequest: "CertificateRequest",
 	})
 	ttlv.RegisterEnum(TagOpaqueDataType, map[OpaqueDataType]string{})
 	ttlv.RegisterEnum(TagState, map[State]string{
@@ -141,6 +194,24 @@ func init() {
 		CryptographicAlgorithmHMAC_SHA3_512:    "HMAC_SHA3_512",
 		CryptographicAlgorithmSHAKE_128:        "SHAKE_128",
 		CryptographicAlgorithmSHAKE_256:        "SHAKE_256",
+
+		// KMIP 2.0.
+		CryptographicAlgorithmARIA:             "ARIA",
+		CryptographicAlgorithmSEED:             "SEED",
+		CryptographicAlgorithmSM2:              "SM2",
+		CryptographicAlgorithmSM3:              "SM3",
+		CryptographicAlgorithmSM4:              "SM4",
+		CryptographicAlgorithmGOSTR34_10_2012:  "GOSTR34_10_2012",
+		CryptographicAlgorithmGOSTR34_11_2012:  "GOSTR34_11_2012",
+		CryptographicAlgorithmGOSTR34_13_2015:  "GOSTR34_13_2015",
+		CryptographicAlgorithmGOST28147_89:     "GOST28147_89",
+		CryptographicAlgorithmXMSS:             "XMSS",
+		CryptographicAlgorithmSPHINCS_256:      "SPHINCS_256",
+		CryptographicAlgorithmMcEliece:         "McEliece",
+		CryptographicAlgorithmMcEliece_6960119: "McEliece_6960119",
+		CryptographicAlgorithmMcEliece_8192128: "McEliece_8192128",
+		CryptographicAlgorithmEd25519:          "Ed25519",
+		CryptographicAlgorithmEd448:            "Ed448",
 	})
 	ttlv.RegisterEnum(TagBlockCipherMode, map[BlockCipherMode]string{
 		BlockCipherModeCBC:               "CBC",
@@ -295,6 +366,10 @@ func init() {
 		RecommendedCurveBRAINPOOLP384T1:  "BRAINPOOLP384T1",
 		RecommendedCurveBRAINPOOLP512R1:  "BRAINPOOLP512R1",
 		RecommendedCurveBRAINPOOLP512T1:  "BRAINPOOLP512T1",
+
+		// KMIP 2.0.
+		RecommendedCurveCURVE25519: "CURVE25519",
+		RecommendedCurveCURVE448:   "CURVE448",
 	})
 	ttlv.RegisterEnum(TagSecretDataType, map[SecretDataType]string{
 		SecretDataTypePassword: "Password",
@@ -327,6 +402,9 @@ func init() {
 
 		// KMIP 1.4.
 		KeyFormatTypePKCS_12: "PKCS_12",
+
+		// KMIP 2.0.
+		KeyFormatTypePKCS_10: "PKCS_10",
 	})
 	ttlv.RegisterEnum(TagKeyCompressionType, map[KeyCompressionType]string{
 		KeyCompressionTypeECPublicKeyTypeUncompressed:         "ECPublicKeyTypeUncompressed",
@@ -364,7 +442,7 @@ func init() {
 		LinkTypePKCS_12CertificateLink: "PKCS_12CertificateLink",
 		LinkTypePKCS_12PasswordLink:    "PKCS_12PasswordLink",
 
-		//FIXME: This is defined in KMIP 2.0+ only.
+		// KMIP 2.0.
 		LinkTypeWrappingKeyLink: "WrappingKeyLink",
 	})
 	ttlv.RegisterEnum(TagQueryFunction, map[QueryFunction]string{
@@ -383,6 +461,9 @@ func init() {
 		QueryFunctionProfiles:                  "QueryProfiles",
 		QueryFunctionCapabilities:              "QueryCapabilities",
 		QueryFunctionClientRegistrationMethods: "QueryClientRegistrationMethods",
+		// KMIP 2.0.
+		QueryFunctionDefaultsInformation:    "QueryDefaultsInformation",
+		QueryFunctionStorageProtectionMasks: "QueryStorageProtectionMasks",
 	})
 	ttlv.RegisterEnum(TagUsageLimitsUnit, map[UsageLimitsUnit]string{
 		UsageLimitsUnitByte:   "Byte",
@@ -407,10 +488,10 @@ func init() {
 	})
 	ttlv.RegisterEnum(TagSplitKeyMethod, map[SplitKeyMethod]string{
 		SplitKeyMethodXOR:                         "XOR",
-		SplitKeyMethodPolynomialSharingGF216:      "PolynomialSharingGF216",
+		SplitKeyMethodPolynomialSharingGF216:      "PolynomialSharingGF2_16",
 		SplitKeyMethodPolynomialSharingPrimeField: "PolynomialSharingPrimeField",
 		// KMIP 1.2.
-		SplitKeyMethodPolynomialSharingGF28: "PolynomialSharingGF28",
+		SplitKeyMethodPolynomialSharingGF28: "PolynomialSharingGF2_8",
 	})
 	ttlv.RegisterEnum(TagObjectGroupMember, map[ObjectGroupMember]string{
 		ObjectGroupMemberFresh:   "GroupMemberFresh",
@@ -650,6 +731,45 @@ func init() {
 		ProfileNameJSONServerKMIPV1_4:                                "JSONServerKMIPV1_4",
 		ProfileNameXMLClientKMIPV1_4:                                 "XMLClientKMIPV1_4",
 		ProfileNameXMLServerKMIPV1_4:                                 "XMLServerKMIPV1_4",
+
+		// KMIP 2.0.
+		ProfileNameCompleteServerBasic:                       "CompleteServerBasic",
+		ProfileNameCompleteServerTLSV1_2:                     "CompleteServerTLSV1_2",
+		ProfileNameTapeLibraryClient:                         "TapeLibraryClient",
+		ProfileNameTapeLibraryServer:                         "TapeLibraryServer",
+		ProfileNameSymmetricKeyLifecycleClient:               "SymmetricKeyLifecycleClient",
+		ProfileNameSymmetricKeyLifecycleServer:               "SymmetricKeyLifecycleServer",
+		ProfileNameAsymmetricKeyLifecycleClient:              "AsymmetricKeyLifecycleClient",
+		ProfileNameAsymmetricKeyLifecycleServer:              "AsymmetricKeyLifecycleServer",
+		ProfileNameBasicCryptographicClient:                  "BasicCryptographicClient",
+		ProfileNameBasicCryptographicServer:                  "BasicCryptographicServer",
+		ProfileNameAdvancedCryptographicClient:               "AdvancedCryptographicClient",
+		ProfileNameAdvancedCryptographicServer:               "AdvancedCryptographicServer",
+		ProfileNameRNGCryptographicClient:                    "RNGCryptographicClient",
+		ProfileNameRNGCryptographicServer:                    "RNGCryptographicServer",
+		ProfileNameBasicSymmetricKeyFoundryClient:            "BasicSymmetricKeyFoundryClient",
+		ProfileNameIntermediateSymmetricKeyFoundryClient:     "IntermediateSymmetricKeyFoundryClient",
+		ProfileNameAdvancedSymmetricKeyFoundryClient:         "AdvancedSymmetricKeyFoundryClient",
+		ProfileNameSymmetricKeyFoundryServer:                 "SymmetricKeyFoundryServer",
+		ProfileNameOpaqueManagedObjectStoreClient:            "OpaqueManagedObjectStoreClient",
+		ProfileNameOpaqueManagedObjectStoreServer:            "OpaqueManagedObjectStoreServer",
+		ProfileNameStorageArrayWithSelfEncryptingDriveClient: "StorageArrayWithSelfEncryptingDriveClient",
+		ProfileNameStorageArrayWithSelfEncryptingDriveServer: "StorageArrayWithSelfEncryptingDriveServer",
+		ProfileNameHTTPSClient:                               "HTTPSClient",
+		ProfileNameHTTPSServer:                               "HTTPSServer",
+		ProfileNameJSONClient:                                "JSONClient",
+		ProfileNameJSONServer:                                "JSONServer",
+		ProfileNameXMLClient:                                 "XMLClient",
+		ProfileNameXMLServer:                                 "XMLServer",
+		ProfileNameAESXTSClient:                              "AESXTSClient",
+		ProfileNameAESXTSServer:                              "AESXTSServer",
+		ProfileNameQuantumSafeClient:                         "QuantumSafeClient",
+		ProfileNameQuantumSafeServer:                         "QuantumSafeServer",
+		ProfileNamePKCS_11Client:                             "PKCS_11Client",
+		ProfileNamePKCS_11Server:                             "PKCS_11Server",
+		ProfileNameBaselineClient:                            "BaselineClient",
+		ProfileNameBaselineServer:                            "BaselineServer",
+		ProfileNameCompleteServer:                            "CompleteServer",
 	})
 	ttlv.RegisterEnum(TagValidationAuthorityType, map[ValidationAuthorityType]string{
 		ValidationAuthorityTypeUnspecified:    "Unspecified",
@@ -707,6 +827,59 @@ func init() {
 		DerivationMethodENCRYPT:     "ENCRYPT",
 		DerivationMethodNIST800_108: "NIST800-108",
 		DerivationMethodAsymmetric:  "AsymmetricKey",
+
+		// KMIP 2.0.
+		DerivationMethodAWSSignatureVersion4: "AWSSignatureVersion4",
+		DerivationMethodHKDF:                 "HKDF",
+	})
+
+	// KMIP 2.0.
+	ttlv.RegisterEnum(TagAsynchronousIndicator, map[AsynchronousIndicator]string{
+		AsynchronousIndicatorMandatory:  "Mandatory",
+		AsynchronousIndicatorOptional:   "Optional",
+		AsynchronousIndicatorProhibited: "Prohibited",
+	})
+	ttlv.RegisterEnum(TagNISTKeyType, map[NISTKeyType]string{
+		NISTKeyTypePrivateSignatureKey:                "PrivateSignatureKey",
+		NISTKeyTypePublicSignatureVerificationKey:     "PublicSignatureVerificationKey",
+		NISTKeyTypeSymmetricAuthenticationKey:         "SymmetricAuthenticationKey",
+		NISTKeyTypePrivateAuthenticationKey:           "PrivateAuthenticationKey",
+		NISTKeyTypePublicAuthenticationKey:            "PublicAuthenticationKey",
+		NISTKeyTypeSymmetricDataEncryptionKey:         "SymmetricDataEncryptionKey",
+		NISTKeyTypeSymmetricKeyWrappingKey:            "SymmetricKeyWrappingKey",
+		NISTKeyTypeSymmetricRandomNumberGenerationKey: "SymmetricRandomNumberGenerationKey",
+		NISTKeyTypeSymmetricMasterKey:                 "SymmetricMasterKey",
+		NISTKeyTypePrivateKeyTransportKey:             "PrivateKeyTransportKey",
+		NISTKeyTypePublicKeyTransportKey:              "PublicKeyTransportKey",
+		NISTKeyTypeSymmetricKeyAgreementKey:           "SymmetricKeyAgreementKey",
+		NISTKeyTypePrivateStaticKeyAgreementKey:       "PrivateStaticKeyAgreementKey",
+		NISTKeyTypePublicStaticKeyAgreementKey:        "PublicStaticKeyAgreementKey",
+		NISTKeyTypePrivateEphemeralKeyAgreementKey:    "PrivateEphemeralKeyAgreementKey",
+		NISTKeyTypePublicEphemeralKeyAgreementKey:     "PublicEphemeralKeyAgreementKey",
+		NISTKeyTypeSymmetricAuthorizationKey:          "SymmetricAuthorizationKey",
+		NISTKeyTypePrivateAuthorizationKey:            "PrivateAuthorizationKey",
+		NISTKeyTypePublicAuthorizationKey:             "PublicAuthorizationKey",
+	})
+	ttlv.RegisterEnum(TagProtectionLevel, map[ProtectionLevel]string{
+		ProtectionLevelHigh: "High",
+		ProtectionLevelLow:  "Low",
+	})
+	ttlv.RegisterEnum(TagTicketType, map[TicketType]string{
+		TicketTypeLogin: "Login",
+	})
+	ttlv.RegisterEnum(TagEndpointRole, map[EndpointRole]string{
+		EndpointRoleClient: "Client",
+		EndpointRoleServer: "Server",
+	})
+	ttlv.RegisterEnum(TagAdjustmentType, map[AdjustmentType]string{
+		AdjustmentTypeIncrement: "Increment",
+		AdjustmentTypeDecrement: "Decrement",
+		AdjustmentTypeNegate:    "Negate",
+	})
+	ttlv.RegisterEnum(TagInteropFunction, map[InteropFunction]string{
+		InteropFunctionBegin: "Begin",
+		InteropFunctionEnd:   "End",
+		InteropFunctionReset: "Reset",
 	})
 }
 
@@ -758,6 +931,53 @@ const (
 	ResultReasonNotExtractable      ResultReason = 0x00000017
 	ResultReasonObjectAlreadyExists ResultReason = 0x00000018
 
+	// KMIP 2.0.
+	ResultReasonInvalidTicket                       ResultReason = 0x00000019
+	ResultReasonUsageLimitExceeded                  ResultReason = 0x0000001A
+	ResultReasonNumericRange                        ResultReason = 0x0000001B
+	ResultReasonInvalidDataType                     ResultReason = 0x0000001C
+	ResultReasonReadOnlyAttribute                   ResultReason = 0x0000001D
+	ResultReasonMultiValuedAttribute                ResultReason = 0x0000001E
+	ResultReasonUnsupportedAttribute                ResultReason = 0x0000001F
+	ResultReasonAttributeInstanceNotFound           ResultReason = 0x00000020
+	ResultReasonAttributeNotFound                   ResultReason = 0x00000021
+	ResultReasonAttributeReadOnly                   ResultReason = 0x00000022
+	ResultReasonAttributeSingleValued               ResultReason = 0x00000023
+	ResultReasonBadCryptographicParameters          ResultReason = 0x00000024
+	ResultReasonBadPassword                         ResultReason = 0x00000025
+	ResultReasonCodecError                          ResultReason = 0x00000026
+	ResultReasonIllegalObjectType                   ResultReason = 0x00000028
+	ResultReasonIncompatibleCryptographicUsageMask  ResultReason = 0x00000029
+	ResultReasonInternalServerError                 ResultReason = 0x0000002A
+	ResultReasonInvalidAsynchronousCorrelationValue ResultReason = 0x0000002B
+	ResultReasonInvalidAttribute                    ResultReason = 0x0000002C
+	ResultReasonInvalidAttributeValue               ResultReason = 0x0000002D
+	ResultReasonInvalidCorrelationValue             ResultReason = 0x0000002E
+	ResultReasonInvalidCSR                          ResultReason = 0x0000002F
+	ResultReasonInvalidObjectType                   ResultReason = 0x00000030
+	ResultReasonKeyWrapTypeNotSupported             ResultReason = 0x00000032
+	ResultReasonMissingInitializationVector         ResultReason = 0x00000034
+	ResultReasonNonUniqueNameAttribute              ResultReason = 0x00000035
+	ResultReasonObjectDestroyed                     ResultReason = 0x00000036
+	ResultReasonObjectNotFound                      ResultReason = 0x00000037
+	ResultReasonNotAuthorized                       ResultReason = 0x00000039
+	ResultReasonServerLimitExceeded                 ResultReason = 0x0000003A
+	ResultReasonUnknownEnumeration                  ResultReason = 0x0000003B
+	ResultReasonUnknownMessageExtension             ResultReason = 0x0000003C
+	ResultReasonUnknownTag                          ResultReason = 0x0000003D
+	ResultReasonUnsupportedCryptographicParameters  ResultReason = 0x0000003E
+	ResultReasonUnsupportedProtocolVersion          ResultReason = 0x0000003F
+	ResultReasonWrappingObjectArchived              ResultReason = 0x00000040
+	ResultReasonWrappingObjectDestroyed             ResultReason = 0x00000041
+	ResultReasonWrappingObjectNotFound              ResultReason = 0x00000042
+	ResultReasonWrongKeyLifecycleState              ResultReason = 0x00000043
+	ResultReasonProtectionStorageUnavailable        ResultReason = 0x00000044
+	ResultReasonPKCS_11CodecError                   ResultReason = 0x00000045
+	ResultReasonPKCS_11InvalidFunction              ResultReason = 0x00000046
+	ResultReasonPKCS_11InvalidInterface             ResultReason = 0x00000047
+	ResultReasonPrivateProtectionStorageUnavailable ResultReason = 0x00000048
+	ResultReasonPublicProtectionStorageUnavailable  ResultReason = 0x00000049
+
 	ResultReasonGeneralFailure ResultReason = 0x00000100
 )
 
@@ -769,6 +989,10 @@ const (
 	CredentialTypeDevice CredentialType = 0x00000002
 	// KMIP 1.2.
 	CredentialTypeAttestation CredentialType = 0x00000003
+	// KMIP 2.0.
+	CredentialTypeOneTimePassword CredentialType = 0x00000004
+	CredentialTypeHashedPassword  CredentialType = 0x00000005
+	CredentialTypeTicket          CredentialType = 0x00000006
 )
 
 type RevocationReasonCode uint32
@@ -812,6 +1036,8 @@ const (
 	ObjectTypeOpaqueObject ObjectType = 0x00000008
 	// KMIP 1.2.
 	ObjectTypePGPKey ObjectType = 0x00000009
+	// KMIP 2.0.
+	ObjectTypeCertificateRequest ObjectType = 0x0000000A
 )
 
 type OpaqueDataType uint32
@@ -878,6 +1104,24 @@ const (
 	CryptographicAlgorithmHMAC_SHA3_512    CryptographicAlgorithm = 0x00000026
 	CryptographicAlgorithmSHAKE_128        CryptographicAlgorithm = 0x00000027
 	CryptographicAlgorithmSHAKE_256        CryptographicAlgorithm = 0x00000028
+
+	// KMIP 2.0.
+	CryptographicAlgorithmARIA             CryptographicAlgorithm = 0x00000029
+	CryptographicAlgorithmSEED             CryptographicAlgorithm = 0x0000002A
+	CryptographicAlgorithmSM2              CryptographicAlgorithm = 0x0000002B
+	CryptographicAlgorithmSM3              CryptographicAlgorithm = 0x0000002C
+	CryptographicAlgorithmSM4              CryptographicAlgorithm = 0x0000002D
+	CryptographicAlgorithmGOSTR34_10_2012  CryptographicAlgorithm = 0x0000002E
+	CryptographicAlgorithmGOSTR34_11_2012  CryptographicAlgorithm = 0x0000002F
+	CryptographicAlgorithmGOSTR34_13_2015  CryptographicAlgorithm = 0x00000030
+	CryptographicAlgorithmGOST28147_89     CryptographicAlgorithm = 0x00000031
+	CryptographicAlgorithmXMSS             CryptographicAlgorithm = 0x00000032
+	CryptographicAlgorithmSPHINCS_256      CryptographicAlgorithm = 0x00000033
+	CryptographicAlgorithmMcEliece         CryptographicAlgorithm = 0x00000034
+	CryptographicAlgorithmMcEliece_6960119 CryptographicAlgorithm = 0x00000035
+	CryptographicAlgorithmMcEliece_8192128 CryptographicAlgorithm = 0x00000036
+	CryptographicAlgorithmEd25519          CryptographicAlgorithm = 0x00000037
+	CryptographicAlgorithmEd448            CryptographicAlgorithm = 0x00000038
 )
 
 type BlockCipherMode uint32
@@ -1049,6 +1293,10 @@ const (
 	RecommendedCurveBRAINPOOLP384T1  RecommendedCurve = 0x00000042
 	RecommendedCurveBRAINPOOLP512R1  RecommendedCurve = 0x00000043
 	RecommendedCurveBRAINPOOLP512T1  RecommendedCurve = 0x00000044
+
+	// KMIP 2.0.
+	RecommendedCurveCURVE25519 RecommendedCurve = 0x00000045
+	RecommendedCurveCURVE448   RecommendedCurve = 0x00000046
 )
 
 // Bitlen returns the bit length for the key using the curve.
@@ -1117,6 +1365,10 @@ func (crv RecommendedCurve) Bitlen() int32 {
 		return 320
 	case RecommendedCurveBRAINPOOLP512R1, RecommendedCurveBRAINPOOLP512T1:
 		return 512
+	case RecommendedCurveCURVE25519:
+		return 255
+	case RecommendedCurveCURVE448:
+		return 448
 	default:
 		return 0
 	}
@@ -1164,6 +1416,8 @@ const (
 
 	// KMIP 1.4.
 	KeyFormatTypePKCS_12 KeyFormatType = 0x00000016
+	// KMIP 2.0.
+	KeyFormatTypePKCS_10 KeyFormatType = 0x00000017
 )
 
 type KeyCompressionType uint32
@@ -1214,7 +1468,7 @@ const (
 	LinkTypePKCS_12CertificateLink LinkType = 0x0000010C
 	LinkTypePKCS_12PasswordLink    LinkType = 0x0000010D
 
-	//FIXME: This is defined in KMIP 2.0+ only.
+	// KMIP 2.0.
 	LinkTypeWrappingKeyLink LinkType = 0x0000010E
 )
 
@@ -1237,6 +1491,9 @@ const (
 	QueryFunctionProfiles                  QueryFunction = 0x0000000A
 	QueryFunctionCapabilities              QueryFunction = 0x0000000B
 	QueryFunctionClientRegistrationMethods QueryFunction = 0x0000000C
+	// KMIP 2.0.
+	QueryFunctionDefaultsInformation    QueryFunction = 0x0000000D
+	QueryFunctionStorageProtectionMasks QueryFunction = 0x0000000E
 )
 
 type UsageLimitsUnit uint32
@@ -1558,6 +1815,45 @@ const (
 	ProfileNameJSONServerKMIPV1_4                                ProfileName = 0x0000009A
 	ProfileNameXMLClientKMIPV1_4                                 ProfileName = 0x0000009B
 	ProfileNameXMLServerKMIPV1_4                                 ProfileName = 0x0000009C
+
+	// KMIP 2.0.
+	ProfileNameCompleteServerBasic                       ProfileName = 0x00000104
+	ProfileNameCompleteServerTLSV1_2                     ProfileName = 0x00000105
+	ProfileNameTapeLibraryClient                         ProfileName = 0x00000106
+	ProfileNameTapeLibraryServer                         ProfileName = 0x00000107
+	ProfileNameSymmetricKeyLifecycleClient               ProfileName = 0x00000108
+	ProfileNameSymmetricKeyLifecycleServer               ProfileName = 0x00000109
+	ProfileNameAsymmetricKeyLifecycleClient              ProfileName = 0x0000010A
+	ProfileNameAsymmetricKeyLifecycleServer              ProfileName = 0x0000010B
+	ProfileNameBasicCryptographicClient                  ProfileName = 0x0000010C
+	ProfileNameBasicCryptographicServer                  ProfileName = 0x0000010D
+	ProfileNameAdvancedCryptographicClient               ProfileName = 0x0000010E
+	ProfileNameAdvancedCryptographicServer               ProfileName = 0x0000010F
+	ProfileNameRNGCryptographicClient                    ProfileName = 0x00000110
+	ProfileNameRNGCryptographicServer                    ProfileName = 0x00000111
+	ProfileNameBasicSymmetricKeyFoundryClient            ProfileName = 0x00000112
+	ProfileNameIntermediateSymmetricKeyFoundryClient     ProfileName = 0x00000113
+	ProfileNameAdvancedSymmetricKeyFoundryClient         ProfileName = 0x00000114
+	ProfileNameSymmetricKeyFoundryServer                 ProfileName = 0x00000115
+	ProfileNameOpaqueManagedObjectStoreClient            ProfileName = 0x00000116
+	ProfileNameOpaqueManagedObjectStoreServer            ProfileName = 0x00000117
+	ProfileNameStorageArrayWithSelfEncryptingDriveClient ProfileName = 0x0000011C
+	ProfileNameStorageArrayWithSelfEncryptingDriveServer ProfileName = 0x0000011D
+	ProfileNameHTTPSClient                               ProfileName = 0x0000011E
+	ProfileNameHTTPSServer                               ProfileName = 0x0000011F
+	ProfileNameJSONClient                                ProfileName = 0x00000120
+	ProfileNameJSONServer                                ProfileName = 0x00000121
+	ProfileNameXMLClient                                 ProfileName = 0x00000122
+	ProfileNameXMLServer                                 ProfileName = 0x00000123
+	ProfileNameAESXTSClient                              ProfileName = 0x00000124
+	ProfileNameAESXTSServer                              ProfileName = 0x00000125
+	ProfileNameQuantumSafeClient                         ProfileName = 0x00000126
+	ProfileNameQuantumSafeServer                         ProfileName = 0x00000127
+	ProfileNamePKCS_11Client                             ProfileName = 0x00000128
+	ProfileNamePKCS_11Server                             ProfileName = 0x00000129
+	ProfileNameBaselineClient                            ProfileName = 0x0000012A
+	ProfileNameBaselineServer                            ProfileName = 0x0000012B
+	ProfileNameCompleteServer                            ProfileName = 0x0000012C
 )
 
 type ValidationAuthorityType uint32
@@ -1650,6 +1946,80 @@ const (
 	DerivationMethodENCRYPT     DerivationMethod = 0x00000004
 	DerivationMethodNIST800_108 DerivationMethod = 0x00000005
 	DerivationMethodAsymmetric  DerivationMethod = 0x00000008
+
+	// KMIP 2.0.
+	DerivationMethodAWSSignatureVersion4 DerivationMethod = 0x00000009
+	DerivationMethodHKDF                 DerivationMethod = 0x0000000A
+)
+
+// KMIP 2.0.
+
+type AsynchronousIndicator uint32
+
+const (
+	AsynchronousIndicatorMandatory  AsynchronousIndicator = 0x00000001
+	AsynchronousIndicatorOptional   AsynchronousIndicator = 0x00000002
+	AsynchronousIndicatorProhibited AsynchronousIndicator = 0x00000003
+)
+
+type NISTKeyType uint32
+
+const (
+	NISTKeyTypePrivateSignatureKey                NISTKeyType = 0x00000001
+	NISTKeyTypePublicSignatureVerificationKey     NISTKeyType = 0x00000002
+	NISTKeyTypeSymmetricAuthenticationKey         NISTKeyType = 0x00000003
+	NISTKeyTypePrivateAuthenticationKey           NISTKeyType = 0x00000004
+	NISTKeyTypePublicAuthenticationKey            NISTKeyType = 0x00000005
+	NISTKeyTypeSymmetricDataEncryptionKey         NISTKeyType = 0x00000006
+	NISTKeyTypeSymmetricKeyWrappingKey            NISTKeyType = 0x00000007
+	NISTKeyTypeSymmetricRandomNumberGenerationKey NISTKeyType = 0x00000008
+	NISTKeyTypeSymmetricMasterKey                 NISTKeyType = 0x00000009
+	NISTKeyTypePrivateKeyTransportKey             NISTKeyType = 0x0000000A
+	NISTKeyTypePublicKeyTransportKey              NISTKeyType = 0x0000000B
+	NISTKeyTypeSymmetricKeyAgreementKey           NISTKeyType = 0x0000000C
+	NISTKeyTypePrivateStaticKeyAgreementKey       NISTKeyType = 0x0000000D
+	NISTKeyTypePublicStaticKeyAgreementKey        NISTKeyType = 0x0000000E
+	NISTKeyTypePrivateEphemeralKeyAgreementKey    NISTKeyType = 0x0000000F
+	NISTKeyTypePublicEphemeralKeyAgreementKey     NISTKeyType = 0x00000010
+	NISTKeyTypeSymmetricAuthorizationKey          NISTKeyType = 0x00000011
+	NISTKeyTypePrivateAuthorizationKey            NISTKeyType = 0x00000012
+	NISTKeyTypePublicAuthorizationKey             NISTKeyType = 0x00000013
+)
+
+type ProtectionLevel uint32
+
+const (
+	ProtectionLevelHigh ProtectionLevel = 0x00000001
+	ProtectionLevelLow  ProtectionLevel = 0x00000002
+)
+
+type TicketType uint32
+
+const (
+	TicketTypeLogin TicketType = 0x00000001
+)
+
+type EndpointRole uint32
+
+const (
+	EndpointRoleClient EndpointRole = 0x00000001
+	EndpointRoleServer EndpointRole = 0x00000002
+)
+
+type AdjustmentType uint32
+
+const (
+	AdjustmentTypeIncrement AdjustmentType = 0x00000001
+	AdjustmentTypeDecrement AdjustmentType = 0x00000002
+	AdjustmentTypeNegate    AdjustmentType = 0x00000003
+)
+
+type InteropFunction uint32
+
+const (
+	InteropFunctionBegin InteropFunction = 0x00000001
+	InteropFunctionEnd   InteropFunction = 0x00000002
+	InteropFunctionReset InteropFunction = 0x00000003
 )
 
 // Text Marshaling for better display in json outputs.
@@ -1942,6 +2312,48 @@ func (enum DerivationMethod) MarshalText() ([]byte, error) {
 }
 func (enum *DerivationMethod) UnmarshalText(text []byte) error {
 	return unmarshalText(enum, TagDerivationMethod, string(text))
+}
+func (enum AsynchronousIndicator) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *AsynchronousIndicator) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagAsynchronousIndicator, string(text))
+}
+func (enum NISTKeyType) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *NISTKeyType) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagNISTKeyType, string(text))
+}
+func (enum ProtectionLevel) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *ProtectionLevel) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagProtectionLevel, string(text))
+}
+func (enum TicketType) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *TicketType) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagTicketType, string(text))
+}
+func (enum EndpointRole) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *EndpointRole) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagEndpointRole, string(text))
+}
+func (enum AdjustmentType) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *AdjustmentType) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagAdjustmentType, string(text))
+}
+func (enum InteropFunction) MarshalText() ([]byte, error) {
+	return marshalText(enum)
+}
+func (enum *InteropFunction) UnmarshalText(text []byte) error {
+	return unmarshalText(enum, TagInteropFunction, string(text))
 }
 
 func marshalText[T ~uint32](enum T) ([]byte, error) {

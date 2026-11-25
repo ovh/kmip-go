@@ -16,6 +16,7 @@ type ResponseHeader struct {
 	ProtocolVersion        ProtocolVersion `ttlv:",set-version"`
 	TimeStamp              time.Time
 	Nonce                  *Nonce            `ttlv:",version=v1.2.."`
+	ServerHashedPassword   []byte            `ttlv:",omitempty,version=v2.0.."`
 	AttestationType        []AttestationType `ttlv:",version=v1.2.."`
 	ClientCorrelationValue string            `ttlv:",omitempty,version=v1.4.."`
 	ServerCorrelationValue string            `ttlv:",omitempty,version=v1.4.."`

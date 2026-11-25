@@ -33,6 +33,22 @@ func (v *Struct) TagDecodeTTLV(d *Decoder, tag int) error {
 	})
 }
 
+// DateTimeExtended is a KMIP 2.0 date-time with a microsecond precision.
+// It's encoded with the Date Time Extended TTLV type, while [time.Time] is encoded with the Date Time type.
+type DateTimeExtended struct {
+	time.Time
+}
+
+func (dt DateTimeExtended) TagEncodeTTLV(e *Encoder, tag int) {
+	e.DateTimeExtended(tag, dt.Time)
+}
+
+func (dt *DateTimeExtended) TagDecodeTTLV(d *Decoder, tag int) error {
+	var err error
+	dt.Time, err = d.DateTimeExtended(tag)
+	return err
+}
+
 // Value is a generic TTLV tagged value.
 type Value struct {
 	// The value's TTLV tag.
@@ -67,6 +83,10 @@ func (v *Value) TagDecodeTTLV(d *Decoder, tag int) error {
 		v.Value = Enum(enum)
 	case TypeInterval:
 		v.Value, err = d.Interval(tag)
+	case TypeDateTimeExtended:
+		val := DateTimeExtended{}
+		val.Time, err = d.DateTimeExtended(tag)
+		v.Value = val
 	case TypeTextString:
 		v.Value, err = d.TextString(tag)
 	case TypeStructure:
@@ -105,6 +125,8 @@ func (v Value) TagEncodeTTLV(e *Encoder, tag int) {
 		e.Enum(0, tag, uint32(val))
 	case time.Duration:
 		e.Interval(tag, val)
+	case DateTimeExtended:
+		e.DateTimeExtended(tag, val.Time)
 	case string:
 		e.TextString(tag, val)
 	case Struct:

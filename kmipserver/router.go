@@ -73,12 +73,15 @@ func NewBatchExecutor() *BatchExecutor {
 
 // SetSupportedProtocolVersions sets the supported KMIP protocol versions for the BatchExecutor.
 // If no versions are provided, it defaults to the predefined supported versions.
-// The provided versions are sorted and duplicates are removed before being set.
+// The provided versions are sorted in decreasing order of preference and duplicates are removed before being set.
 func (exec *BatchExecutor) SetSupportedProtocolVersions(versions ...kmip.ProtocolVersion) {
 	if len(versions) == 0 {
 		versions = defaultSupportedVersion
 	}
-	slices.SortFunc(versions, ttlv.CompareVersions)
+	versions = slices.Clone(versions)
+	slices.SortFunc(versions, func(a, b kmip.ProtocolVersion) int {
+		return ttlv.CompareVersions(b, a)
+	})
 	versions = slices.Compact(versions)
 	exec.supportedVersions = versions
 }

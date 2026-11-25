@@ -51,6 +51,12 @@ func (s *TtlvEncodingSuite) TestEncodeLongInteger() {
 	s.Equal(expected, strings.ToUpper(hex.EncodeToString(s.enc.Bytes())))
 }
 
+func (s *TtlvEncodingSuite) TestEncodeDateTimeExtended() {
+	s.enc.DateTimeExtended(0x540001, -2)
+	expected := expectedHex("54 00 01 | 0B | 00 00 00 08 | FF FF FF FF FF FF FF FE")
+	s.Equal(expected, strings.ToUpper(hex.EncodeToString(s.enc.Bytes())))
+}
+
 func (s *TtlvEncodingSuite) TestEncodeBigInteger() {
 	s.Run("positive", func() {
 		s.enc.Clear()
@@ -152,6 +158,24 @@ func (s *TtlvDecodingSuite) TestDecodeLongInteger() {
 	v, err := dec.LongInteger(0x420020)
 	s.NoError(err)
 	s.Equal(int64(123456789000000000), v)
+}
+
+func (s *TtlvDecodingSuite) TestDecodeDateTimeExtended() {
+	dec := decodeHex("54 00 01 | 0B | 00 00 00 08 | FF FF FF FF FF FF FF FE")
+	v, err := dec.DateTimeExtended(0x540001)
+	s.NoError(err)
+	s.Equal(int64(-2), v)
+}
+
+func (s *TtlvDecodingSuite) TestDecodeDateTimeExtendedMalformedLength() {
+	for _, value := range []string{
+		"00 00 00 02 | 00 01 00 00 00 00 00 00",
+		"00 00 00 10 | 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 02",
+	} {
+		dec := decodeHex("54 00 01 | 0B | " + value)
+		_, err := dec.DateTimeExtended(0x540001)
+		s.ErrorContains(err, "invalid TTLV Date Time Extended value length")
+	}
 }
 
 func (s *TtlvDecodingSuite) TestDecodeBigInteger() {

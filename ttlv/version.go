@@ -33,6 +33,31 @@ type extension struct {
 	version *version
 }
 
+// Version returns the protocol version currently set on the encoder or decoder,
+// or nil if no version has been set yet.
+//
+// The version is usually set when encoding or decoding a field annotated with the `set-version`
+// option (ie: the protocol version of KMIP's request and response headers). It's mainly useful
+// for custom codecs which need to adapt their encoding to the protocol version.
+func (ext *extension) Version() Version {
+	if ext.version == nil {
+		return nil
+	}
+	return *ext.version
+}
+
+// SetVersion forces the protocol version used by the encoder or decoder.
+// Passing a nil version unsets it, meaning that all versioned fields are considered valid.
+func (ext *extension) SetVersion(v Version) {
+	ext.version = toVersion(v)
+}
+
+// VersionIn returns true if the version set on the encoder or decoder is greater or equal to minVersion,
+// and lower or equal to maxVersion. A nil bound is considered open. If no version is set, it returns true.
+func (ext *extension) VersionIn(minVersion, maxVersion Version) bool {
+	return ext.versionIn(versionRange{start: toVersion(minVersion), end: toVersion(maxVersion)})
+}
+
 // versionIn checks that the version stored in the extension is in the given
 // version range `vrange`. If extension has no version set, then the function always
 // returns true.
@@ -45,8 +70,16 @@ func (ext *extension) versionIn(vrange versionRange) bool {
 }
 
 func (ext *extension) setVersion(v Version) {
-	ext.version = &version{major: v.Major(), minor: v.Minor()}
+	ext.version = toVersion(v)
 	// fmt.Println("set encoder version to", **enc.version)
+}
+
+// toVersion converts a Version into the internal version type. It returns nil if v is nil.
+func toVersion(v Version) *version {
+	if v == nil {
+		return nil
+	}
+	return &version{major: v.Major(), minor: v.Minor()}
 }
 
 type version struct {

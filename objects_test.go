@@ -467,3 +467,49 @@ func TestPrivateKey_ECDSA(t *testing.T) {
 		require.EqualValues(t, ecKey, cryptoKey)
 	})
 }
+
+func TestPrivateKey_ECDSA_TransparentScalar(t *testing.T) {
+	transparentKey := func(format KeyFormatType, curve RecommendedCurve, d *big.Int) *PrivateKey {
+		material := KeyMaterial{}
+		if format == KeyFormatTypeTransparentECPrivateKey {
+			material.TransparentECPrivateKey = &TransparentECPrivateKey{RecommendedCurve: curve, D: *d}
+		} else {
+			material.TransparentECDSAPrivateKey = &TransparentECDSAPrivateKey{RecommendedCurve: curve, D: *d}
+		}
+		return &PrivateKey{KeyBlock: KeyBlock{
+			KeyFormatType: format,
+			KeyValue:      &KeyValue{Plain: &PlainKeyValue{KeyMaterial: material}},
+		}}
+	}
+
+	for _, format := range []KeyFormatType{KeyFormatTypeTransparentECDSAPrivateKey, KeyFormatTypeTransparentECPrivateKey} {
+		for _, tc := range []struct {
+			curve RecommendedCurve
+			size  int
+		}{
+			{RecommendedCurveP_256, 32},
+			{RecommendedCurveP_521, 66},
+		} {
+			t.Run(ttlv.EnumStr(format)+"/"+ttlv.EnumStr(tc.curve), func(t *testing.T) {
+				t.Run("short scalar is left-padded", func(t *testing.T) {
+					key, err := transparentKey(format, tc.curve, big.NewInt(1)).ECDSA()
+					require.NoError(t, err)
+					raw, err := key.Bytes()
+					require.NoError(t, err)
+					expected := make([]byte, tc.size)
+					expected[tc.size-1] = 1
+					require.Equal(t, expected, raw)
+				})
+				t.Run("negative scalar is rejected", func(t *testing.T) {
+					_, err := transparentKey(format, tc.curve, big.NewInt(-1)).ECDSA()
+					require.ErrorContains(t, err, "invalid private scalar")
+				})
+				t.Run("oversized scalar is rejected", func(t *testing.T) {
+					d := new(big.Int).Lsh(big.NewInt(1), uint(tc.size*8))
+					_, err := transparentKey(format, tc.curve, d).ECDSA()
+					require.ErrorContains(t, err, "invalid private scalar")
+				})
+			})
+		}
+	}
+}
